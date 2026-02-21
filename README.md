@@ -27,7 +27,7 @@ git init
 ### 2. Install Squad
 
 ```bash
-npx github:bradygaster/squad-sdk
+npx github:bradygaster/squad-pr
 ```
 
 This installs the Squad agent, 12 GitHub Actions workflows for automation (Ralph heartbeat, CI, triage, etc.), templates, and starter skills.
