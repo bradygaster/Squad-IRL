@@ -49,3 +49,15 @@ Recommend renaming `squad watch` to `squad triage` (40% better semantic accuracy
 - PR #282 on branch `squad/234-235-shell-module` → `bradygaster/dev`
 - Decision: no ink dependency added — another agent (#233) handles that. Shell uses console.log only.
 
+### 📌 #236/#237: Shell chrome + session registry — implemented
+- Updated `src/cli/shell/index.ts`: replaced placeholder with full header chrome, readline input loop, clean exit
+- Header displays box-drawing chrome with version read from package.json via `createRequire`
+- Readline loop (`node:readline/promises`) processes input; `exit` and `/quit` trigger clean shutdown with "👋 Squad out."
+- SIGINT (Ctrl+C) handler prints cleanup message and exits cleanly
+- Created `src/cli/shell/sessions.ts`: `SessionRegistry` class — Map-backed registry for tracking agent sessions by name
+- SessionRegistry methods: register, get, getAll, getActive (filters working/streaming), updateStatus, remove, clear
+- Exported `SessionRegistry` from `src/cli/shell/index.ts`
+- PR #284 on branch `squad/236-237-shell-chrome-registry` → `bradygaster/dev`
+- Pattern: version sourced via `createRequire(import.meta.url)` for ESM-compatible JSON import (matches existing codebase pattern in `github-dist.ts`)
+- Pattern: SessionRegistry is a simple stateful class — no persistence, no events — designed for ink UI to consume later (#242+)
+
