@@ -1,0 +1,95 @@
+{
+  "agents": {
+    "keaton": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Keaton",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "verbal": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Verbal",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "fenster": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Fenster",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "hockney": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Hockney",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "mcmanus": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "McManus",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "kujan": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Kujan",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "edie": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Edie",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "kobayashi": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Kobayashi",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "fortier": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Fortier",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "rabin": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Rabin",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "baer": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Baer",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "redfoot": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Redfoot",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    },
+    "strausz": {
+      "created_at": "2026-02-21T19:48:00Z",
+      "persistent_name": "Strausz",
+      "universe": "The Usual Suspects",
+      "legacy_named": false,
+      "status": "active"
+    }
+  }
+}
