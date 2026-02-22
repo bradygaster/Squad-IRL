@@ -46,4 +46,26 @@
 - M5 round complete: McManus (docs PR #280), Fenster (guard PR #279), Kobayashi (blocked #209)
 - Decisions merged: ensureSquadPath() guard, CLI routing testability pattern
 
+### 2026-02-21: Epic #181 P0 docs — CHANGELOG and SquadUI integration guide
+**Status:** Complete.
+**Changes made:**
+1. **CHANGELOG.md** — Created with [Unreleased] section documenting three P0 items:
+   - Breaking: CLI entry point moved to `dist/cli-entry.js`
+   - Fixed: CRLF normalization across 8 parsers
+   - Fixed: `process.exit()` removed from library functions
+   - Internal: Notes on new `normalizeEol()` utility and `src/cli-entry.ts`
+   - Also backfilled v0.6.0 section for context
+2. **docs/squadui-integration.md** — Created practical integration guide for SquadUI team:
+   - Three subsections matching the P0 work (CRLF, entry point, process.exit)
+   - Code snippets showing safe import patterns for extensions
+   - Simple table summarizing breaking changes and migration paths
+   - Brief P1 roadmap section (type extensions, subpath exports, error types)
+3. **Commit on branch `squad/181-squadui-p0`** with proper Co-authored-by trailer
+**Tone notes:**
+- No hype in CHANGELOG — factual, issue-linked, clear scope
+- SquadUI guide is practical not promotional — code-first, minimal prose, brief sections
+- Separated "What Changed" (P0) from "What's Coming" (P1) to set expectations
+- Breaking changes table is explicit (Impact + Migration Path) to reduce support burden
+**Process:** Read history.md and decisions.md for context; verified tone ceiling; no source changes — docs-only.
+
 
