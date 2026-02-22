@@ -1,0 +1,54 @@
+/**
+ * Types barrel — pure type re-exports, zero runtime code.
+ * Use `export type` exclusively to guarantee no runtime imports.
+ *
+ * @module types
+ */
+
+// --- Parsed types (config/markdown-migration.ts) ---
+export type { ParsedAgent } from './config/markdown-migration.js';
+export type { ParsedRoutingRule } from './config/markdown-migration.js';
+export type { ParsedDecision } from './config/markdown-migration.js';
+export type { MarkdownParseResult } from './config/markdown-migration.js';
+export type { MarkdownMigrationOptions } from './config/markdown-migration.js';
+export type { MarkdownMigrationResult } from './config/markdown-migration.js';
+
+// --- Charter types (agents/charter-compiler.ts) ---
+export type { ParsedCharter } from './agents/charter-compiler.js';
+export type { CharterCompileOptions } from './agents/charter-compiler.js';
+export type { CharterConfigOverrides } from './agents/charter-compiler.js';
+export type { CompiledCharter } from './agents/charter-compiler.js';
+
+// --- Routing types (config/routing.ts) ---
+export type { CompiledRouter } from './config/routing.js';
+export type { CompiledWorkTypeRule } from './config/routing.js';
+export type { CompiledIssueRule } from './config/routing.js';
+export type { RoutingMatch } from './config/routing.js';
+
+// --- Skill types (skills/skill-loader.ts) ---
+export type { SkillDefinition } from './skills/skill-loader.js';
+
+// --- Config types (runtime/config.ts) ---
+export type { SquadConfig } from './runtime/config.js';
+export type { RoutingConfig } from './runtime/config.js';
+export type { RoutingRule } from './runtime/config.js';
+export type { IssueRoutingRule } from './runtime/config.js';
+export type { ModelSelectionConfig } from './runtime/config.js';
+export type { ModelTier } from './runtime/config.js';
+export type { ModelId } from './runtime/config.js';
+export type { WorkType } from './runtime/config.js';
+export type { AgentRole } from './runtime/config.js';
+export type { TaskOutputType } from './runtime/config.js';
+export type { TaskToModelRule } from './runtime/config.js';
+export type { RoleToModelMapping } from './runtime/config.js';
+export type { ComplexityAdjustment } from './runtime/config.js';
+export type { CastingPolicy } from './runtime/config.js';
+export type { AgentSourceConfig } from './runtime/config.js';
+export type { PlatformOverrides } from './runtime/config.js';
+export type { CopilotCapabilityEvaluation } from './runtime/config.js';
+export type { ConfigLoadResult } from './runtime/config.js';
+export type { ConfigValidationError } from './runtime/config.js';
+
+// --- Adapter types (adapter/types.ts) ---
+export type { SquadSessionConfig } from './adapter/types.js';
+export type { SquadCustomAgentConfig } from './adapter/types.js';

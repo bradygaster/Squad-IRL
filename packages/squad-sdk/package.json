@@ -30,9 +30,57 @@
       "types": "./dist/agents/index.d.ts",
       "import": "./dist/agents/index.js"
     },
-    "./cli": {
-      "types": "./dist/cli/index.d.ts",
-      "import": "./dist/cli/index.js"
+    "./adapter": {
+      "types": "./dist/adapter/types.d.ts",
+      "import": "./dist/adapter/types.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    },
+    "./coordinator": {
+      "types": "./dist/coordinator/index.d.ts",
+      "import": "./dist/coordinator/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js"
+    },
+    "./tools": {
+      "types": "./dist/tools/index.d.ts",
+      "import": "./dist/tools/index.js"
+    },
+    "./runtime": {
+      "types": "./dist/runtime/config.d.ts",
+      "import": "./dist/runtime/config.js"
+    },
+    "./runtime/streaming": {
+      "types": "./dist/runtime/streaming.d.ts",
+      "import": "./dist/runtime/streaming.js"
+    },
+    "./marketplace": {
+      "types": "./dist/marketplace/index.d.ts",
+      "import": "./dist/marketplace/index.js"
+    },
+    "./build": {
+      "types": "./dist/build/index.d.ts",
+      "import": "./dist/build/index.js"
+    },
+    "./sharing": {
+      "types": "./dist/sharing/index.d.ts",
+      "import": "./dist/sharing/index.js"
+    },
+    "./ralph": {
+      "types": "./dist/ralph/index.d.ts",
+      "import": "./dist/ralph/index.js"
+    },
+    "./casting": {
+      "types": "./dist/casting/index.d.ts",
+      "import": "./dist/casting/index.js"
+    },
+    "./resolution": {
+      "types": "./dist/resolution.d.ts",
+      "import": "./dist/resolution.js"
     }
   },
   "files": [

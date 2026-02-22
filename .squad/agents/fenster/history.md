@@ -90,3 +90,15 @@ Recommend renaming `squad watch` to `squad triage` (40% better semantic accuracy
 
 ### 📌 Team update (2026-02-22T020714Z): CRLF normalization complete and merged
 Fenster's src/utils/normalize-eol.ts utility is now applied to 8 parser entry points across 6 files. Pattern established: normalize at parser entry, not at file-read callsite. This ensures cross-platform line ending safety for all parsers (Windows CRLF, Unix LF, old Mac CR). Decision merged to decisions.md. Issue #220, #221 closed. All 1683 tests passing.
+
+### 📌 SDK/CLI File Migration — Keaton's split plan executed
+- **Phase 1 (SDK):** Copied all 15 directories (adapter, agents, build, casting, client, config, coordinator, hooks, marketplace, ralph, runtime, sharing, skills, tools, utils) and 4 standalone files (index.ts, resolution.ts, parsers.ts, types.ts) from root `src/` into `packages/squad-sdk/src/`. Cleaned the SDK barrel (`packages/squad-sdk/src/index.ts`) — removed the CLI re-exports block (lines 25-52 of the original, exporting success/error/warn/fatal/SquadError/detectSquadDir/runWatch/runInit/runExport/runImport/runCopilot etc. from `./cli/index.js`). Updated SDK `package.json` exports map: removed `./cli`, added all subpath exports from Keaton's plan (resolution, runtime/streaming, coordinator, hooks, tools, adapter, client, marketplace, build, sharing, ralph, casting).
+- **Phase 2 (CLI):** Copied `src/cli/` directory and `src/cli-entry.ts` into `packages/squad-cli/src/`. Copied `templates/` into `packages/squad-cli/templates/`. Rewrote 4 cross-package imports in CLI source:
+  - `cli/upgrade.ts`: `../config/migration.js` → `@bradygaster/squad-sdk/config`
+  - `cli/copilot-install.ts`: `../config/init.js` → `@bradygaster/squad-sdk/config`
+  - `cli/shell/spawn.ts`: `../../resolution.js` → `@bradygaster/squad-sdk/resolution`
+  - `cli/shell/stream-bridge.ts`: `../../runtime/streaming.js` → `@bradygaster/squad-sdk/runtime/streaming`
+  - `cli-entry.ts`: `./resolution.js` and `./index.js` → `@bradygaster/squad-sdk`
+- **Intra-CLI imports** (within `cli/` directory) left untouched — all relative.
+- **Root `src/` preserved** — not deleted, per plan (cleanup after tests pass).
+- Pattern: SDK subpath exports match the directory barrel structure — `@bradygaster/squad-sdk/{module}` resolves to `dist/{module}/index.js`. Special cases: `./resolution` → `dist/resolution.js`, `./runtime/streaming` → `dist/runtime/streaming.js`.
