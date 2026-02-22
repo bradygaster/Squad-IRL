@@ -209,7 +209,7 @@ export interface ParsedDecision {
 
 **Parser 1: `parseRoutingRulesMarkdown()`**
 - **Location:** `src/config/markdown-migration.ts`
-- **Purpose:** Parse legacy `.ai-team/routing.md` files into structured rules
+- **Purpose:** Parse `.squad/routing.md` files into structured rules
 - **Returns:** `{ rules: ParsedRoutingRule[]; warnings: string[] }`
 - **Use Case:** Migrating from markdown-based routing to typed config
 - **Rule Shape:** `ParsedRoutingRule = { workType: string; agents: string[]; examples?: string[] }`

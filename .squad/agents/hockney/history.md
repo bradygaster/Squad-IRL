@@ -162,3 +162,11 @@ All four agents shipped Phase 2 in parallel: Fortier wired TTFT/duration/through
 - Key pattern: `getNextFallback` walks by provider preference, not raw chain order — visited set comparison is correct, array order comparison is not.
 - Key pattern: HealthMonitor.check() uses `Promise.race` for timeout — timeout of N ms with ping delay > N produces unhealthy; response > 80% of timeout produces degraded.
 - Key pattern: `parseInput` supports both `@Agent message` and `Agent, message` comma syntax for direct addressing.
+
+### Issue #207: Docs site build verification tests (2026-02-23)
+- Created `test/docs-build.test.ts` (17 tests): Comprehensive validation for docs site build pipeline.
+- **Markdown validation** (10 tests): All 8 markdown files in docs/guide/ have proper headings, properly fenced code blocks, no broken relative links between guides, header anchors, no empty files.
+- **Code example validation** (2 tests): Code blocks contain valid content, bash examples have proper syntax.
+- **Docs build script** (5 tests): Conditional tests that verify docs/build.js execution when it exists (created by parallel agents), produces HTML output in docs/dist/, HTML files have proper DOCTYPE/closing tags, contain nav/menu elements, contain main/article/section content areas, have proper internal links.
+- Test design: Markdown validation always active (guides exist now). Build script tests are conditional — they skip gracefully if docs/build.js doesn't exist yet (other agents still creating). Tests use regex patterns for HTML structure validation (flexible, not brittle). All 17 tests pass.
+- Test count grew from 2141 → 2158 across 80 files — all passing.

@@ -7,6 +7,20 @@
 
 ## Learnings
 
+### 2026-02-23: Docs Site Engine & Beta Content (#185, #188)
+- **Task:** Build a minimal static site generator for markdown documentation + landing page with navigation sidebar
+- **Solution delivered:**
+  - `docs/build.js` — ESM-compatible Node.js markdown-to-HTML converter (uses file:// URLs for imports)
+  - `docs/template.html` — HTML5 template with sticky sidebar navigation, responsive design, mobile hamburger menu
+  - `docs/assets/style.css` — Professional GitHub-styled design (CSS variables, flexbox layout, dark sidebar, syntax highlighting for code blocks)
+  - `docs/assets/app.js` — Minimal JavaScript (sidebar toggle on mobile, active page highlighting, click-to-close)
+  - `docs/guide/index.md` — Landing page linking all guides with organized sections (Getting Started, Guides, Reference)
+- **Content verified:** All 8 existing guides present (installation, configuration, shell, sdk-integration, tools-and-hooks, marketplace, upstream-inheritance, feature-migration) + architecture/api reference
+- **Build system:** Running `node docs/build.js` generates HTML in `docs/dist/` (added to .gitignore explicitly)
+- **Key decision:** ESM-only approach (project-wide constraint) required `import.meta.url` + `fileURLToPath` for __dirname replacement
+- **GitHub Pages ready:** Output is static HTML with relative asset paths, works offline
+- **Status:** ✅ All 10 HTML files generated successfully with no errors
+
 ### 2026-02-22: Issue #306 Cleanup Audit (Phase 1 — AUDIT ONLY)
 - **Scope:** Comprehensive audit of hardcoded values, code quality, and test coverage gaps across `packages/squad-sdk/src/` and `packages/squad-cli/src/`
 - **Findings:** 47 total findings across 4 categories:

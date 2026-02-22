@@ -9,8 +9,8 @@
 ```mermaid
 graph LR
   subgraph "Beta (v0.4.x — Markdown)"
-    A1[squad.agent.md] --> A2[.ai-team/team.md]
-    A2 --> A3[.ai-team/routing.md]
+    A1[squad.agent.md] --> A2[.squad/team.md]
+    A2 --> A3[.squad/routing.md]
     A3 --> A4[Copilot Agent Picker]
     A4 --> A5[Single-agent response]
   end
@@ -96,13 +96,13 @@ graph TD
   sharing --> config
 ```
 
-## 5. Migration Path — .ai-team/ → .squad/
+## 5. Migration Path — .squad/ (current standard)
 
 ```mermaid
 flowchart LR
   subgraph "Legacy (v0.4)"
-    L1[.ai-team/team.md]
-    L2[.ai-team/routing.md]
+    L1[.squad/team.md]
+    L2[.squad/routing.md]
     L3[squad.agent.md]
   end
 

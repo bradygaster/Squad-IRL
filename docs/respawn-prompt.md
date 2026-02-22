@@ -24,7 +24,7 @@
 - **SDK-native:** Squad is now built *on* Copilot SDK, not alongside it
 - **Typed end-to-end:** TypeScript strict mode with discriminated unions
 - **Hook-based governance:** Security, PII, file-write guards via hooks (not prompt instructions)
-- **Team state:** `.squad/` (not `.ai-team/`) — single directory for all team data
+- **Team state:** `.squad/` — single directory for all team data
 - **Module boundaries:** 13 modules, each with clear ownership and exports
 - **Runtime performance:** Streaming, offline-first, cost tracking, telemetry, benchmarks
 
@@ -237,7 +237,7 @@ src/
 >
 > **Project structure:**
 > - 13 modules: adapter, agents, build, casting, cli, client, config, coordinator, hooks, marketplace, ralph, runtime, sharing, skills, tools
-> - Team state: `.squad/` (NOT `.ai-team/`) — single directory for all team data
+> - Team state: `.squad/` — single directory for all team data
 > - Public API: `src/index.ts` exports everything
 >
 > **Key context from beta:**

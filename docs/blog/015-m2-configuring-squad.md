@@ -9,9 +9,9 @@
 
 ## Why Typed Config Matters
 
-Beta Squad's configuration lived in markdown: `team.md`, `routing.md`, agent docs scattered across `.ai-team/`. It was readable but fragile. A typo in a model name silently fell back to defaults. A malformed routing table broke at runtime with no useful error. Editors couldn't autocomplete, and refactoring was grep-and-pray.
+Squad's configuration lives in markdown: `team.md`, `routing.md`, agent docs in `.squad/`. It is readable and maintainable. Editors can autocomplete paths and structure. Refactoring is supported through the migration tools.
 
-M2 introduced `squad.config.ts` — a single TypeScript file that replaces the entire `.ai-team/` directory as the source of truth.
+M2 introduced `squad.config.ts` — a single TypeScript file that works alongside `.squad/` directory as the source of truth.
 
 ## defineConfig()
 
@@ -43,7 +43,7 @@ Full TypeScript inference, editor autocomplete, and compile-time checking — al
 
 ## Migration Path
 
-For teams on beta, `migrateMarkdownToConfig()` converts `.ai-team/` files into a typed `SquadConfig`. `parseTeamMarkdown()` extracts team structure, `parseRoutingMarkdown()` converts routing tables, and `generateConfigFromParsed()` assembles the result. `MigrationRegistry` handles versioned migrations (v0.4 → v0.5 → v0.6) with composable transform functions.
+For teams managing configuration, `migrateMarkdownToConfig()` converts `.squad/` files into a typed `SquadConfig`. `parseTeamMarkdown()` extracts team structure, `parseRoutingMarkdown()` converts routing tables, and `generateConfigFromParsed()` assembles the result. `MigrationRegistry` handles versioned migrations (v0.4 → v0.5 → v0.6) with composable transform functions.
 
 ## Result
 

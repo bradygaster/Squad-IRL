@@ -26,7 +26,7 @@
 - Full `SquadConfig` schema with validation
 - `defineConfig()` helper for type-safe authoring
 - Config migrations (v0.4 → v0.6)
-- Legacy fallback: `.ai-team/` → `.squad/` detection and merge
+- Standard directory: `.squad/` for all team state
 - `ConfigValidationError` with actionable messages
 
 ### M3 — Feature Parity
@@ -63,7 +63,7 @@
 | Change | Migration |
 |--------|-----------|
 | Config file: `squad.agent.md` → `squad.config.ts` | Run `squad init` to generate typed config |
-| Team dir: `.ai-team/` → `.squad/` | Auto-detected; legacy files still read as fallback |
+| Team dir: `.squad/` | Standard directory for all team state |
 | Routing: markdown rules → typed `RoutingRule[]` | Export existing rules with `squad export` |
 | Models: string names → tier-based `ModelConfig` | Use `defaultTier` + `fallbackChains` in config |
 
@@ -73,7 +73,7 @@
 2. **Init**: `npx squad init` — generates `squad.config.ts` from existing setup
 3. **Verify**: `npx squad status` — confirms config loads and agents resolve
 4. **Test**: Run your project's test suite to confirm no regressions
-5. **Clean up**: Remove `.ai-team/` once validated (legacy fallback remains active)
+5. **Finalize**: Ensure `.squad/` contains all required team state files
 
 ## Test Summary
 

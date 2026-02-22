@@ -136,3 +136,95 @@ McManus updated CHANGELOG.md with v0.6.0 entries and created docs/squadui-integr
 - Closest-wins resolution algorithm and ordering importance emphasized to prevent user error
 - Troubleshooting focuses on common paths (git auth, local path validation, cache invalidation, order dependency)
 - All SDK examples use actual public exports from `@bradygaster/squad-sdk`
+
+### 2026-02-22: Issue #206, #203, #201, #199, #196 — Five documentation guides
+**Status:** Complete.
+**Changes made:**
+1. **docs/guide/architecture.md** — 15.2KB architecture overview:
+   - System diagram showing SDK, CLI, SquadUI, and Copilot integration
+   - Package boundaries: Squad SDK (core runtime), Squad CLI (entry point + commands), SquadUI (VS Code extension)
+   - Complete module map with subdirectories and key types (Agents, Casting, Routing, Tools, Config, Upstream, Adapter, Runtime)
+   - OTel 3-layer observability pipeline (low-level: initializeOTel/getTracer; mid-level: bridgeEventBusToOTel; high-level: initSquadTelemetry)
+   - Trace flow from user input → SDK spans → EventBus → OTLP → Aspire
+   - Execution flows for CLI shell and SquadUI
+   - Development workflow patterns (adding CLI command, adding tool, adding SDK export)
+
+2. **docs/guide/migration.md** — 9.6KB migration from beta to v1:
+   - Directory rename: `.ai-team/` → `.squad/` (automated with `squad upgrade --migrate-directory`)
+   - Package names: monolithic SDK → separate SDK + CLI (`@bradygaster/squad-sdk`, `@bradygaster/squad-cli`)
+   - CLI commands: all work with global install, no more `npx github:bradygaster/squad-sdk`
+   - Config changes: .agent.md still exists but no longer baked into routing (now programmatic)
+   - Charter format: still markdown but structured sections (Identity, Knowledge, Tools, Collaboration)
+   - 10-step migration checklist with validation at each step
+   - What's new: deterministic routing, OTel observability, upstream inheritance, response tiers, independent versioning
+   - Troubleshooting: command not found, missing directories, agent load failures, model availability, script updates
+
+3. **docs/guide/cli-install.md** — 8.1KB CLI installation guide:
+   - Three install methods: global (npm), one-off (npx), GitHub native (development)
+   - How resolution works: global PATH lookup vs. npx on-demand vs. git clone
+   - Personal squad: `squad init --global` for shared ~/.squad/ across projects
+   - Global vs. local squad comparison table
+   - Resolution order: ./.squad/ → parents → ~/.squad/ → fallback
+   - Command compatibility matrix (which commands work with which install methods)
+   - When to use each method (frequency, CI/CD, testing, GitHub native)
+   - Version management: check, update, pin, insider channel
+   - Troubleshooting: command not found, missing .squad/, permissions, version mismatch, Docker setup
+
+4. **docs/guide/vscode-integration.md** — 10KB SquadUI integration for extension developers:
+   - User flow: user → SquadUI → runSubagent → SDK spawns agent
+   - Client compatibility modes: CLI (interactive shell, full filesystem) vs. VS Code (no interactive, scoped file ops)
+   - Extension developer checklist: 7 items (detect mode, import safely, load config, call agents, stream, error handling, user context)
+   - API reference: CastMember, AgentCharter, RoutingDecision, ConfigLoadResult types
+   - Safe patterns: read-only status, non-blocking spawn, stream output
+   - Detailed troubleshooting: Squad not found, process.exit() crashes, non-streaming responses, import paths
+   - Emphasis on never importing CLI entry point (it calls process.exit())
+
+5. **docs/guide/sdk-api-reference.md** — 20.3KB complete SDK API reference:
+   - Barrel export overview (all imports work from @bradygaster/squad-sdk)
+   - **Resolution**: resolveSquad, resolveGlobalSquadPath, ensureSquadPath
+   - **Runtime Constants**: MODELS, TIMEOUTS, AGENT_ROLES with examples
+   - **Configuration**: loadConfig, loadConfigSync with types (ConfigLoadResult, AgentConfig, RoutingConfig)
+   - **Agents**: onboardAgent with full usage example
+   - **Casting**: CastingEngine, CastingHistory with examples
+   - **Coordinator**: SquadCoordinator class, selectResponseTier, getTier with complete types
+   - **Tools**: defineTool helper, ToolRegistry, built-in tool table
+   - **OTel (3-layer)**:
+     - Layer 1: initializeOTel, shutdownOTel, getTracer, getMeter (low-level control)
+     - Layer 2: bridgeEventBusToOTel, createOTelTransport (mid-level bridge)
+     - Layer 3: initSquadTelemetry with lifecycle handle (high-level convenience)
+     - Zero overhead guarantee: no-op if no TracerProvider configured
+   - **Streaming**: createReadableStream
+   - **Upstream**: readUpstreamConfig, resolveUpstreams, buildInheritedContextBlock, buildSessionDisplay
+   - **Skills**: loadSkills, readSkill, writeSkill
+   - Final glossary table of all exports
+
+**Tone applied:**
+- No hype — each API presented matter-of-factly with code examples
+- Every export grounded in actual source code (verified against packages/squad-sdk/src/index.ts)
+- OTel 3-layer structure explained with zero-overhead guarantee (prevents unfounded adoption fears)
+- Migration guide balances pragmatism (automated rename) with honest troubleshooting (what can go wrong)
+- CLI install guide emphasizes resolution and decision-making (which method when) rather than prescriptiveness
+- SquadUI guide warns against common mistakes (process.exit crash, importing CLI) with concrete fixes
+- Architecture guide uses diagrams and module maps (not narrative prose) for clarity
+- All five guides cross-reference each other (Next Steps sections)
+
+**Process:**
+- Read actual source: packages/squad-sdk/src/index.ts (all exports), src/runtime/otel*.ts, src/tools/index.ts, src/agents/, src/coordinator/, src/upstream/
+- Verified CLI structure: packages/squad-cli/src/cli-entry.ts, cli/commands/, cli/shell/
+- Verified casting: packages/squad-sdk/src/casting/casting-engine.ts, casting-history.ts
+- Verified adapter: packages/squad-sdk/src/adapter/types.ts, client.ts
+- Verified upstream: packages/squad-sdk/src/upstream/resolver.ts, types.ts
+- Checked history.md for prior tone decisions (ALWAYS: no hype, no unsubstantiated claims)
+- All code examples use actual API signatures (not invented)
+- Glossaries and index sections for cross-referencing
+
+**Notes:**
+- All five guides marked "⚠️ INTERNAL ONLY" per v1 policy (no published docs site)
+- Architecture guide serves as central reference; other guides link back to it
+- Migration guide is safety-first: backup, validate, rollback instructions
+- CLI install guide clarifies confusing resolution behavior (global vs. npx vs. GitHub)
+- SquadUI guide prevents costly mistakes (extension crashes, wrong import paths)
+- SDK API reference is exhaustive (every export from index.ts) and grouped by domain
+- OTel reference emphasizes 3-layer structure matching Issue #266 decision
+- No screenshots or videos (text-only for internal review)
+- Troubleshooting sections in migration, CLI, and SquadUI guides address real failure modes from beta feedback

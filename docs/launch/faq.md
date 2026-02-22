@@ -79,10 +79,10 @@ Yes. `AgentCache` provides TTL-based caching. Agent definitions cache for 1 hour
 ## Migration
 
 ### 17. How do I migrate from beta (v0.5.1)?
-Use `migrateMarkdownToConfig('.ai-team/')` to auto-convert markdown config to typed `squad.config.ts`. See the [Migration Guide](./migration-guide-v051-v060.md) for step-by-step instructions.
+Use `migrateMarkdownToConfig('.squad/')` to auto-convert markdown config to typed `squad.config.ts`. See the [Migration Guide](./migration-guide-v051-v060.md) for step-by-step instructions.
 
-### 18. Can I keep my `.ai-team/` directory?
-Yes. The system auto-detects `.ai-team/` directories and uses them as a fallback. `detectDrift()` reports mismatches between legacy docs and typed config.
+### 18. Can I use the `.squad/` directory?
+Yes. The system uses `.squad/` as the standard. `detectDrift()` reports mismatches between config and documentation.
 
 ### 19. What breaks when upgrading?
 Key changes: config moves from markdown to TypeScript, model selection uses 4-layer priority, response tiers are new, and `HookPipeline` enforces policies by default. See the [Migration Guide](./migration-guide-v051-v060.md) breaking changes table.

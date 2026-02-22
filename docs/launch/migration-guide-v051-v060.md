@@ -13,7 +13,7 @@ This guide provides concrete steps to migrate a Squad project from v0.5.1 (markd
 ## Prerequisites
 
 - Node.js ≥ 20.0.0
-- Existing Squad project with `.ai-team/` directory
+- Existing Squad project with `.squad/` directory
 - Back up your project before migrating
 
 ## Step 1: Install the SDK
@@ -103,14 +103,14 @@ const result = await loadConfig();
 
 ```
 # Before (v0.5.1)         # After (v0.6.0)
-.ai-team/                  .squad/
+.squad/                    (standard directory)
   team.md                    agents/
   routing.md                 skills/
   agents/                  squad.config.ts
     backend.md
 ```
 
-The `.ai-team/` directory can remain as a fallback — the system auto-detects it and logs migration suggestions. Use `detectDrift()` to check for config/doc mismatches.
+The `.squad/` directory is the standard location. Use `detectDrift()` to check for config/doc mismatches.
 
 ## Step 9: Verify
 
@@ -123,8 +123,8 @@ npm test        # All tests pass
 
 | v0.5.1 | v0.6.0 | Action |
 |--------|--------|--------|
-| `.ai-team/team.md` | `squad.config.ts` → `team` | Auto-migrated |
-| `.ai-team/routing.md` | `squad.config.ts` → `routing` | Auto-migrated |
+| `.squad/team.md` | `squad.config.ts` → `team` | Standardized |
+| `.squad/routing.md` | `squad.config.ts` → `routing` | Standardized |
 | Implicit model selection | `resolveModel()` 4-layer priority | Review model config |
 | No response tiers | `ResponseTier` system | New behavior — review routing |
 | No hook pipeline | `HookPipeline` with 5 policies | Opt-in, but review defaults |

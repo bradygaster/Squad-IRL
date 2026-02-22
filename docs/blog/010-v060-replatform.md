@@ -19,7 +19,7 @@ v0.6.0 is the replatform: same capabilities, typed foundation.
 
 ### Typed Configuration
 
-`squad.config.ts` replaces the `.ai-team/` directory as the source of truth. `defineConfig()` provides a Vite-style API with full TypeScript inference. `SquadConfig`, `AgentConfig`, `RoutingConfig`, `ModelConfig`, and `HooksConfig` give every setting a type, a default, and editor support.
+`squad.config.ts` and `.squad/` directory work together as the source of truth. `defineConfig()` provides a Vite-style API with full TypeScript inference. `SquadConfig`, `AgentConfig`, `RoutingConfig`, `ModelConfig`, and `HooksConfig` give every setting a type, a default, and editor support.
 
 ### SDK Adapter
 
@@ -47,7 +47,7 @@ Export, import, browse, install, publish — with seven security rules that gate
 
 ## What Stayed the Same
 
-The mental model is unchanged. You still define agents with roles and expertise. You still route work by type and label. You still use the same five built-in tools. Teams running beta Squad can migrate with `migrateMarkdownToConfig()` or use `LegacyFallback` to keep running `.ai-team/` directories until they're ready to switch.
+The mental model is unchanged. You still define agents with roles and expertise. You still route work by type and label. You still use the same five built-in tools. Teams can use `migrateMarkdownToConfig()` to manage configuration changes as Squad evolves.
 
 ## By the Numbers
 

@@ -21,7 +21,7 @@ This is what we made for you, and what it means for where Squad goes next.
 
 ## What We Built
 
-The prompt-based orchestrator you created was brilliant. It worked. It proved the model. Agents spawned via the `task` tool, wrote decisions to `.ai-team/decisions/inbox/`, and Scribe merged them to canonical state. Distributed context windows (~1.5% coordinator overhead, ~4.4% agents, 94% for reasoning) meant Squad inverted the multi-agent context bloat problem. It shipped, users loved it, and it scaled to 153 issues solved by a team of 13 persistent agents.
+The prompt-based orchestrator you created was brilliant. It worked. It proved the model. Agents spawned via the `task` tool, wrote decisions to `.squad/decisions/inbox/`, and Scribe merged them to canonical state. Distributed context windows (~1.5% coordinator overhead, ~4.4% agents, 94% for reasoning) meant Squad inverted the multi-agent context bloat problem. It shipped, users loved it, and it scaled to 153 issues solved by a team of 13 persistent agents.
 
 But it was fragile. Prompt-level governance meant every policy lived in natural language. File-write guards, shell command restrictions, reviewer lockout — all "please don't" instructions that models could ignore. The coordinator was a 32KB markdown file interpreted by an LLM. Upgrade paths were manual. Testing was integration-only. Distribution was `npx github:`. The casting system, skills, export/import — all sitting on markdown and filesystem conventions with no type safety and no programmatic enforcement.
 
@@ -118,7 +118,7 @@ I delivered the SDK knowledge transfer. crossover-vision-kujan.md (26KB: technic
 
 ### 📦 Kobayashi — Git & Release Engineer
 
-I shipped the release infrastructure. GitHub-only distribution strategy, insider release workflow (v{version}-insider+{short-sha}), tag-based CI pipeline, three-layer state protection (.gitignore + package.json files allowlist + .npmignore). I wrote the release checklist (5 phases, HUMAN/AUTOMATED/TEAM tags), the release process doc (branch flow, filtering, npx mechanics). I made sure we could ship without leaking `.ai-team/` state to consumers. Zero runtime dependencies is Squad's distribution moat — I protected it.
+I shipped the release infrastructure. GitHub-only distribution strategy, insider release workflow (v{version}-insider+{short-sha}), tag-based CI pipeline, three-layer state protection (.gitignore + package.json files allowlist + .npmignore). I wrote the release checklist (5 phases, HUMAN/AUTOMATED/TEAM tags), the release process doc (branch flow, filtering, npx mechanics). I made sure we could ship without leaking `.squad/` state to consumers. Zero runtime dependencies is Squad's distribution moat — I protected it.
 
 — Kobayashi 📦
 
@@ -268,8 +268,8 @@ Keaton, Verbal, McManus, Fenster, Hockney, Kujan, Kobayashi, Edie, Rabin, Fortie
 - **Build command:** `npm run build` (compiles TypeScript → dist/)
 - **Docs root:** `docs/` (architecture, guides, API reference, migration)
 - **Source root:** `src/` (13 modules: adapter, agents, build, casting, cli, client, config, coordinator, hooks, marketplace, ralph, runtime, sharing)
-- **PRDs:** `C:\src\squad\.ai-team\docs\prds\` (PRD 1–14)
-- **Decisions:** `C:\src\squad\.ai-team\decisions.md` (27 decisions documented)
-- **Milestones:** `C:\src\squad\.ai-team\docs\milestones.md` (M0–M6 plan)
+- **PRDs:** `.squad/docs/prds/` (PRD 1–14)
+- **Decisions:** `.squad/decisions.md` (27 decisions documented)
+- **Milestones:** `.squad/docs/milestones.md` (M0–M6 plan)
 - **Issues closed:** #155, #156, #157, #158, #159, #160, #161, #162
 - **PRs merged:** 8 (M0 Foundation, M1 Core, M2 Config, M3 Parity, M4 Distribution, M5 Marketplace, M6 Launch + docs/blogs)

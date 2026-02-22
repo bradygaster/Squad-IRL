@@ -11,7 +11,7 @@
 
 ### Config & Migration
 - [ ] Config migration tested (v0.4 → v0.6)
-- [ ] Legacy fallback working (`.ai-team/` → `.squad/`)
+- [ ] Squad directory structure working (`.squad/`)
 - [ ] Export/import roundtrip verified
 - [ ] `defineConfig()` helper works in consumer repos
 

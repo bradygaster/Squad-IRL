@@ -137,4 +137,4 @@ skillCache.clear();
 ```
 
 ### Migration Rollback
-Keep `.ai-team/` as backup. The system auto-detects legacy directories and can fall back to markdown-based configuration if `squad.config.ts` is removed.
+Use `.squad/` as your primary directory for all team state. Ensure `squad.config.ts` is in sync with your team configuration.

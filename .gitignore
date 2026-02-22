@@ -9,3 +9,5 @@ coverage/
 .squad/orchestration-log/
 .squad/log/
 .test-cli-*
+# Docs site generated files
+docs/dist/

@@ -212,3 +212,14 @@ Fenster's src/utils/normalize-eol.ts utility is now applied to 8 parser entry po
 - **TODO removed:** "Wire to CopilotClient session API" in spawn.ts — resolved by this change.
 - **TODO deferred:** "Parent span context propagation" in `tools/index.ts` — requires agent.work span lifecycle to be complete first. Left in place.
 - **Build:** tsc clean (0 errors). **Tests:** 47 shell tests passing.
+
+### 📌 Mechanical Documentation Updates (2026-02-23) — Fenster (Issues #191, #192, #195)
+- **Issue #191 (.ai-team/ → .squad/):** Updated 42+ doc files to reflect `.squad/` as the standard team directory. Removed language about "legacy fallback" and "auto-detection of .ai-team/". Updated migration guides, feature docs, blog posts, templates, and architecture diagrams to use `.squad/` consistently.
+  - Files updated: diagrams.md, quick-reference.md, module-map.md, codebase-comparison.md, 004-m3-feature-parity.md, checklist.md, beta-to-v1.md, feature-migration.md, 006-sdk-replatform.md, respawn-prompt.md, demo-scenarios.md, faq.md, migration-guide-v051-v060.md, 010-v060-replatform.md, operational-runbooks.md, squadui-type-corrections.md, release-notes-v060.md, 015-m2-configuring-squad.md, 011-migration-guide.md, test-scripts/05-beta-parity.md, team-to-brady.md, templates/scribe-charter.md, templates/squad.agent.md.
+  - Pattern: Removed references to `.ai-team/` as a fallback/legacy directory. Updated code examples, comments, and prose to assume `.squad/` is the primary and only standard directory.
+- **Issue #192 (CLI invocations):** Verified current package names in docs (@bradygaster/squad-cli, @bradygaster/squad-sdk) are already correct. No old `@bradygaster/ai-team` or `squad-cli` invocation patterns found. Confirmed README.md uses correct npm install patterns.
+- **Issue #195 (repo URLs):** Updated 2 files:
+  - CONTRIBUTING.md: Changed clone URL from `bradygaster/squad` to `bradygaster/squad-pr` (v1 SDK repo).
+  - docs/README.md: Clarified repo column as `bradygaster/squad` (beta) vs `bradygaster/squad-pr` (v1 SDK).
+  - Pattern: Intentionally preserved references to `bradygaster/squad` (the beta repo) where appropriate — it still exists and is referenced for context/comparison. Only updated URLs that should point to squad-pr (v1 SDK repo).
+- **Build:** No build changes needed. **Tests:** All docs-only changes, no test impact. Verified no breaking changes to code or configuration.

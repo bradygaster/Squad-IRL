@@ -403,7 +403,7 @@ All 33 template files from the beta are carried forward to v1. The init flow sca
 **Risk:** We haven't migrated a real beta squad to v1 yet. We have a migration plan (documented in PRD 6), but it's untested in production. Users with 6 months of squad history, 200+ decisions, 50+ skills — we don't know if the migration handles edge cases.
 
 **Mitigation:**
-- Migration is non-destructive. Old .ai-team/ directory is preserved. New .squad/ directory is created. Rollback is trivial (delete .squad/, revert to beta).
+- Migration is non-destructive. New .squad/ directory is created as the standard. Rollback is trivial (delete .squad/, revert to earlier version).
 - Pre-migration spike plan (10.5h, 5 spikes) validates SDK assumptions before M0 starts.
 - Feature parity audit (54 features tracked) ensures v1 doesn't regress beta capabilities.
 

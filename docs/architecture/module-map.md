@@ -57,7 +57,7 @@ src/
 | `doc-sync.ts` | `syncDocToConfig`, `syncConfigToDoc`, `detectDrift` | Bidirectional markdown↔config synchronization |
 | `init.ts` | `initSquad`, `InitOptions`, `InitResult` | Project scaffolding |
 | `migration.ts` | `MigrationRegistry`, `parseSemVer`, `compareSemVer` | Semver-based config migration chains |
-| `markdown-migration.ts` | `migrateMarkdownToConfig`, `parseTeamMarkdown` | Legacy .ai-team/ → typed config converter |
+| `markdown-migration.ts` | `migrateMarkdownToConfig`, `parseTeamMarkdown` | Legacy .squad/ → typed config converter |
 
 ### `src/agents/` — Agent Management
 

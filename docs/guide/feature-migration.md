@@ -75,4 +75,4 @@ pipeline.onReasoning((event: ReasoningDelta) => log(event));
 
 ## Legacy Fallback
 
-`migrateMarkdownToConfig()` converts `.ai-team/` files to typed config. `parseTeamMarkdown()` and `parseRoutingMarkdown()` handle legacy formats. `MigrationRegistry` chains versioned transforms (v0.4 → v0.5 → v0.6). The system auto-detects `.ai-team/` directories and logs migration suggestions.
+`migrateMarkdownToConfig()` converts `.squad/` files to typed config. `parseTeamMarkdown()` and `parseRoutingMarkdown()` handle configuration formats. `MigrationRegistry` chains versioned transforms (v0.4 → v0.5 → v0.6). The system ensures `.squad/` is the standard directory for team state.

@@ -91,7 +91,7 @@
 | `Migration` | interface | Single version migration (from, to, transform function) |
 | `parseSemVer` | function | Parses version string into SemVer object |
 | `compareSemVer` | function | Compares two SemVer values |
-| `migrateMarkdownToConfig` | function | Converts .ai-team/ markdown to typed SquadConfig |
+| `migrateMarkdownToConfig` | function | Converts .squad/ markdown to typed SquadConfig |
 | `parseTeamMarkdown` | function | Parses team.md into structured data |
 | `generateConfigFromParsed` | function | Converts parsed markdown into SquadConfig |
 

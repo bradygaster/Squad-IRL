@@ -9,7 +9,7 @@
 
 ## Why We Replatformed
 
-Squad started as a markdown convention — a `squad.agent.md` file and a `.ai-team/` directory that GitHub Copilot could read to coordinate multiple agents. It worked, but it hit a ceiling fast.
+Squad started as a markdown convention — a `squad.agent.md` file and a `.squad/` directory that GitHub Copilot could read to coordinate multiple agents. It worked, but it hit a ceiling fast.
 
 Markdown configs couldn't be validated at authoring time. Routing rules were fragile strings. There was no way to test a team configuration without running it live. And as teams grew past three or four agents, the lack of type safety made changes risky.
 
@@ -29,7 +29,7 @@ The replatform replaced the markdown layer with a typed TypeScript SDK while kee
 
 ## Backward Compatibility
 
-Legacy `.ai-team/` directories are auto-detected and merged into the typed config at load time. Typed config always wins on conflict, but teams can migrate incrementally — the old files keep working until you're ready to remove them. A dedicated migration path converts markdown routing rules into typed `RoutingRule[]` objects.
+Squad uses the `.squad/` directory as the standard for all team state. The system provides migration tools to convert legacy configurations to the typed config format. A dedicated migration path converts markdown routing rules into typed `RoutingRule[]` objects.
 
 ## By the Numbers
 

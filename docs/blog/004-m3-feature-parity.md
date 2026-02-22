@@ -41,7 +41,7 @@ Three response tiers — **streaming**, **buffered**, and **direct** — let the
 
 ### Migration Finalization & Legacy Fallback
 
-The migration system from M2 is finalized with end-to-end chain validation. `LegacyFallback` detects `.ai-team/` directories and transparently routes through the markdown-based pipeline, so existing beta projects work without any config changes.
+The migration system from M2 is finalized with end-to-end chain validation. Squad uses `.squad/` as the standard directory for all team state, ensuring consistent configuration across projects.
 
 ### Feature Audit & Parity Tests
 

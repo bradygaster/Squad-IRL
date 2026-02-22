@@ -12,11 +12,11 @@ Squad v1 replaces the markdown-convention-based beta with a typed TypeScript run
 
 | Area | Beta | v1 |
 |------|------|----|
-| Configuration | `.ai-team/team.md` (markdown) | `squad.config.ts` (typed TypeScript) |
-| Team directory | `.ai-team/` | `.squad/` |
+| Configuration | `.squad/team.md` (markdown) | `squad.config.ts` (typed TypeScript) |
+| Team directory | `.squad/` | `.squad/` |
 | Agent files | `agents/{name}/agent.md` | `agents/{name}/charter.md` |
 | Routing | `routing.md` (markdown table) | `routing` section in `squad.config.ts` |
-| Decisions | `.ai-team/decisions/inbox/` | TODO: M3+ decision system |
+| Decisions | `.squad/decisions/inbox/` | TODO: M3+ decision system |
 | Model selection | Implicit / per-agent prompt | Explicit 4-layer resolution in config |
 | Tools | Prompt-based conventions | `ToolRegistry` with typed schemas |
 | Hooks/policies | None | `HookPipeline` with 5 built-in policies |
@@ -31,13 +31,13 @@ npm install @bradygaster/squad
 
 ### 2. Auto-Migrate Markdown Config
 
-Use the built-in markdown migration to convert your existing `.ai-team/` files:
+Use the built-in markdown migration to convert your squad files:
 
 ```ts
 import { migrateMarkdownToConfig } from '@bradygaster/squad';
 
 const result = migrateMarkdownToConfig({
-  teamRoot: '.ai-team',
+  teamRoot: '.squad',
   // parses team.md, routing.md, and decisions/
 });
 // result.config is a typed SquadConfig
@@ -75,7 +75,7 @@ export default defineConfig({
 ### 4. Rename Directory Structure
 
 ```
-.ai-team/                →  .squad/
+.squad/                  (standard directory)
   agents/NAME/agent.md   →  agents/NAME/charter.md
   routing.md             →  (routing section in squad.config.ts)
   team.md                →  (team section in squad.config.ts)

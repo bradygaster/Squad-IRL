@@ -36,8 +36,8 @@ Each package has independent versioning via changesets. A change to squad-sdk ma
 ### 1. Clone and Install
 
 ```bash
-git clone https://github.com/bradygaster/squad.git
-cd squad
+git clone https://github.com/bradygaster/squad-pr.git
+cd squad-pr
 npm install
 ```
 

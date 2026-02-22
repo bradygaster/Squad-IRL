@@ -21,7 +21,7 @@ docs/
 
 | Concern | Beta (public) | v1 SDK (internal) |
 |---------|--------------|-------------------|
-| Repo | `bradygaster/squad` | `bradygaster/squad-pr` |
+| Repo | `bradygaster/squad` (beta) | `bradygaster/squad-pr` (v1 SDK) |
 | Docs | `squad/docs/` | `squad-sdk/docs/` |
 | Blog | `squad/docs/blog/` | `squad-sdk/docs/blog/` |
 | Published | Yes — docs site | **No** — repo only |
