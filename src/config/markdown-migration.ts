@@ -8,6 +8,8 @@
  * @module config/markdown-migration
  */
 
+import { normalizeEol } from '../utils/normalize-eol.js';
+
 import type {
   SquadConfig,
   RoutingConfig,
@@ -117,6 +119,7 @@ export interface MarkdownMigrationResult {
  * @returns Array of parsed agents and any warnings
  */
 export function parseTeamMarkdown(content: string): { agents: ParsedAgent[]; warnings: string[] } {
+  content = normalizeEol(content);
   const agents: ParsedAgent[] = [];
   const warnings: string[] = [];
 
@@ -268,6 +271,7 @@ function parseTeamTable(lines: string[]): ParsedAgent[] {
 export function parseRoutingRulesMarkdown(
   content: string,
 ): { rules: ParsedRoutingRule[]; warnings: string[] } {
+  content = normalizeEol(content);
   const rules: ParsedRoutingRule[] = [];
   const warnings: string[] = [];
 
@@ -345,6 +349,7 @@ export function parseRoutingRulesMarkdown(
 export function parseDecisionsMarkdown(
   content: string,
 ): { decisions: ParsedDecision[]; warnings: string[] } {
+  content = normalizeEol(content);
   const decisions: ParsedDecision[] = [];
   const warnings: string[] = [];
 

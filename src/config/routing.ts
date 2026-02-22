@@ -8,6 +8,7 @@
  */
 
 import type { RoutingConfig, RoutingRule, IssueRoutingRule } from '../runtime/config.js';
+import { normalizeEol } from '../utils/normalize-eol.js';
 
 /**
  * Compiled routing matcher with regex patterns.
@@ -111,6 +112,7 @@ export interface RoutingMatch {
  * @returns Parsed routing configuration
  */
 export function parseRoutingMarkdown(content: string): RoutingConfig {
+  content = normalizeEol(content);
   const rules: RoutingRule[] = [];
   const lines = content.split('\n');
   

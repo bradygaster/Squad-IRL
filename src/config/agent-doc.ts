@@ -8,6 +8,8 @@
  * @module config/agent-doc
  */
 
+import { normalizeEol } from '../utils/normalize-eol.js';
+
 /**
  * Structured metadata extracted from an agent .md file.
  */
@@ -58,6 +60,7 @@ const STANDARD_SECTIONS = new Set([
  * @returns Parsed metadata
  */
 export function parseAgentDoc(markdown: string): AgentDocMetadata {
+  markdown = normalizeEol(markdown);
   const result: AgentDocMetadata = {
     capabilities: [],
     routingHints: [],

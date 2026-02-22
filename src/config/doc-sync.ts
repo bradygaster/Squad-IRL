@@ -10,6 +10,7 @@
 
 import type { AgentDocMetadata } from './agent-doc.js';
 import type { SquadConfig, AgentConfig } from './schema.js';
+import { normalizeEol } from '../utils/normalize-eol.js';
 
 /**
  * A single mismatch between the agent doc and the typed config.
@@ -285,7 +286,8 @@ function buildCapabilitiesBlock(config: SquadConfig): string {
   const caps: string[] = [];
   for (const agent of config.agents) {
     if (agent.charter) {
-      for (const line of agent.charter.split('\n')) {
+      const charter = normalizeEol(agent.charter);
+      for (const line of charter.split('\n')) {
         caps.push(`- ${line}`);
       }
     } else {

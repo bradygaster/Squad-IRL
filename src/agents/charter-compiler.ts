@@ -8,6 +8,7 @@
 
 import { SquadCustomAgentConfig } from '../adapter/types.js';
 import { ConfigurationError } from '../adapter/errors.js';
+import { normalizeEol } from '../utils/normalize-eol.js';
 
 /**
  * Options for compiling a charter.
@@ -183,6 +184,7 @@ export function compileCharterFull(options: CharterCompileOptions): CompiledChar
  * @returns Parsed charter structure
  */
 export function parseCharterMarkdown(content: string): ParsedCharter {
+  content = normalizeEol(content);
   const result: ParsedCharter = {
     identity: {},
     fullContent: content,

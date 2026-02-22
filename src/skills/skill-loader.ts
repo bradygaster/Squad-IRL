@@ -18,6 +18,7 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { normalizeEol } from '../utils/normalize-eol.js';
 
 // --- Types ---
 
@@ -45,6 +46,7 @@ export interface SkillDefinition {
 export function parseFrontmatter(
   raw: string,
 ): { meta: Record<string, string | string[]>; body: string } {
+  raw = normalizeEol(raw);
   const meta: Record<string, string | string[]> = {};
   let body = raw;
 
