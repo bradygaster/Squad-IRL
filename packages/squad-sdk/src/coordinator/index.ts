@@ -44,10 +44,13 @@ export {
 // --- Legacy types (kept for backwards compat) ---
 
 import type { SquadClient, SquadSessionConfig } from '../client/index.js';
-import type { EventBus } from '../client/event-bus.js';
+import type { EventBus } from '../runtime/event-bus.js';
 import type { AgentSessionManager, AgentCharter } from '../agents/index.js';
 import type { HookPipeline } from '../hooks/index.js';
 import type { ToolRegistry } from '../tools/index.js';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('squad-sdk');
 
 // --- Routing Types ---
 
@@ -75,6 +78,14 @@ export interface CoordinatorConfig {
 
 // --- Coordinator ---
 
+export interface CoordinatorDeps {
+  client?: SquadClient;
+  eventBus?: EventBus;
+  agentManager?: AgentSessionManager;
+  hookPipeline?: HookPipeline;
+  toolRegistry?: ToolRegistry;
+}
+
 export class Coordinator {
   private client: SquadClient | null = null;
   private eventBus: EventBus | null = null;
@@ -82,40 +93,152 @@ export class Coordinator {
   private hookPipeline: HookPipeline | null = null;
   private toolRegistry: ToolRegistry | null = null;
   private config: CoordinatorConfig;
+  private initialized = false;
+  private unsubscribers: (() => void)[] = [];
 
-  constructor(config: CoordinatorConfig) {
+  constructor(config: CoordinatorConfig, deps?: CoordinatorDeps) {
     this.config = config;
-    // TODO: PRD 5 — Accept injected dependencies (client, eventBus, agentManager, hooks, tools)
+    if (deps) {
+      this.client = deps.client ?? null;
+      this.eventBus = deps.eventBus ?? null;
+      this.agentManager = deps.agentManager ?? null;
+      this.hookPipeline = deps.hookPipeline ?? null;
+      this.toolRegistry = deps.toolRegistry ?? null;
+    }
   }
 
-  /** Initialize the coordinator: connect client, load team, register hooks */
+  /** Initialize the coordinator: wire up event subscriptions and mark ready */
   async initialize(): Promise<void> {
-    // TODO: PRD 5 — Initialize SquadClient and connect
-    // TODO: PRD 5 — Load all agent charters via CharterCompiler
-    // TODO: PRD 5 — Register custom tools via ToolRegistry
-    // TODO: PRD 5 — Set up hook pipeline
-    // TODO: PRD 5 — Subscribe to EventBus for agent lifecycle events
-    // TODO: PRD 5 — Create coordinator's own session for routing logic
+    const span = tracer.startSpan('squad.coordinator.initialize');
+    try {
+      if (this.eventBus) {
+        this.unsubscribers.push(
+          this.eventBus.subscribe('session:created', (event) => {
+            console.log(`[Coordinator] Session created: ${event.sessionId ?? 'unknown'}`);
+          }),
+        );
+        this.unsubscribers.push(
+          this.eventBus.subscribe('session:error', (event) => {
+            console.log(`[Coordinator] Session error: ${event.sessionId ?? 'unknown'}`);
+          }),
+        );
+        this.unsubscribers.push(
+          this.eventBus.subscribe('session:destroyed', (event) => {
+            console.log(`[Coordinator] Session destroyed: ${event.sessionId ?? 'unknown'}`);
+          }),
+        );
+      }
+      this.initialized = true;
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
 
   /** Route an incoming user message to the appropriate agent(s) */
   async route(message: string): Promise<RoutingDecision> {
-    // TODO: PRD 5 — Determine response tier (direct/lightweight/standard/full)
-    // TODO: PRD 5 — Select target agent(s) based on message content and team roster
-    // TODO: PRD 5 — Handle parallel fan-out for multi-agent tasks
-    throw new Error('Not implemented');
+    const span = tracer.startSpan('squad.coordinator.route');
+    span.setAttribute('message.length', message.length);
+    try {
+      const lower = message.toLowerCase().trim();
+
+      let decision: RoutingDecision;
+
+      // Direct response: status queries, factual questions
+      if (/^(status|help|what is|who is|how many|show|list)\b/.test(lower)) {
+        decision = {
+          tier: 'direct',
+          agents: [],
+          parallel: false,
+          rationale: `Direct response for informational query: "${message}"`,
+        };
+      } else {
+        // Agent name mention — route to that specific agent
+        const agentMention = lower.match(/@(\w+)/);
+        if (agentMention) {
+          decision = {
+            tier: 'standard',
+            agents: [agentMention[1]!],
+            parallel: false,
+            rationale: `Routed to mentioned agent: ${agentMention[1]!}`,
+          };
+        } else if (/\bteam\b/.test(lower)) {
+          // Team-wide task — fan-out to all agents
+          decision = {
+            tier: 'full',
+            agents: ['all'],
+            parallel: true,
+            rationale: 'Team-wide task detected — fan-out to all agents',
+          };
+        } else {
+          // Default: route to lead agent (Keaton)
+          decision = {
+            tier: 'standard',
+            agents: ['lead'],
+            parallel: false,
+            rationale: 'Default routing to lead agent (Keaton)',
+          };
+        }
+      }
+
+      span.setAttribute('routing.tier', decision.tier);
+      span.setAttribute('target.agents', decision.agents.join(','));
+      span.setAttribute('routing.reason', decision.rationale);
+      return decision;
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
 
-  /** Execute a routing decision: spawn/resume agents and deliver work */
+  /** Execute a routing decision: emit routing event on EventBus */
   async execute(decision: RoutingDecision, message: string): Promise<void> {
-    // TODO: PRD 5 — Spawn or resume agent sessions per decision
-    // TODO: PRD 5 — Deliver message via sendAndWait()
-    // TODO: PRD 5 — Monitor progress via event subscriptions
+    const span = tracer.startSpan('squad.coordinator.execute');
+    span.setAttribute('routing.tier', decision.tier);
+    span.setAttribute('target.agents', decision.agents.join(','));
+    try {
+      if (this.eventBus) {
+        await this.eventBus.emit({
+          type: 'coordinator:routing',
+          payload: { decision, message },
+          timestamp: new Date(),
+        });
+      }
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
 
-  /** Graceful shutdown */
+  /** Graceful shutdown: unsubscribe from events and release references */
   async shutdown(): Promise<void> {
-    // TODO: PRD 5 — Destroy all agent sessions
-    // TODO: PRD 5 — Disconnect client
+    const span = tracer.startSpan('squad.coordinator.shutdown');
+    try {
+      for (const unsub of this.unsubscribers) {
+        unsub();
+      }
+      this.unsubscribers = [];
+      this.initialized = false;
+      this.client = null;
+      this.eventBus = null;
+      this.agentManager = null;
+      this.hookPipeline = null;
+      this.toolRegistry = null;
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
 }

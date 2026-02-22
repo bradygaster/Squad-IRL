@@ -71,3 +71,37 @@ Edie fixed root tsconfig (base config + project refs), SDK tsconfig (composite +
 - Changed to `"*"` which achieves the same local resolution under npm workspaces
 - Verified: `npm install` succeeds, `npm run build` compiles both packages cleanly
 - Also verified: prepublishOnly scripts and dynamic VERSION (via createRequire) from previous commit are working correctly
+
+### 📌 Team update (2026-02-22T08:50:00Z): CharterCompiler reuses parseCharterMarkdown — decided by Edie
+CharterCompiler.compile() delegates to existing parseCharterMarkdown() rather than duplicate parsing logic. Single source of truth. AgentSessionManager accepts optional EventBus injection — when present, spawn() emits session.created; when absent, manager works silently. Improves testability.
+
+### 📌 Team update (2026-02-22T070156Z): npm workspace protocol decision merged, test import migration complete, barrel conventions finalized — decided by Edie, Fenster, Hockney
+- **npm workspace protocol (Decision):** Use `"*"` version string for CLI→SDK dependency, not pnpm's `workspace:*`. npm workspaces auto-resolve local packages by name regardless of version specifier.
+- **Test import migration (Decision):** 56 test files successfully migrated from `../src/` to `@bradygaster/squad-sdk` / `@bradygaster/squad-cli` package paths. 26 SDK subpath exports + 16 CLI subpath exports. All 1727 tests passing. Vitest resolves through compiled `dist/`.
+- **Barrel file conventions (Decision):** `src/parsers.ts` and `src/types.ts` created as public API barrels — parsers re-export all functions + types, types exports ONLY types (zero runtime imports). Both follow ESM barrel pattern.
+- **All decisions merged to decisions.md.** Status: Production-ready, awaiting Phase 3 SDK session integration for final runtime wiring.
+
+### CharterCompiler + AgentSessionManager implementation (PRD 4)
+- `CharterCompiler.compile()` reads charter.md from disk, delegates markdown parsing to existing `parseCharterMarkdown()` from `charter-compiler.ts` — no duplicate parsing logic
+- `CharterCompiler.compileAll()` uses `readdir` with `withFileTypes` to enumerate `.squad/agents/*/charter.md`, skips `scribe` and `_alumni/` dirs
+- `AgentSessionManager` accepts optional `EventBus` from `../client/event-bus.js` — emits `session.created` and `session.destroyed` lifecycle events
+- `spawn()` uses `crypto.randomUUID()` for session IDs, `resume()` throws on unknown agent, `destroy()` emits event before removing from map
+- Key file: `packages/squad-sdk/src/agents/index.ts` — barrel re-exports from submodules remain intact, only class stubs replaced
+- EventBus event types: `session.created`, `session.destroyed` (from `SquadEventType` union in `client/event-bus.ts`)
+- All 1727 tests pass, build clean
+
+### OpenTelemetry dependency wiring (#254)
+- Added `@opentelemetry/api` as optional peer dep (`^1.9.0`) with `peerDependenciesMeta` marking it optional — and in devDependencies so tsc can resolve types during build
+- Added 8 OTel packages as `optionalDependencies`: `sdk-node`, `sdk-trace-node`, `sdk-trace-base`, `sdk-metrics`, `exporter-trace-otlp-http`, `exporter-metrics-otlp-http`, `resources`, `semantic-conventions`
+- Critical version alignment: `sdk-node@0.57.x` depends on the `1.30.x` core line (`sdk-trace-base`, `sdk-trace-node`, `sdk-metrics`, `resources`). Pinning these in optionalDependencies prevents npm from hoisting 2.x to the top level and causing type mismatches between duplicate `@opentelemetry/sdk-trace-base` versions
+- Fortier's `src/runtime/otel.ts` (issue #255) was already in place with full TracerProvider/MeterProvider implementation — no stub needed
+- Build clean, 1832/1832 pre-existing tests pass (Fortier's 36 OTel tests fail due to no local OTLP collector, pre-existing condition)
+
+### Token usage + session pool metrics wiring (#261, #263)
+- Wired `recordTokenUsage(event)` into `StreamingPipeline.processEvent()` — fires after `dispatchUsage()` in the `usage` case, merged import with existing otel-metrics imports
+- Wired `recordSessionCreated()`, `recordSessionClosed()`, `recordSessionError()` into `SquadClient.createSession()` and `deleteSession()` — success paths get created/closed, inner catch blocks get error
+- Barrel export (`src/index.ts` line 30) and package.json subpath export (`./runtime/otel-metrics`) already present — no changes needed
+- Build clean, 1886/1886 tests pass
+
+### 📌 Team update (2026-02-22T093300Z): OTel Phase 2 complete — session traces, latency metrics, tool enhancements, agent metrics, token usage wiring, metrics tests — decided by Fortier, Fenster, Edie, Hockney
+All four agents shipped Phase 2 in parallel: Fortier wired TTFT/duration/throughput metrics. Fenster established tool trace patterns and agent metric wiring conventions. Edie wired token usage and session pool metrics. Hockney created spy-meter test pattern (39 new tests). Total: 1940 tests passing, metrics ready for production telemetry.

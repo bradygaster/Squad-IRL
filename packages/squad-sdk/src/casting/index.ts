@@ -8,7 +8,8 @@
  * Legacy API:     CastingRegistry (filesystem-backed, stub)
  */
 
-// Re-export v1 casting engine (M3-2)
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 export {
   CastingEngine,
   type CastMember,
@@ -65,7 +66,14 @@ export class CastingRegistry {
   }
 
   async load(): Promise<void> {
-    // TODO: PRD 11 — Parse registry.json into entries map
+    const registryPath = path.join(this.config.castingDir, 'registry.json');
+    if (!fs.existsSync(registryPath)) return;
+
+    const raw = fs.readFileSync(registryPath, 'utf-8');
+    const entries = JSON.parse(raw) as CastingEntry[];
+    for (const entry of entries) {
+      this.entries.set(entry.role, entry);
+    }
   }
 
   getByRole(role: string): CastingEntry | undefined {

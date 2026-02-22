@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  build-node:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -29,8 +29,8 @@ jobs:
       - name: Build
         run: npm run build
 
-  test:
-    needs: build
+  test-node:
+    needs: build-node
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -51,16 +51,16 @@ jobs:
       - name: Run tests
         run: npm test
 
-  # Rollup job that branch protection can reference by exact name
-  ci:
+  # Rollup job — exact name matches branch protection rule
+  build:
     if: always()
-    needs: [build, test]
+    needs: [build-node, test-node]
     runs-on: ubuntu-latest
     steps:
       - name: Check results
         run: |
-          if [[ "${{ needs.build.result }}" != "success" || "${{ needs.test.result }}" != "success" ]]; then
-            echo "CI failed: build=${{ needs.build.result }}, test=${{ needs.test.result }}"
+          if [[ "${{ needs.build-node.result }}" != "success" || "${{ needs.test-node.result }}" != "success" ]]; then
+            echo "CI failed: build-node=${{ needs.build-node.result }}, test-node=${{ needs.test-node.result }}"
             exit 1
           fi
           echo "✅ All checks passed"

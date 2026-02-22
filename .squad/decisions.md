@@ -486,6 +486,87 @@ Medium. Changes error handling contract for all functions that used `fatal()`. B
 **Import Rewriting Rules:**
 - CLI → SDK relative imports become package imports (`from '../config/'` → `from '@bradygaster/squad-sdk/config'`)
 - Intra-SDK and intra-CLI imports stay relative (unchanged)
+
+### 2026-02-22: CharterCompiler reuses parseCharterMarkdown — no duplicate parsing
+
+**By:** Edie
+
+**What:** `CharterCompiler.compile()` delegates to the existing `parseCharterMarkdown()` function from `charter-compiler.ts` rather than implementing its own markdown parser. The legacy class is a thin filesystem wrapper around the already-tested parsing logic.
+
+**Why:** Single source of truth for charter parsing. The `parseCharterMarkdown` function already handles all `## Identity` and `## Model` field extraction with tested regex patterns. Duplicating that logic would create drift risk.
+
+### 2026-02-22: AgentSessionManager uses optional EventBus injection
+
+**By:** Edie
+
+**What:** `AgentSessionManager` constructor accepts an optional `EventBus` parameter. When present, `spawn()` emits `session.created` and `destroy()` emits `session.destroyed`. When absent, the manager works silently (no events).
+
+**Why:** Keeps the manager testable without requiring a full event bus setup. Coordinator can wire the bus when available; unit tests can omit it.
+
+### 2026-02-22: Ink Shell Wiring — ShellApi callback pattern
+
+**By:** Fenster
+
+**Date:** 2026-02-22
+
+**Status:** Implemented
+
+**Context:** The shell needed to move from a readline echo loop to an Ink-based UI using the three existing components (AgentPanel, MessageStream, InputPrompt). The key challenge was connecting the StreamBridge (which pushes events from the streaming pipeline) into React component state.
+
+**Decision:** **ShellApi callback pattern:** The `App` component accepts an `onReady` prop that fires once on mount, delivering a `ShellApi` object with three methods: `addMessage`, `setStreamingContent`, `refreshAgents`. The host (`runShell()`) captures this API and wires it to StreamBridge callbacks.
+
+This keeps the Ink component decoupled from StreamBridge internals — the component doesn't import or know about the bridge. The host is the only place where both meet.
+
+**`React.createElement` in index.ts:** Rather than renaming `index.ts` to `index.tsx` (which would ripple through exports maps and imports), `runShell()` uses `React.createElement(App, props)` directly. This keeps the file extension stable.
+
+**Streaming content accumulation:** StreamBridge's `onContent` callback delivers deltas. The host maintains a `streamBuffers` Map to accumulate content per agent and pushes the full accumulated string to `setStreamingContent`. On `onComplete`, the buffer is cleared and the final message is added.
+
+**Consequences:** StreamBridge is ready for coordinator wiring — call `_bridge.handleEvent(event)` when the coordinator emits streaming events. Direct agent messages and coordinator routing show placeholders until coordinator integration (Phase 3). All existing exports from `shell/index.ts` are preserved. New exports: `App`, `ShellApi`, `AppProps`.
+
+### 2026-02-22: Runtime EventBus as canonical bus for orchestration classes
+
+**By:** Fortier
+
+**Date:** 2026-02-22
+
+**Scope:** Coordinator, Ralph, and future orchestration components
+
+**Decision:** The `runtime/event-bus.ts` (colon-notation: `session:created`, `subscribe()` API, built-in error isolation via `executeHandler()`) is the canonical EventBus for all orchestration classes. The `client/event-bus.ts` (dot-notation: `session.created`, `on()` API) remains for backward-compat but should not be used in new code.
+
+**Rationale:**
+- Runtime EventBus has proper error isolation — one handler failure doesn't crash others
+- SquadCoordinator (M3-1) tests already use RuntimeEventBus
+- Consistent API surface (`subscribe`/`subscribeAll`/`unsubscribe`) is cleaner than `on`/`onAny`
+- Event type strings use colon-notation which avoids ambiguity with property access patterns
+
+**Impact:**
+- Coordinator and RalphMonitor now import from `../runtime/event-bus.js`
+- All new EventBus consumers should follow this pattern
+- Client EventBus remains exported for external consumers
+
+### 2026-02-22: Runtime Module Test Patterns
+
+**By:** Hockney (Tester)
+
+**Date:** 2026-02-22
+
+**Status:** Adopted
+
+**Context:** Writing proactive tests for runtime modules (CharterCompiler, AgentSessionManager, Coordinator, RalphMonitor) being built in parallel by multiple team members.
+
+**Decisions:**
+
+1. **Two EventBus APIs require different mocks.** The client EventBus uses `on()`/`emit()` while the runtime EventBus uses `subscribe()`/`emit()`. Tests must use the correct mock depending on which bus the module under test consumes. AgentSessionManager uses the client bus (`on`); Coordinator uses the runtime bus (`subscribe`).
+
+2. **CharterCompiler tests use real test-fixtures.** Instead of mocking the filesystem, we read from `test-fixtures/.squad/agents/` for `compile()` and `compileAll()` tests. This gives integration-level confidence. Only `parseCharterMarkdown` uses inline string fixtures for unit isolation.
+
+3. **Coordinator routing priority is: direct > @mention > team keyword > default.** Tests explicitly verify this ordering. Any change to routing logic must preserve this priority chain.
+
+4. **RalphMonitor tests are future-proof stubs.** Since Ralph is mostly TODO stubs, tests validate current behavior (empty arrays, no-throw lifecycle) and will automatically exercise real logic once implemented — no test changes needed.
+
+**Impact:**
+- 105 new tests across 4 files, all passing
+- Test count: 1727 → 1832 across 61 files
 - No circular dependencies verified (clean DAG)
 
 **Migration Order:**
@@ -581,5 +662,231 @@ Medium. Changes error handling contract for all functions that used `fatal()`. B
 
 **Impact:** Low. Two new files, no changes to existing source. Build passes, all 1683 tests pass.
 
+### 2026-02-22: Use npm-native workspace resolution (not pnpm `workspace:*`)
+**By:** Edie (TypeScript Engineer)
+**Date:** 2026-02-22
+**Status:** Applied
 
+**Context:** Brady's task requested using `workspace:*` for the CLI→SDK dependency. However, this project uses npm workspaces (not pnpm or Yarn). The `workspace:` protocol is a pnpm/Yarn feature and npm rejects it with `EUNSUPPORTEDPROTOCOL`.
+
+**Decision:** Use `"*"` as the version specifier instead. Under npm workspaces, when a dependency name matches a local workspace package, npm automatically resolves to the local package regardless of the version specifier. `"*"` accepts any version, ensuring the local SDK is always used during development.
+
+**Trade-off:** `"*"` will be published as-is to npm (unlike pnpm's `workspace:*` which gets replaced with the real version at publish time). Before publishing the CLI package, the SDK dependency version should be pinned to the actual release version. A `prepublishOnly` script or CI step could automate this.
+
+### 2026-02-22: Test import migration to workspace packages
+**By:** Fenster (Core Dev)
+**Date:** 2026-02-22
+**Status:** Implemented
+
+**Context:** All 56 test files imported from root `src/` via relative paths (`../src/...`). With the SDK/CLI workspace split, tests needed to import from `@bradygaster/squad-sdk` and `@bradygaster/squad-cli` packages instead.
+
+**Decision:**
+1. **Barrel-first imports:** Where a barrel/index file re-exports symbols from sub-modules, tests import from the barrel path (e.g., `@bradygaster/squad-sdk/config` instead of individual files).
+2. **New subpath exports for orphaned modules:** 8 runtime/adapter modules not covered by existing barrels got new subpath exports in the SDK package.json.
+3. **Missing barrel re-exports fixed:** `selectResponseTier`/`getTier` added to coordinator barrel; `onboardAgent`/`addAgentToConfig` added to agents barrel.
+4. **CLI functions correctly located:** Consumer imports test updated to import CLI functions from `@bradygaster/squad-cli` (not SDK), reflecting intentional separation.
+
+**Consequence:** Zero `grep -r "from '../src/" test/` results. All 1727 tests pass. SDK has 26 subpath exports, CLI has 17.
+
+### 2026-02-22: CI/CD & Release Readiness Assessment
+**By:** Kobayashi (Git & Release)
+**Date:** 2026-02-22
+**Status:** ASSESSMENT COMPLETE
+
+**Summary:** All 13 CI/CD workflows are production-ready and correctly configured. Merge drivers are in place. Branch protection is working. Publishing infrastructure works both for stable releases (v* tags) and pre-releases (insider branch).
+
+**Version Status:**
+- SDK `package.json`: 0.8.0
+- CLI `package.json`: 0.8.1 (intentional patch for bin entry fix)
+- CHANGELOG: 0.6.0-alpha.0 (root workspace marker)
+
+**Workflow Audit:**
+- ✅ Core CI validates on PR/push to main, dev, insider
+- ✅ squad-publish.yml: Publishes both packages on v* tags with public access
+- ✅ squad-insider-publish.yml: Auto-publishes on insider push with `--tag insider`
+- ✅ Release/promote workflows fully functional
+
+**Merge Drivers:** Union merge configured for append-only files (decisions.md, agents/*/history.md, log/**, orchestration-log/**).
+
+**Release Readiness:** Insider channel ready now. Stable release ready after version alignment if desired.
+
+**Recommendation:** Version alignment (SDK 0.8.0, CLI 0.8.0) simplifies CHANGELOG during pre-1.0. Separate versioning can be deferred post-1.0 if needed.
+
+### 2026-02-22: Fix npx bin resolution for squad-cli
+**By:** Rabin (Distribution)
+**Date:** 2026-02-22
+**Status:** Implemented & Published
+
+**Context:** `npx @bradygaster/squad-cli@0.8.0` printed placeholder text instead of running the real CLI. The bin entry was `"squad": "./dist/cli-entry.js"` but npx resolves by unscoped package name (`squad-cli`), not by custom bin names.
+
+**Decision:**
+1. Added `"squad-cli"` as second bin entry pointing to `./dist/cli-entry.js`
+2. Replaced orphaned placeholder `dist/cli.js` with redirect to `cli-entry.js`
+3. Bumped version to 0.8.1 (0.8.0 immutable on npm)
+4. Published @bradygaster/squad-cli@0.8.1 to npm
+
+**Consequence:**
+- `npx @bradygaster/squad-cli` now runs the real CLI
+- `squad` command still works for global installs
+- Both bin names resolve to the same entry point
+- Future releases must keep both bin entries
+
+
+
+
+### OpenTelemetry version alignment: pin core packages to 1.30.x line
+**By:** Edie
+**Issue:** #254
+**What:** All OTel optional dependencies in `packages/squad-sdk/package.json` must stay version-aligned: `sdk-node@^0.57.x` requires `sdk-trace-base@^1.30.0`, `sdk-trace-node@^1.30.0`, `sdk-metrics@^1.30.0`, `resources@^1.30.0`. These must be explicit optional dependencies, not left to transitive resolution.
+**Why:** Without explicit pins, npm hoists the latest versions (2.x) of `sdk-trace-base`, `sdk-metrics`, and `resources` to the top-level `node_modules`. The 2.x types are structurally incompatible with the 1.x types that `sdk-node@0.57.x` transitively depends on, causing TS2345/TS2741 type errors (e.g., missing `instrumentationScope` on `ReadableSpan`, missing `getRawAttributes` on `Resource`). Explicit pins at `^1.30.0` force npm to deduplicate on the 1.x line, eliminating the type conflicts.
+
+
+# Decision: OpenTelemetry Tracing for Agent Lifecycle & Coordinator Routing
+
+**Date:** 2026-02-22  
+**By:** Fenster  
+**Issues:** #257, #258  
+**Status:** Implemented
+
+## What
+
+Added OpenTelemetry trace instrumentation to four files in `packages/squad-sdk/src/`:
+
+1. **`agents/index.ts`** — AgentSessionManager: `spawn()`, `resume()`, `destroy()` wrapped with spans (`squad.agent.spawn`, `squad.agent.resume`, `squad.agent.destroy`).
+2. **`agents/lifecycle.ts`** — AgentLifecycleManager: `spawnAgent()`, `destroyAgent()` wrapped with spans (`squad.lifecycle.spawnAgent`, `squad.lifecycle.destroyAgent`).
+3. **`coordinator/index.ts`** — Coordinator: `initialize()`, `route()`, `execute()`, `shutdown()` wrapped with spans (`squad.coordinator.initialize`, `squad.coordinator.route`, `squad.coordinator.execute`, `squad.coordinator.shutdown`).
+4. **`coordinator/coordinator.ts`** — SquadCoordinator: `handleMessage()` wrapped with span (`squad.coordinator.handleMessage`).
+
+## Why
+
+- Observability is foundational for debugging multi-agent orchestration at runtime.
+- Using `@opentelemetry/api` only — no-ops without a registered provider, so zero cost in production unless OTel is configured.
+- Trace hierarchy: `coordinator.handleMessage → coordinator.route → coordinator.execute → lifecycle.spawnAgent → agent.spawn`.
+
+## Convention Established
+
+- **Tracer name:** `trace.getTracer('squad-sdk')` — one tracer per package.
+- **Span naming:** `squad.{module}.{method}` (e.g., `squad.agent.spawn`).
+- **Attributes:** Use descriptive keys like `agent.name`, `routing.tier`, `target.agents`, `spawn.mode`.
+- **Error handling:** `span.setStatus({ code: SpanStatusCode.ERROR })` + `span.recordException(err)` in catch blocks. Always `span.end()` in `finally`.
+- **Import only from `@opentelemetry/api`** — never from SDK packages directly.
+
+
+# Decision: OTel Foundation — NodeSDK over individual providers
+
+**Author:** Fortier (Node.js Runtime)
+**Date:** 2026-02-22
+**Issues:** #255, #256
+**Status:** Implemented
+
+## Context
+
+Issues #255 and #256 require OTel provider initialization and a bridge from the existing TelemetryCollector to OTel spans. The OpenTelemetry JS ecosystem has multiple packages (`sdk-trace-base`, `sdk-trace-node`, `sdk-metrics`, `resources`, `exporter-*`) that frequently ship with incompatible transitive versions, causing TypeScript type errors even when runtime behavior is correct.
+
+## Decision
+
+Use `@opentelemetry/sdk-node`'s `NodeSDK` class as the single provider manager, and import `Resource` and `PeriodicExportingMetricReader` from its re-exports (`resources`, `metrics` sub-modules) rather than installing them as direct dependencies.
+
+Direct deps added to `packages/squad-sdk`:
+- `@opentelemetry/api`
+- `@opentelemetry/sdk-node`
+- `@opentelemetry/exporter-trace-otlp-http`
+- `@opentelemetry/exporter-metrics-otlp-http`
+- `@opentelemetry/semantic-conventions`
+
+NOT added (bundled via `sdk-node`):
+- `@opentelemetry/sdk-trace-base`
+- `@opentelemetry/sdk-trace-node`
+- `@opentelemetry/sdk-metrics`
+- `@opentelemetry/resources`
+
+## Consequences
+
+- Single `_sdk.shutdown()` handles both tracing and metrics cleanup.
+- No version skew between trace and metric providers.
+- `getTracer()` / `getMeter()` return no-op instances when OTel is not initialized — zero overhead in the default case.
+- The bridge (`otel-bridge.ts`) is additive — it produces a `TelemetryTransport` that can be registered alongside any existing transport.
+
+## Files Changed
+
+- `packages/squad-sdk/src/runtime/otel.ts` — Provider initialization module
+- `packages/squad-sdk/src/runtime/otel-bridge.ts` — TelemetryCollector → OTel span bridge
+- `packages/squad-sdk/src/index.ts` — Barrel exports for both modules
+- `packages/squad-sdk/package.json` — Dependencies + subpath exports
+
+
+
+### Decision: StreamingPipeline.markMessageStart() as explicit latency tracking entry point
+
+**By:** Fortier (Node.js Runtime)
+**Date:** 2026-02-22
+**Issues:** #259, #264
+
+**What:** Latency metrics (TTFT, response duration, tokens/sec) in StreamingPipeline require an explicit `markMessageStart(sessionId)` call before sending a message. This opts callers into latency tracking rather than making it automatic.
+
+**Why:** The pipeline doesn't own the send call — it only sees events after they arrive. Without a start timestamp, TTFT and duration are meaningless. Making it explicit avoids hidden coupling between the pipeline and SquadClient.sendMessage(), and means callers who don't need latency metrics (e.g. tests, offline replay) pay zero overhead.
+
+**Pattern:** Call `pipeline.markMessageStart(sessionId)` → send message → pipeline records TTFT on first `message_delta` with `index === 0`, records duration + tokens/sec when `usage` event arrives. Tracking state auto-cleans after usage event or `clear()`.
+
+**Also:** SquadClient now exposes `sendMessage(session, options)` with `squad.session.message` + child `squad.session.stream` OTel spans, and `closeSession(sessionId)` as a traced alias for `deleteSession`.
+
+
+### 2026-02-22: Tool trace enhancements + agent metric wiring conventions
+
+**By:** Fenster
+**What:** Established patterns for OTel tool span attributes and agent metric wiring:
+
+1. **`sanitizeArgs()`** strips fields matching `/token|secret|password|key|auth/i` before recording as span attributes. Truncates to 1024 chars. Exported from `tools/index.ts` for reuse.
+2. **`defineTool` accepts optional `agentName`** in config — recorded as `agent.name` span attribute when present. Does not change the handler signature.
+3. **`result.length`** attribute added to `squad.tool.result` events — measures `textResultForLlm` length.
+4. **Agent metrics** (`recordAgentSpawn/Duration/Error/Destroy`) wired into both `AgentSessionManager` (index.ts) and `AgentLifecycleManager` (lifecycle.ts). Duration computed from `createdAt` in destroy path.
+5. **Parent span propagation** deferred (TODO comment in `defineTool`) — will wire when agent.work span lifecycle is complete.
+
+**Why:** Consistent instrumentation patterns prevent divergence between tool and agent telemetry. The sanitization approach is deliberately simple (field-name matching, not value inspection) to keep it fast and predictable. Agent metrics are wired at both abstraction levels (SessionManager + LifecycleManager) because they can be used independently.
+
+**References:** Issues #260, #262
+
+
+# Decision: OTel Metric Wiring Pattern (#261, #263)
+
+**Author:** Edie  
+**Date:** 2026-02-22  
+**Status:** Implemented  
+
+## Context
+
+Issues #261 and #263 required wiring pre-existing metric functions from `otel-metrics.ts` into the runtime (`StreamingPipeline`) and adapter (`SquadClient`).
+
+## Decision
+
+- **Token usage metrics** (`recordTokenUsage`) are recorded in `StreamingPipeline.processEvent()` AFTER dispatching to user-registered handlers. This ensures user handlers see the event before OTel instrumentation, and handler failures don't block metric recording.
+- **Session pool metrics** are recorded at the innermost success/error boundary in `SquadClient`:
+  - `recordSessionCreated()` after successful `client.createSession()` return
+  - `recordSessionClosed()` after successful `client.deleteSession()` return
+  - `recordSessionError()` at the top of inner catch blocks — recorded for EVERY failed attempt, including ones that trigger reconnection. This is intentional: a reconnect-eligible failure is still an error worth counting.
+- No new exports needed — barrel and subpath exports were already wired in the Phase 1 otel-metrics scaffold.
+
+## Rationale
+
+Metric calls are no-ops when OTel is not configured (the meter returns no-op instruments), so this adds zero overhead for users without OTel. Recording errors before reconnect checks gives accurate failure counts without double-counting successes (the recursive retry gets its own `recordSessionCreated()` on success).
+
+
+# Decision: OTel metrics test pattern — spy meter mock
+
+**By:** Hockney (Tester)
+**Date:** 2026-02-23
+**Status:** Implemented
+
+## What
+OTel metrics tests use a spy-meter pattern: mock `getMeter()` to return a fake meter where every `createCounter`/`createHistogram`/`createUpDownCounter`/`createGauge` returns a spy instrument with `.add()` and `.record()` mocks. This allows verifying exact metric names, values, and attributes without a real OTel SDK or collector.
+
+## Why
+- The otel-metrics module is a thin instrumentation layer — tests need to verify *what* gets recorded, not *how* OTel processes it.
+- Spy meter pattern avoids needing `InMemoryMetricExporter` (which has complex async flush semantics) and keeps tests synchronous and fast.
+- Pattern is consistent with existing otel-bridge tests (spy spans via InMemorySpanExporter) but adapted for the metrics API surface.
+
+## Applies to
+- `test/otel-metrics.test.ts` (34 tests)
+- `test/otel-metric-wiring.test.ts` (5 tests)
+- Future OTel metric tests should follow this same pattern.
 

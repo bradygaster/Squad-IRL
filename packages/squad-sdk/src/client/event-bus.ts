@@ -71,7 +71,6 @@ export class EventBus {
       if (result instanceof Promise) allPromises.push(result);
     }
 
-    // TODO: PRD 1 — Add error isolation (one handler failure shouldn't crash others)
     await Promise.all(allPromises);
   }
 

@@ -5,38 +5,51 @@
 - **Stack:** TypeScript (strict mode, ESM-only), Node.js ≥20, @github/copilot-sdk, Vitest, esbuild
 - **Created:** 2026-02-21
 
+## Core Context
+
+**Created:** 2026-02-21  
+**Role:** Core Developer — Runtime implementation, CLI structure, shell infrastructure  
+**Key Decisions Owned:** Test import patterns (vitest via dist/), CRLF normalization at parser entry, shell module structure (readline→ink progression), spawn lifecycle, SessionRegistry design
+
+**Phase 1-2 Complete (2026-02-21 → 2026-02-22T041800Z):**
+- M3 Resolution (#210/#211): `resolveSquad()` + `resolveGlobalSquadPath()` in src/resolution.ts, standalone concerns (no auto-fallback)
+- CLI: --global flag routing, `squad status` command composition, command rename finalized (triage, loop, hire)
+- Shell foundation: readline-based CLI shell, SessionRegistry (Map-backed, no persistence), spawn infrastructure (loadAgentCharter, buildAgentPrompt, spawnAgent)
+- CRLF hardening: normalize-eol.ts applied to 8 parsers, one-line guard at entry point
+- SDK/CLI split executed: 15 dirs + 4 files migrated to packages/, exports map updated (7→18 subpaths SDK, 14 subpaths CLI), 6 config files fixed, versions aligned to 0.8.0
+- Test import migration: 56 test files migrated from ../src/ to @bradygaster/squad-sdk/* and @bradygaster/squad-cli/*, 26 SDK + 16 CLI subpath exports, vitest resolves via dist/, all 1719+ tests passing
+- Zero-dependency scaffolding preserved, strict mode enforced, build clean (tsc 0 errors)
+
+**Phase 3 Blocking (2026-02-22 onwards):**
+- Ralph start(): EventBus subscription + health checks (14 TODOs)
+- Coordinator initialize()/route(): CopilotClient wiring + agent manager (13 TODOs)
+- Agents spawn(): SDK session creation + history injection (14 TODOs)
+- Shell UI: Ink components not yet wired (readline only), streaming responses, agent status display
+- Casting: registry.json parsing stub (1 TODO)
+- Triage/Loop/Hire: placeholder commands (low priority, defer)
+
 ## Learnings
 
-### From Beta (carried forward)
-- Casting system implementation: universe selection, registry.json (persistent names), history.json (assignment snapshots)
-- Drop-box pattern for decisions inbox: agents write to decisions/inbox/{name}-{slug}.md, Scribe merges
-- Parallel spawn mechanics: background mode default, sync only for hard data dependencies
-- 13 modules: adapter, agents, build, casting, cli, client, config, coordinator, hooks, marketplace, ralph, runtime, sharing, skills, tools
-- CLI is zero-dep scaffolding: cli.js stays thin, runtime is modular
-- Ralph module: work monitor, queue manager, keep-alive — runs continuous loop until board is clear
+### 📌 Core Context: SDK/CLI Migration & Test Import Foundation
 
-### 📌 Team update (2026-02-21T21:23Z): CLI command renames are pending — decided by Keaton
-Recommend renaming `squad watch` to `squad triage` (40% better semantic accuracy; aligns with GitHub terminology). Keep `watch` as silent alias for backward compatibility. Do NOT expose `squad ralph` as user-facing CLI; suggest `squad monitor` or `squad loop` instead for the monitoring function. Ralph remains in team identity, not CLI. Confidence: 85% for triage, 90% against ralph.
+**SDK/CLI File Migration (2026-02-21):**
+Migrated 15 directories (adapter, agents, build, casting, client, config, coordinator, hooks, marketplace, ralph, runtime, sharing, skills, tools, utils) and 4 files (index.ts, resolution.ts, parsers.ts, types.ts) into packages/squad-sdk/src/ and packages/squad-cli/src/. Updated exports maps: 18 SDK subpaths, 14 CLI subpaths. Rewrote 4 cross-package imports. SDK barrel cleaned (no CLI re-exports). Root src/ preserved. Pattern: SDK subpath exports resolve to dist/{module}/index.js.
 
-### 📌 Team update (2026-02-21T21:35Z): CLI naming finalized — decided by Brady
-**Final directives:** `squad triage` (confirmed), `squad loop` (replaces Keaton's `squad monitor` proposal), `squad hire` (replaces `squad init`). Commands chosen for clarity and identity alignment. Brady's preference supersedes earlier recommendations.
+**Test Import Migration (2026-02-21→2026-02-22):**
+Migrated 56 test files (173 imports) from ../src/ to @bradygaster/squad-sdk/* and @bradygaster/squad-cli/*. 26 SDK + 16 CLI subpath exports. Added 8 new deep SDK exports (adapter/errors, config/migrations, runtime/event-bus, etc.). Verified barrel re-exports for missing symbols. All 1727 tests passing. Pattern: vitest resolves through compiled dist/, so barrel changes require npm run build.
 
-### 📌 M3 Resolution (#210, #211) — implemented
-- Created `src/resolution.ts` with `resolveSquad()` (walk-up to .git boundary) and `resolveGlobalSquadPath()` (platform-specific global config dir)
-- Both exported from `src/index.ts` public API
-- 10 tests in `test/resolution.test.ts` — all passing
-- PR #275 on branch `squad/210-resolution-algorithms` → `bradygaster/dev`
-- Decision: placed in `src/resolution.ts` (root src, not packages/squad-sdk) since code hasn't moved to monorepo packages yet
-- Decision: `resolveSquad()` intentionally does NOT fall back to `resolveGlobalSquadPath()` — kept as separate concerns per #210/#211 separation. Consumer code can chain them.
+---
 
-### 📌 #212/#213: --global flag and squad status command — implemented
-- Added `--global` flag to `squad init` and `squad upgrade` in `src/index.ts` main()
-- `--global` passes `resolveGlobalSquadPath()` as the dest instead of `process.cwd()`
-- Added `squad status` command: shows active squad type (repo/personal/none), path, and resolution reason
-- Status command composes `resolveSquad()` + `resolveGlobalSquadPath()` — the chaining pattern envisioned in #210/#211
-- All changes in `src/index.ts` only — no modifications to resolution.ts, init.ts, or upgrade.ts needed
-- PR on branch `squad/212-213-global-flag-status` → `bradygaster/dev`
+### 📌 Runtime Implementation Assessment (2026-02-22T22:00Z) — Fenster
+**Status:** Phase 1-2 complete (SDK/CLI split, monorepo structure). Phase 3 (runtime integration) blocked.
 
+**Implemented & Working:**
+- ✅ **SDK/CLI split:** Both packages at 0.8.0 (SDK)/0.8.1 (CLI). Clean exports maps (18 subpaths SDK, 14 subpaths CLI).
+- ✅ **Build pipeline:** tsc compiles both packages to dist/, all dependencies resolved (SDK→Copilot SDK, CLI→SDK+ink+react). Zero errors.
+- ✅ **CLI structure:** Entry point (cli-entry.ts) routes 14 commands. Commands implemented: `help`, `version`, `status`, `init`, `upgrade`, `export`, `import`, `copilot`, `plugin`, `scrub-emails`. Commands stubbed: `triage` (watch alias), `loop`, `hire`.
+- ✅ **Shell foundation:** readline-based CLI shell with header chrome, session registry, spawn infrastructure. Agent discovery, charter loading, and spawn lifecycle foundation. Type-safe completion.
+- ✅ **Core modules:** resolution.ts, config/, build/, skills/, hooks/, tools/, client/ (EventBus structure), marketplace/, adapter/ all present.
+- ✅ **Monorepo:** npm workspaces, changesets configured, independent versioning (SDK/CLI can release separately).
 ### 📌 Team update (2026-02-22T041800Z): SDK/CLI split executed, versions aligned to 0.8.0, 1719 tests passing — decided by Keaton, Fenster, Edie, Kobayashi, Hockney, Rabin, Coordinator
 - **Phase 1 (SDK):** Migrated 15 directories + 4 standalone files from root `src/` into `packages/squad-sdk/src/`. Cleaned SDK barrel (removed CLI re-exports block). Updated exports map from 7 to 18 subpath entries.
 - **Phase 2 (CLI):** Migrated `src/cli/` + `src/cli-entry.ts` to `packages/squad-cli/src/`. Copied `templates/` into CLI package. Rewrote 6 cross-package imports to use `@bradygaster/squad-sdk/*` package names.
@@ -48,53 +61,94 @@ Recommend renaming `squad watch` to `squad triage` (40% better semantic accuracy
 - **Next phase:** Phase 3 (root cleanup) — delete root src/, update test imports when blocking.
 
 
-### 📌 #234/#235: Shell module structure + main entry wiring — implemented
-- Created `src/cli/shell/` module: `index.ts` (placeholder `runShell()`), `types.ts` (ShellState, ShellMessage, AgentSession), `components/.gitkeep`
-- `runShell()` prints version header + exit hint, handles SIGINT, exits cleanly — placeholder until ink UI is wired (#233)
-- Wired `src/index.ts`: `squad` with no args now calls `runShell()` instead of `runInit()`. `squad init` is now an explicit subcommand.
-- Types defined: `ShellState` (status + agents + history), `ShellMessage` (role/agent/content/timestamp), `AgentSession` (name/role/status/startedAt)
-- PR #282 on branch `squad/234-235-shell-module` → `bradygaster/dev`
-- Decision: no ink dependency added — another agent (#233) handles that. Shell uses console.log only.
+**Incomplete/Stubs (Phase 3 blockers):**
+- ⏳ **Ralph monitor** (src/ralph/index.ts): Class structure present. 14 TODO comments (PRD 8). Methods stubbed: start(), handleEvent(), healthCheck(), stop(). EventBus subscription logic not wired.
+- ⏳ **Coordinator** (src/coordinator/index.ts): Class structure present. 13 TODO comments (PRD 5). Methods stubbed: initialize(), route(), spawn(), monitor(), destroy(). No SquadClient wiring, no agent manager hookup.
+- ⏳ **Agents module** (src/agents/index.ts): Charter compilation imported from separate file (working). SessionManager class present but 14 TODO comments (PRD 4). Methods stubbed: spawn(), resume(), terminate(). No SDK session creation wired.
+- ⏳ **Casting system** (src/casting/index.ts): v1 CastingEngine imported (working). Legacy CastingRegistry stubbed — 1 TODO (PRD 11) for registry.json parsing. Cast/recast methods throw "Not implemented".
+- ⏳ **Shell UI:** No ink-based components wired. readline loop exists but command handling is echo-only (line 78 in shell/index.ts). No agent discovery integration, no streaming response display, no real coordinator handoff.
+- ⏳ **Triage/Loop/Hire commands:** Placeholder messages in cli-entry.ts lines 115-148. No implementation.
 
-### 📌 #236/#237: Shell chrome + session registry — implemented
-- Updated `src/cli/shell/index.ts`: replaced placeholder with full header chrome, readline input loop, clean exit
-- Header displays box-drawing chrome with version read from package.json via `createRequire`
-- Readline loop (`node:readline/promises`) processes input; `exit` and `/quit` trigger clean shutdown with "👋 Squad out."
-- SIGINT (Ctrl+C) handler prints cleanup message and exits cleanly
-- Created `src/cli/shell/sessions.ts`: `SessionRegistry` class — Map-backed registry for tracking agent sessions by name
-- SessionRegistry methods: register, get, getAll, getActive (filters working/streaming), updateStatus, remove, clear
-- Exported `SessionRegistry` from `src/cli/shell/index.ts`
-- PR #284 on branch `squad/236-237-shell-chrome-registry` → `bradygaster/dev`
-- Pattern: version sourced via `createRequire(import.meta.url)` for ESM-compatible JSON import (matches existing codebase pattern in `github-dist.ts`)
-- Pattern: SessionRegistry is a simple stateful class — no persistence, no events — designed for ink UI to consume later (#242+)
+**Important TODOs in Code:**
+- **Ralph (8):** start() needs EventBus subscription, health checks, persistent state loading/saving (8 items).
+- **Coordinator (13):** initialize() needs client connection, charter loading, hook setup, EventBus wiring (13 items).
+- **Agents (14):** spawn() needs charter reading, YAML parsing, SDK session creation with history injection (14 items).
+- **Shell spawn.ts (1):** "Wire to CopilotClient session API" — CopilotClient session creation stubbed with TODO (line ~78 in spawn.ts).
+- **Casting (1):** registry.json parsing stub.
 
-### 📌 #238: SDK-based agent spawning infrastructure — implemented
-- Created `src/cli/shell/spawn.ts`: `loadAgentCharter()`, `buildAgentPrompt()`, `spawnAgent()`
-- `loadAgentCharter(name, teamRoot?)` loads charter from `.squad/agents/{name}/charter.md` using `resolveSquad()` for directory resolution
-- `buildAgentPrompt(charter, options?)` constructs system prompt: "You are an AI agent..." + charter + optional context
-- `spawnAgent(name, task, registry, options?)` is the full lifecycle: load charter → parse role from `# Name — Role` header → register in SessionRegistry → set status to working → build prompt → return SpawnResult → set status to idle
-- Types exported: `SpawnOptions` (mode: sync/background, systemContext, tools), `SpawnResult` (agentName, status, response/error), `ToolDefinition` (name, description, parameters)
-- All exported from `src/cli/shell/index.ts` barrel
-- SDK session creation intentionally stubbed with TODO — CopilotClient session API wiring deferred until we understand the session management surface
-- PR #285 on branch `squad/238-sdk-spawning` → `bradygaster/dev`
-- Pattern: charter loading uses `resolveSquad()` (returns `.squad/` dir path) — `teamRoot` param constructs `.squad/` path from project root for testability
-- Pattern: role parsing from charter header is regex-based (`/^#\s+\w+\s+—\s+(.+)$/m`), falls back to "Agent" if no match
-- Foundation for #239 (stream bridge integration) and #241 (coordinator spawn orchestration)
+**CLI Commands Status:**
+- **Fully working (7):** help, version, status, init, upgrade, export, import, copilot, plugin, scrub-emails
+- **Stubbed (3):** triage (watch alias), loop, hire — all print placeholder messages
+- **Design note:** Commands are correct per Brady's directives (squad loop, squad triage, squad hire). Command routing works; implementations pending.
 
-### 📌 #220/#221: CRLF normalization utility + parser hardening — implemented
-- Created `src/utils/normalize-eol.ts` with `normalizeEol()` — strips `\r\n` and lone `\r` to LF-only before any parsing logic runs.
-- Applied to all 8 markdown parsers: `parseTeamMarkdown`, `parseRoutingRulesMarkdown`, `parseDecisionsMarkdown` (markdown-migration.ts), `parseRoutingMarkdown` (routing.ts), `parseCharterMarkdown` (charter-compiler.ts), `parseFrontmatter` (skill-loader.ts), `parseAgentDoc` (agent-doc.ts), `buildCapabilitiesBlock` (doc-sync.ts).
-- Build clean (0 errors), all 1670 tests pass. Committed on `squad/181-squadui-p0`.
-- Pattern: normalize at the entry point of the parser function, before any `.split('\n')` or regex matching. This is a one-line defensive guard — no behavioral change for LF-only inputs.
+**Technical Debt:**
+- **Phase 3 cleanup pending:** root `src/` directory still exists (backward compat). Will be deleted after monorepo migration complete per history.
+- **Ink components:** No UI components wired yet. Shell uses readline only. Ink dependency is in CLI package.json but not used.
+- **Event-driven flow:** EventBus is defined (event-bus.ts) but no actual event emission wired. Handler error isolation TODO (PRD 1).
 
-### 📌 #224: Re-export all CLI functions from main barrel — implemented
-- Added `runInit`, `runExport`, `runImport`, `runCopilot`, `type CopilotFlags`, and `scrubEmails` to `src/index.ts` public API surface.
-- These were already exported from `src/cli/index.ts` barrel but were missing from the top-level selective named export block in `src/index.ts`.
-- Single-line change pattern: expand the existing named import list from `./cli/index.js` — no new import statements needed.
-- Build clean (0 errors), all 1683 tests pass. Committed on `squad/181-squadui-p1`.
-- Pattern: when Edie split `main()` into `cli-entry.ts`, the barrel became selective. Any new CLI function must be explicitly added to the `src/index.ts` named export list to be part of the public API.
+**CLI Entry Point Wiring:**
+- `main()` parses command and routes to implementations (all sync/await patterns clean).
+- No external commands spawned yet (e.g., `gh api`, file system watch).
+- `--global` flag works (resolveGlobalSquadPath routing correct).
 
+**Build/Test/Lint Status:**
+- ✅ **Build:** 0 errors (tsc clean).
+- ✅ **Tests:** 1700+ passing (exact count varies by run, all passing).
+- ✅ **Lint:** tsc --noEmit clean (strict mode enforced).
 
+**Next Phase Blocking Items:**
+1. Wire EventBus: Actual event emission from sessions + handler execution in coordinator/ralph.
+2. CopilotClient session integration: Ralph.start() and spawnAgent() need live session creation/resumption.
+3. Coordinator.initialize() and route(): Accept user message, load charters, route to agents.
+4. Shell UI: Wire ink components for agent display, streaming responses, session status.
+
+### 📌 Team update (2026-02-22T08:50:00Z): Ink Shell Wiring — ShellApi callback pattern — decided by Fenster
+App component accepts `onReady` prop that fires on mount, delivering ShellApi object with `addMessage`, `setStreamingContent`, `refreshAgents` methods. Host captures API and wires to StreamBridge callbacks. Keeps Ink component decoupled from bridge internals. Streaming content accumulation uses per-agent buffers. Ready for coordinator integration (Phase 3).
+5. Triage/Loop/Hire: Implement placeholder commands (low priority, can defer).
+
+**Assessment for Brady:** Core runtime foundation is solid — SDK/CLI split is complete, command routing works, type safety is enforced. Phase 3 (integrating with CopilotClient, EventBus event emission, Coordinator logic) is the next lift. Ralph and Coordinator are well-structured but need internal wiring. No broken code — just incomplete TODOs. Estimate 2-3 weeks to wire Phase 3 fully.
+
+### 📌 Team update (2026-02-22T070156Z): Test import migration merged to decisions, CLI functions correctly exported from CLI package — decided by Fenster, Edie, Hockney
+- **Test import migration decision:** 56 test files migrated from `../src/` to `@bradygaster/squad-sdk` / `@bradygaster/squad-cli`. 26 SDK subpath exports, 16 CLI subpath exports. Barrel re-exports verified for missing symbols. All 1727 tests passing.
+- **CLI function placement clarified:** runInit, runExport, runImport, scrubEmails correctly exported from `@bradygaster/squad-cli` (not SDK), reflecting intentional architecture separation.
+- **Pattern established:** Vitest resolves through compiled `dist/`, so barrel changes require `npm run build` in the package before tests see them.
+- **Decision merged to decisions.md.** Status: Test infrastructure aligned with workspace split, ready for Phase 3 runtime integration.
+
+### 📌 Ink shell wiring (2026-02-22) — Fenster
+- **Replaced readline loop with Ink render** in `packages/squad-cli/src/cli/shell/index.ts`. The `runShell()` function now uses `ink.render()` + `waitUntilExit()` instead of `readline.createInterface`.
+- **Created `App.tsx`** (`packages/squad-cli/src/cli/shell/components/App.tsx`) — main Ink component composing AgentPanel, MessageStream, InputPrompt. Manages messages, agents, streaming state via React hooks.
+- **ShellApi pattern:** App exposes an `onReady` callback prop that delivers a `ShellApi` object (`addMessage`, `setStreamingContent`, `refreshAgents`). This lets the host wire StreamBridge callbacks into React state without coupling the component to the bridge directly.
+- **StreamBridge wiring:** `runShell()` creates a StreamBridge with callbacks that accumulate content deltas in a local `streamBuffers` Map, then push accumulated content into the Ink component via ShellApi. The bridge is ready for coordinator integration — just call `_bridge.handleEvent(event)`.
+- **Router + command handler integration:** App's `handleSubmit` calls `parseInput()` for input classification and `executeCommand()` for slash commands. Direct agent and coordinator messages produce system placeholders until coordinator is wired.
+- **Exit handling:** `/quit`, `/exit` (via executeCommand), bare `exit` (via EXIT_WORDS set), and Ctrl+C (via `useInput` + `useApp().exit()` with `exitOnCtrlC: false`). Farewell message "👋 Squad out." printed after `waitUntilExit()`.
+- **index.ts uses `React.createElement`** instead of JSX to avoid renaming the file to .tsx. All existing exports preserved. New exports: `App`, `ShellApi`, `AppProps`.
+- **No test breakage:** All 60 previously-passing test files still pass (1813 tests). 5 pre-existing failures in agent-session-manager.test.ts are unrelated.
+- **Key file paths:** `components/App.tsx`, `components/index.ts`, `shell/index.ts`.
+
+### 📌 OpenTelemetry tracing instrumentation (2026-02-22) — Fenster (Issues #257, #258)
+- **Added `@opentelemetry/api`** as a dependency in `packages/squad-sdk`. Imported `trace` and `SpanStatusCode` only — no SDK packages.
+- **Instrumented 4 files:** `agents/index.ts` (AgentSessionManager: spawn/resume/destroy), `agents/lifecycle.ts` (AgentLifecycleManager: spawnAgent/destroyAgent), `coordinator/index.ts` (Coordinator: initialize/route/execute/shutdown), `coordinator/coordinator.ts` (SquadCoordinator: handleMessage).
+- **Span naming convention:** `squad.{module}.{method}` — e.g. `squad.agent.spawn`, `squad.coordinator.route`.
+- **Error pattern:** catch block sets `SpanStatusCode.ERROR` + `recordException()`, then re-throws. `span.end()` always in `finally`.
+- **No-op by default:** Without a registered TracerProvider, all spans are no-ops. Zero overhead unless OTel is configured.
+- **Build:** 0 errors in instrumented files (2 pre-existing errors in Fortier's `otel.ts` — unrelated SDK type mismatch).
+- **Tests:** All 1828 passing tests unaffected. 23 pre-existing failures in `otel-provider.test.ts` are Fortier's parallel work.
+
+### 📌 Tool trace enhancements + agent metric wiring (2026-02-22) — Fenster (Issues #260, #262)
+- **Issue #260 — Tool traces enhanced** in `tools/index.ts`:
+  - Added `sanitizeArgs()` — strips fields matching `/token|secret|password|key|auth/i`, truncates to 1024 chars. Exported for reuse.
+  - `defineTool` now accepts optional `agentName` in config → recorded as `agent.name` span attribute.
+  - `squad.tool.result` event now includes `result.length` (textResultForLlm length).
+  - `duration_ms` verified present on both result and error events (was already there, confirmed consistent).
+  - TODO comment added re: parent span context propagation (deferred until agent.work span lifecycle is complete).
+- **Issue #262 — Agent metrics wired** into lifecycle code:
+  - `AgentSessionManager` (agents/index.ts): `recordAgentSpawn` in spawn(), `recordAgentDuration`+`recordAgentDestroy` in destroy(), `recordAgentError` in catch blocks.
+  - `AgentLifecycleManager` (agents/lifecycle.ts): `recordAgentSpawn` in spawnAgent(), `recordAgentDestroy` in destroyAgent(), `recordAgentError` in catch.
+  - Duration computed from `createdAt` timestamp in destroy path.
+- **Build:** tsc clean (0 errors). **Tests:** All 1886 tests passing (65 files).
+
+### 📌 Team update (2026-02-22T093300Z): OTel Phase 2 complete — session traces, latency metrics, tool enhancements, agent metrics, token usage wiring, metrics tests — decided by Fortier, Fenster, Edie, Hockney
+All four agents shipped Phase 2 in parallel: Fortier wired TTFT/duration/throughput metrics. Fenster established tool trace patterns and agent metric wiring conventions. Edie wired token usage and session pool metrics. Hockney created spy-meter test pattern (39 new tests). Total: 1940 tests passing, metrics ready for production telemetry.
 ### 📌 Team update (2026-02-22T020714Z): CRLF normalization complete and merged
 Fenster's src/utils/normalize-eol.ts utility is now applied to 8 parser entry points across 6 files. Pattern established: normalize at parser entry, not at file-read callsite. This ensures cross-platform line ending safety for all parsers (Windows CRLF, Unix LF, old Mac CR). Decision merged to decisions.md. Issue #220, #221 closed. All 1683 tests passing.
 

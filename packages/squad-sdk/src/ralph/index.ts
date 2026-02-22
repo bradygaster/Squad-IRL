@@ -11,7 +11,8 @@
  *   3. Cloud heartbeat: External health signal (future)
  */
 
-import type { EventBus, SquadEvent } from '../client/event-bus.js';
+import { writeFile, readFile } from 'node:fs/promises';
+import type { EventBus, SquadEvent } from '../runtime/event-bus.js';
 
 // --- Monitor Types ---
 
@@ -53,6 +54,8 @@ export class RalphMonitor {
   private config: MonitorConfig;
   private state: MonitorState;
   private eventBus: EventBus | null = null;
+  private unsubscribers: (() => void)[] = [];
+  private healthCheckTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(config: MonitorConfig) {
     this.config = config;
@@ -61,32 +64,91 @@ export class RalphMonitor {
       agents: new Map(),
       observations: [],
     };
-    // TODO: PRD 8 — Load persisted state from statePath if exists
-    // TODO: PRD 8 — Initialize as persistent SDK session via resumeSession('squad-ralph')
   }
 
   /** Start monitoring — subscribe to EventBus and begin health checks */
   async start(eventBus: EventBus): Promise<void> {
     this.eventBus = eventBus;
-    // TODO: PRD 8 — Subscribe to session lifecycle events
-    // TODO: PRD 8 — Subscribe to agent.milestone events
-    // TODO: PRD 8 — Start periodic health check timer
-    // TODO: PRD 8 — Register onSessionStart hook to track new agents
+
+    // Subscribe to session lifecycle events
+    this.unsubscribers.push(
+      eventBus.subscribe('session:created', (event) => this.handleEvent(event)),
+    );
+    this.unsubscribers.push(
+      eventBus.subscribe('session:destroyed', (event) => this.handleEvent(event)),
+    );
+    this.unsubscribers.push(
+      eventBus.subscribe('session:error', (event) => this.handleEvent(event)),
+    );
+    this.unsubscribers.push(
+      eventBus.subscribe('agent:milestone', (event) => this.handleEvent(event)),
+    );
+
+    // Start periodic health check
+    const interval = this.config.healthCheckInterval ?? 30_000;
+    this.healthCheckTimer = setInterval(() => {
+      void this.healthCheck();
+    }, interval);
   }
 
   /** Handle an incoming event from the EventBus */
   private handleEvent(event: SquadEvent): void {
-    // TODO: PRD 8 — Update agent work status based on event type
-    // TODO: PRD 8 — Extract [MILESTONE] markers from agent output
-    // TODO: PRD 8 — Detect stale sessions and flag for coordinator
+    const agentName = event.agentName ?? 'unknown';
+    const sessionId = event.sessionId ?? 'unknown';
+
+    switch (event.type) {
+      case 'session:created': {
+        this.state.agents.set(agentName, {
+          agentName,
+          sessionId,
+          status: 'working',
+          lastActivity: event.timestamp,
+          milestones: [],
+        });
+        break;
+      }
+      case 'session:destroyed': {
+        this.state.agents.delete(agentName);
+        break;
+      }
+      case 'session:error': {
+        const existing = this.state.agents.get(agentName);
+        if (existing) {
+          existing.status = 'error';
+          existing.lastActivity = event.timestamp;
+        }
+        break;
+      }
+      case 'agent:milestone': {
+        const agent = this.state.agents.get(agentName);
+        if (agent) {
+          const payload = event.payload as { milestone?: string; task?: string } | null;
+          if (payload?.milestone) {
+            agent.milestones.push(payload.milestone);
+          }
+          if (payload?.task) {
+            agent.currentTask = payload.task;
+          }
+          agent.lastActivity = event.timestamp;
+          agent.status = 'working';
+        }
+        break;
+      }
+    }
   }
 
   /** Run a health check across all tracked agent sessions */
   async healthCheck(): Promise<AgentWorkStatus[]> {
-    // TODO: PRD 8 — Check each session's last activity timestamp
-    // TODO: PRD 8 — Mark stale sessions (no activity > threshold)
-    // TODO: PRD 8 — Persist state to statePath for crash recovery
-    this.state.lastHealthCheck = new Date();
+    const now = new Date();
+    const staleThreshold = this.config.staleSessionThreshold ?? 300_000;
+
+    for (const agent of this.state.agents.values()) {
+      if (agent.status === 'error') continue;
+      const elapsed = now.getTime() - agent.lastActivity.getTime();
+      agent.status = elapsed > staleThreshold ? 'stale' : agent.status === 'stale' ? 'idle' : agent.status;
+    }
+
+    this.state.lastHealthCheck = now;
     return Array.from(this.state.agents.values());
   }
 
@@ -97,8 +159,28 @@ export class RalphMonitor {
 
   /** Stop monitoring and persist final state */
   async stop(): Promise<void> {
-    // TODO: PRD 8 — Unsubscribe from EventBus
-    // TODO: PRD 8 — Stop health check timer
-    // TODO: PRD 8 — Persist final state to statePath
+    // Unsubscribe from EventBus
+    for (const unsub of this.unsubscribers) {
+      unsub();
+    }
+    this.unsubscribers = [];
+
+    // Stop health check timer
+    if (this.healthCheckTimer !== null) {
+      clearInterval(this.healthCheckTimer);
+      this.healthCheckTimer = null;
+    }
+
+    // Persist state if statePath is configured
+    if (this.config.statePath) {
+      const serializable = {
+        lastHealthCheck: this.state.lastHealthCheck?.toISOString() ?? null,
+        agents: Array.from(this.state.agents.entries()),
+        observations: this.state.observations,
+      };
+      await writeFile(this.config.statePath, JSON.stringify(serializable, null, 2), 'utf-8');
+    }
+
+    this.eventBus = null;
   }
 }

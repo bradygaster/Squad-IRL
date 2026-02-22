@@ -26,6 +26,9 @@ import {
 } from '../config/routing.js';
 import type { RoutingConfig as RuntimeRoutingConfig } from '../runtime/config.js';
 import { spawnParallel, type AgentSpawnConfig, type SpawnResult, type FanOutDependencies } from './fan-out.js';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+
+const tracer = trace.getTracer('squad-sdk');
 
 // --- Re-export CoordinatorContext for convenience ---
 export type { CoordinatorContext } from './direct-response.js';
@@ -104,83 +107,98 @@ export class SquadCoordinator {
     message: string,
     context: CoordinatorContext,
   ): Promise<CoordinatorResult> {
-    const start = Date.now();
+    const span = tracer.startSpan('squad.coordinator.handleMessage');
+    span.setAttribute('message.length', message.length);
+    try {
+      const start = Date.now();
 
-    // Emit coordinator.route event
-    await this.emit('coordinator:routing', context.sessionId, {
-      phase: 'start',
-      messageLength: message.length,
-    });
-
-    // --- Step 1: Direct response check ---
-    if (this.directHandler.shouldHandleDirectly(message, this.config)) {
-      const directResult = this.directHandler.handleDirect(message, context);
-
+      // Emit coordinator.route event
       await this.emit('coordinator:routing', context.sessionId, {
-        phase: 'complete',
-        strategy: 'direct',
-        category: directResult.category,
+        phase: 'start',
+        messageLength: message.length,
       });
 
-      return {
-        strategy: 'direct',
-        directResponse: directResult,
-        durationMs: Date.now() - start,
-      };
-    }
+      // --- Step 1: Direct response check ---
+      if (this.directHandler.shouldHandleDirectly(message, this.config)) {
+        const directResult = this.directHandler.handleDirect(message, context);
 
-    // --- Step 2: Route analysis ---
-    const routing = matchRoute(message, this.compiledRouter);
+        await this.emit('coordinator:routing', context.sessionId, {
+          phase: 'complete',
+          strategy: 'direct',
+          category: directResult.category,
+        });
 
-    await this.emit('coordinator:routing', context.sessionId, {
-      phase: 'routed',
-      agents: routing.agents,
-      confidence: routing.confidence,
-      reason: routing.reason,
-    });
-
-    // --- Step 3: Determine spawn strategy ---
-    const strategy = this.determineStrategy(routing);
-
-    // --- Step 4: Spawn agents ---
-    let spawnResults: SpawnResult[] | undefined;
-
-    if (this.fanOutDeps && (strategy === 'single' || strategy === 'multi')) {
-      const spawnConfigs = this.buildSpawnConfigs(routing, message, context);
-
-      await this.emit('coordinator:routing', context.sessionId, {
-        phase: 'spawning',
-        strategy,
-        agentCount: spawnConfigs.length,
-      });
-
-      spawnResults = await spawnParallel(spawnConfigs, this.fanOutDeps);
-
-      // If all spawns failed in single mode, mark as fallback
-      if (strategy === 'single' && spawnResults.every(r => r.status === 'failed')) {
+        span.setAttribute('routing.strategy', 'direct');
         return {
-          strategy: 'fallback',
-          routing,
-          spawnResults,
+          strategy: 'direct',
+          directResponse: directResult,
           durationMs: Date.now() - start,
         };
       }
+
+      // --- Step 2: Route analysis ---
+      const routing = matchRoute(message, this.compiledRouter);
+
+      await this.emit('coordinator:routing', context.sessionId, {
+        phase: 'routed',
+        agents: routing.agents,
+        confidence: routing.confidence,
+        reason: routing.reason,
+      });
+
+      span.setAttribute('target.agents', routing.agents.join(','));
+      span.setAttribute('routing.confidence', routing.confidence);
+
+      // --- Step 3: Determine spawn strategy ---
+      const strategy = this.determineStrategy(routing);
+      span.setAttribute('routing.strategy', strategy);
+
+      // --- Step 4: Spawn agents ---
+      let spawnResults: SpawnResult[] | undefined;
+
+      if (this.fanOutDeps && (strategy === 'single' || strategy === 'multi')) {
+        const spawnConfigs = this.buildSpawnConfigs(routing, message, context);
+
+        await this.emit('coordinator:routing', context.sessionId, {
+          phase: 'spawning',
+          strategy,
+          agentCount: spawnConfigs.length,
+        });
+
+        spawnResults = await spawnParallel(spawnConfigs, this.fanOutDeps);
+
+        // If all spawns failed in single mode, mark as fallback
+        if (strategy === 'single' && spawnResults.every(r => r.status === 'failed')) {
+          return {
+            strategy: 'fallback',
+            routing,
+            spawnResults,
+            durationMs: Date.now() - start,
+          };
+        }
+      }
+
+      // --- Step 5: Complete ---
+      await this.emit('coordinator:routing', context.sessionId, {
+        phase: 'complete',
+        strategy,
+        spawnCount: spawnResults?.length ?? 0,
+        successCount: spawnResults?.filter(r => r.status === 'success').length ?? 0,
+      });
+
+      return {
+        strategy,
+        routing,
+        spawnResults,
+        durationMs: Date.now() - start,
+      };
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
-
-    // --- Step 5: Complete ---
-    await this.emit('coordinator:routing', context.sessionId, {
-      phase: 'complete',
-      strategy,
-      spawnCount: spawnResults?.length ?? 0,
-      successCount: spawnResults?.filter(r => r.status === 'success').length ?? 0,
-    });
-
-    return {
-      strategy,
-      routing,
-      spawnResults,
-      durationMs: Date.now() - start,
-    };
   }
 
   /**

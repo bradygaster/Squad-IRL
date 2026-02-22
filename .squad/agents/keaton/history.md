@@ -40,3 +40,42 @@
 
 ### 📌 Team update (2026-02-22T041800Z): SDK/CLI split plan executed, versions aligned to 0.8.0, 1719 tests passing
 Keaton's split plan produced definitive SDK/CLI mapping with clean DAG (CLI → SDK → @github/copilot-sdk). Fenster migrated 154 files across both packages. Edie fixed all 6 config files (tsconfigs with composite builds, package.json exports maps). Kobayashi aligned all versions to 0.8.0 (clear break from 0.7.0 stubs). Hockney verified build clean + all 1719 tests pass, deferred test import migration until root src/ removal. Rabin verified publish workflows ready. Coordinator published both packages to npm (0.8.0). Inbox merged to decisions.md. Ready for Phase 3 (root cleanup).
+
+## Status Snapshot (2026-02-22T225951Z)
+
+**Current Branch:** `bradygaster/dev` (latest: d2b1b1f)  
+**No Open PRs** — Previous work is merged. Repository is in a clean state.
+
+### What's Shipped ✅
+- **Root package:** v0.6.0-alpha.0 (workspace coordinator, private)
+- **SDK package:** v0.8.0 (real code, 18 subpath exports, @github/copilot-sdk only)
+- **CLI package:** v0.8.1 (ink/react shell foundation, parser functions, agent spawn skeleton)
+- **Build:** ✅ Clean (SDK + CLI both compile with zero errors)
+- **Tests:** ✅ 1,727 passing across 57 test files
+- **Architecture:** ✅ SDK/CLI split complete, one-way dependency graph (CLI → SDK → Copilot SDK)
+
+### What's Missing / Incomplete ⚠️
+1. **Root src/ directory removal** — Still exists alongside workspace packages. Phase 3 cleanup is blocked. This creates confusion about canonical source location.
+2. **Interactive shell UX implementation** — `runShell()` is console.log-only. Ink component wiring not done (AgentPanel.tsx, MessageStream.tsx defined but not integrated). Session/prompt/spawn all stubbed.
+3. **OpenTelemetry observability epic** — 9 P0/P1 issues (#261, #257–259, etc.): token metrics, agent/coordinator tracing, session pool metrics. None in progress.
+4. **Documentation migration epic** — 11 issues (#182–206): copy beta docs, update URLs, write new guides (Architecture, Migration, SDK API Reference). High priority but no active work.
+5. **Test import migration** — 150+ import lines still use `../src/` (root); blocked until root deletion.
+
+### Open Issues Summary (27 open, 6 assigned to Keaton)
+- **Observability (9):** Epic #253 — Token usage metrics (P0), agent lifecycle traces (P0/P1), session pool metrics, Aspire dashboard integration
+- **Docs (11):** Epic #182 — Migration guide, API reference, architecture overview, install guides (all Keaton)
+- **File watcher:** #268 (Fenster, P1) — Port squad-observer from paulyuk/squad
+- **OTel integration tests:** #267 (Hockney, P1)
+- **SquadUI integration:** 2 issues in pipeline
+
+### Critical Blockers ⛔
+**None for current release.** But two near-term constraints:
+1. **Root src/ is a time bomb** — Parallel structure (root src/ + workspace packages) is confusing and error-prone. Removing it unblocks test migration and clarifies package boundaries.
+2. **Observability is a pre-requisite for production** — All 9 OTel issues are P0/P1, needed before a public release. Token metrics (#261) is marked P0 (release blocker).
+
+### Recommended Next Steps (Prioritized)
+1. **Phase 3: Delete root src/ directory** — Move remaining 56 test files to use workspace packages. Unblock test import migration. Forces clarity.
+2. **Merge missing observability** — Assign OTel work (9 issues) to sprint. #261 (token metrics) is P0. Others are P1 (agent/coordinator traces). Needed for production observability.
+3. **Documentation pass** — Assign 11-issue epic to Keaton (already labeled). Write Architecture Overview (#206), Migration Guide (#203), API Reference (#196). Unblock public release.
+4. **Complete interactive shell wiring** — Wire Ink components (AgentPanel, MessageStream, InputPrompt) to SDK session → streaming. Current code is skeleton-only.
+5. **Verify insider publish pipeline** — Both packages published to npm (0.8.0 insider). Run end-to-end test: `npm install -g @bradygaster/squad-cli && squad` on a fresh machine.

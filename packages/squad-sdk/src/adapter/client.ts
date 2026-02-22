@@ -8,6 +8,8 @@
  */
 
 import { CopilotClient } from "@github/copilot-sdk";
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { recordSessionCreated, recordSessionClosed, recordSessionError } from '../runtime/otel-metrics.js';
 import type { 
   SquadSessionConfig, 
   SquadSession,
@@ -18,7 +20,10 @@ import type {
   SquadGetAuthStatusResponse,
   SquadGetStatusResponse,
   SquadModelInfo,
+  SquadMessageOptions,
 } from "./types.js";
+
+const tracer = trace.getTracer('squad-sdk');
 
 /**
  * Connection state for SquadClient.
@@ -216,34 +221,46 @@ export class SquadClient {
    * @throws Error if connection fails or protocol version is incompatible
    */
   async connect(): Promise<void> {
-    if (this.state === "connected") {
-      return;
-    }
-
-    if (this.state === "connecting") {
-      throw new Error("Connection already in progress");
-    }
-
-    this.state = "connecting";
-    this.manualDisconnect = false;
-
-    const startTime = Date.now();
-
+    const span = tracer.startSpan('squad.client.connect');
+    span.setAttribute('connection.transport', this.options.useStdio ? 'stdio' : 'tcp');
     try {
-      await this.client.start();
-      const elapsed = Date.now() - startTime;
-      
-      this.state = "connected";
-      this.reconnectAttempts = 0;
-
-      if (elapsed > 2000) {
-        console.warn(`SquadClient connection took ${elapsed}ms (> 2s threshold)`);
+      if (this.state === "connected") {
+        return;
       }
-    } catch (error) {
-      this.state = "error";
-      throw new Error(
-        `Failed to connect to Copilot CLI: ${error instanceof Error ? error.message : String(error)}`
-      );
+
+      if (this.state === "connecting") {
+        throw new Error("Connection already in progress");
+      }
+
+      this.state = "connecting";
+      this.manualDisconnect = false;
+
+      const startTime = Date.now();
+
+      try {
+        await this.client.start();
+        const elapsed = Date.now() - startTime;
+        
+        this.state = "connected";
+        this.reconnectAttempts = 0;
+
+        span.setAttribute('connection.duration_ms', elapsed);
+
+        if (elapsed > 2000) {
+          console.warn(`SquadClient connection took ${elapsed}ms (> 2s threshold)`);
+        }
+      } catch (error) {
+        this.state = "error";
+        throw new Error(
+          `Failed to connect to Copilot CLI: ${error instanceof Error ? error.message : String(error)}`
+        );
+      }
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
   }
 
@@ -258,18 +275,27 @@ export class SquadClient {
    * @returns Promise that resolves with any errors encountered during cleanup
    */
   async disconnect(): Promise<Error[]> {
-    this.manualDisconnect = true;
+    const span = tracer.startSpan('squad.client.disconnect');
+    try {
+      this.manualDisconnect = true;
 
-    if (this.reconnectTimer) {
-      clearTimeout(this.reconnectTimer);
-      this.reconnectTimer = null;
+      if (this.reconnectTimer) {
+        clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = null;
+      }
+
+      const errors = await this.client.stop();
+      this.state = "disconnected";
+      this.reconnectAttempts = 0;
+
+      return errors;
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
-
-    const errors = await this.client.stop();
-    this.state = "disconnected";
-    this.reconnectAttempts = 0;
-
-    return errors;
   }
 
   /**
@@ -299,23 +325,39 @@ export class SquadClient {
    * @returns Promise that resolves with the created session
    */
   async createSession(config: SquadSessionConfig = {}): Promise<SquadSession> {
-    if (!this.isConnected() && this.options.autoStart) {
-      await this.connect();
-    }
-
-    if (!this.isConnected()) {
-      throw new Error("Client not connected. Call connect() first.");
-    }
-
+    const span = tracer.startSpan('squad.session.create');
+    span.setAttribute('session.auto_start', this.options.autoStart);
     try {
-      const session = await this.client.createSession(config);
-      return session as unknown as SquadSession;
-    } catch (error) {
-      if (this.shouldAttemptReconnect(error)) {
-        await this.attemptReconnection();
-        return this.createSession(config);
+      if (!this.isConnected() && this.options.autoStart) {
+        await this.connect();
       }
-      throw error;
+
+      if (!this.isConnected()) {
+        throw new Error("Client not connected. Call connect() first.");
+      }
+
+      try {
+        const session = await this.client.createSession(config);
+        const result = session as unknown as SquadSession;
+        if (result && (result as any).sessionId) {
+          span.setAttribute('session.id', (result as any).sessionId);
+        }
+        recordSessionCreated();
+        return result;
+      } catch (error) {
+        recordSessionError();
+        if (this.shouldAttemptReconnect(error)) {
+          await this.attemptReconnection();
+          return this.createSession(config);
+        }
+        throw error;
+      }
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
   }
 
@@ -327,23 +369,33 @@ export class SquadClient {
    * @returns Promise that resolves with the resumed session
    */
   async resumeSession(sessionId: string, config: SquadSessionConfig = {}): Promise<SquadSession> {
-    if (!this.isConnected() && this.options.autoStart) {
-      await this.connect();
-    }
-
-    if (!this.isConnected()) {
-      throw new Error("Client not connected. Call connect() first.");
-    }
-
+    const span = tracer.startSpan('squad.session.resume');
+    span.setAttribute('session.id', sessionId);
     try {
-      const session = await this.client.resumeSession(sessionId, config);
-      return session as unknown as SquadSession;
-    } catch (error) {
-      if (this.shouldAttemptReconnect(error)) {
-        await this.attemptReconnection();
-        return this.resumeSession(sessionId, config);
+      if (!this.isConnected() && this.options.autoStart) {
+        await this.connect();
       }
-      throw error;
+
+      if (!this.isConnected()) {
+        throw new Error("Client not connected. Call connect() first.");
+      }
+
+      try {
+        const session = await this.client.resumeSession(sessionId, config);
+        return session as unknown as SquadSession;
+      } catch (error) {
+        if (this.shouldAttemptReconnect(error)) {
+          await this.attemptReconnection();
+          return this.resumeSession(sessionId, config);
+        }
+        throw error;
+      }
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
   }
 
@@ -351,19 +403,30 @@ export class SquadClient {
    * List all available sessions.
    */
   async listSessions(): Promise<SquadSessionMetadata[]> {
-    if (!this.isConnected()) {
-      throw new Error("Client not connected");
-    }
-
+    const span = tracer.startSpan('squad.session.list');
     try {
-      const sessions = await this.client.listSessions();
-      return sessions as unknown as SquadSessionMetadata[];
-    } catch (error) {
-      if (this.shouldAttemptReconnect(error)) {
-        await this.attemptReconnection();
-        return this.listSessions();
+      if (!this.isConnected()) {
+        throw new Error("Client not connected");
       }
-      throw error;
+
+      try {
+        const sessions = await this.client.listSessions();
+        const result = sessions as unknown as SquadSessionMetadata[];
+        span.setAttribute('sessions.count', result.length);
+        return result;
+      } catch (error) {
+        if (this.shouldAttemptReconnect(error)) {
+          await this.attemptReconnection();
+          return this.listSessions();
+        }
+        throw error;
+      }
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
   }
 
@@ -371,18 +434,30 @@ export class SquadClient {
    * Delete a session by ID.
    */
   async deleteSession(sessionId: string): Promise<void> {
-    if (!this.isConnected()) {
-      throw new Error("Client not connected");
-    }
-
+    const span = tracer.startSpan('squad.session.delete');
+    span.setAttribute('session.id', sessionId);
     try {
-      await this.client.deleteSession(sessionId);
-    } catch (error) {
-      if (this.shouldAttemptReconnect(error)) {
-        await this.attemptReconnection();
-        return this.deleteSession(sessionId);
+      if (!this.isConnected()) {
+        throw new Error("Client not connected");
       }
-      throw error;
+
+      try {
+        await this.client.deleteSession(sessionId);
+        recordSessionClosed();
+      } catch (error) {
+        recordSessionError();
+        if (this.shouldAttemptReconnect(error)) {
+          await this.attemptReconnection();
+          return this.deleteSession(sessionId);
+        }
+        throw error;
+      }
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
   }
 
@@ -478,6 +553,96 @@ export class SquadClient {
         return this.listModels();
       }
       throw error;
+    }
+  }
+
+  /**
+   * Send a message to a session, wrapped with OTel tracing.
+   *
+   * Creates a `squad.session.message` span for the full call and a
+   * child `squad.session.stream` span that tracks streaming duration
+   * with `first_token`, `last_token`, and `stream_error` events.
+   *
+   * @param session - The session to send the message to
+   * @param options - Message content and delivery options
+   * @returns Promise that resolves when the message is processed
+   */
+  async sendMessage(session: SquadSession, options: SquadMessageOptions): Promise<void> {
+    const messageSpan = tracer.startSpan('squad.session.message');
+    messageSpan.setAttribute('session.id', session.sessionId);
+    messageSpan.setAttribute('prompt.length', options.prompt.length);
+    messageSpan.setAttribute('streaming', true);
+
+    const streamSpan = tracer.startSpan('squad.session.stream');
+    streamSpan.setAttribute('session.id', session.sessionId);
+
+    const messageStartMs = Date.now();
+    let firstTokenRecorded = false;
+    let outputTokens = 0;
+    let inputTokens = 0;
+
+    const prevOnMessage = (session as any)._squadOnMessage;
+    const origOn = session.on.bind(session);
+
+    // Wire temporary event listener for stream tracking
+    const streamListener = (event: SquadSessionEvent) => {
+      if (event.type === 'message_delta' && !firstTokenRecorded) {
+        firstTokenRecorded = true;
+        streamSpan.addEvent('first_token');
+      }
+      if (event.type === 'usage') {
+        inputTokens = (event as any).inputTokens ?? 0;
+        outputTokens = (event as any).outputTokens ?? 0;
+      }
+    };
+
+    origOn('message_delta', streamListener);
+    origOn('usage', streamListener);
+
+    try {
+      await session.sendMessage(options);
+
+      const durationMs = Date.now() - messageStartMs;
+      streamSpan.addEvent('last_token');
+      streamSpan.setAttribute('tokens.input', inputTokens);
+      streamSpan.setAttribute('tokens.output', outputTokens);
+      streamSpan.setAttribute('duration_ms', durationMs);
+    } catch (err) {
+      streamSpan.addEvent('stream_error');
+      streamSpan.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      streamSpan.recordException(err instanceof Error ? err : new Error(String(err)));
+      messageSpan.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      messageSpan.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      streamSpan.end();
+      messageSpan.end();
+      // Clean up listeners
+      try {
+        session.off('message_delta', streamListener);
+        session.off('usage', streamListener);
+      } catch {
+        // session may not support off — ignore
+      }
+    }
+  }
+
+  /**
+   * Close a session (alias for deleteSession with `squad.session.close` span).
+   *
+   * @param sessionId - ID of the session to close
+   */
+  async closeSession(sessionId: string): Promise<void> {
+    const span = tracer.startSpan('squad.session.close');
+    span.setAttribute('session.id', sessionId);
+    try {
+      await this.deleteSession(sessionId);
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
     }
   }
 

@@ -6,6 +6,16 @@
  * Injects dynamic context via session hooks instead of string templates.
  */
 
+import { readFile, readdir } from 'node:fs/promises';
+import { join, dirname, basename } from 'node:path';
+import { randomUUID } from 'node:crypto';
+import { parseCharterMarkdown } from './charter-compiler.js';
+import { EventBus } from '../client/event-bus.js';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { recordAgentSpawn, recordAgentDuration, recordAgentError, recordAgentDestroy } from '../runtime/otel-metrics.js';
+
+const tracer = trace.getTracer('squad-sdk');
+
 // --- M1-8 Charter Compilation + M2-9 Config-driven ---
 export { 
   compileCharter, 
@@ -109,24 +119,51 @@ export interface AgentSessionInfo {
 export class CharterCompiler {
   /**
    * Load and compile a charter.md file into an AgentCharter.
-   * Parses frontmatter and prompt content from markdown.
+   * Parses identity/model sections from markdown.
    */
   async compile(charterPath: string): Promise<AgentCharter> {
-    // TODO: PRD 4 — Read charter.md from filesystem
-    // TODO: PRD 4 — Parse YAML frontmatter (name, role, expertise, style)
-    // TODO: PRD 4 — Extract prompt body
-    // TODO: PRD 4 — Map to CustomAgentConfig for SDK registration
-    throw new Error('Not implemented');
+    const content = await readFile(charterPath, 'utf-8');
+    const parsed = parseCharterMarkdown(content);
+
+    const name = parsed.identity.name ?? basename(dirname(charterPath));
+    const role = parsed.identity.role ?? '';
+    const expertise = parsed.identity.expertise ?? [];
+    const style = parsed.identity.style ?? '';
+    const displayName = `${name} — ${role}`;
+
+    return {
+      name: name.toLowerCase(),
+      displayName,
+      role,
+      expertise,
+      style,
+      prompt: content,
+      modelPreference: parsed.modelPreference,
+    };
   }
 
   /**
    * Load all charters from the team directory.
-   * Scans .squad/agents/{name}/charter.md
+   * Scans .squad/agents/{name}/charter.md, skipping scribe and _alumni.
    */
   async compileAll(teamRoot: string): Promise<AgentCharter[]> {
-    // TODO: PRD 4 — Glob for charter.md files
-    // TODO: PRD 4 — Compile each charter
-    throw new Error('Not implemented');
+    const agentsDir = join(teamRoot, '.squad', 'agents');
+    const entries = await readdir(agentsDir, { withFileTypes: true });
+    const charters: AgentCharter[] = [];
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue;
+      if (entry.name === 'scribe' || entry.name.startsWith('_')) continue;
+
+      const charterPath = join(agentsDir, entry.name, 'charter.md');
+      try {
+        charters.push(await this.compile(charterPath));
+      } catch {
+        // Skip agents without a valid charter.md
+      }
+    }
+
+    return charters;
   }
 }
 
@@ -134,25 +171,73 @@ export class CharterCompiler {
 
 export class AgentSessionManager {
   private agents: Map<string, AgentSessionInfo> = new Map();
+  private eventBus?: EventBus;
 
-  constructor() {
-    // TODO: PRD 4 — Accept SquadClient and SessionPool references
+  constructor(eventBus?: EventBus) {
+    this.eventBus = eventBus;
   }
 
   /** Spawn a new agent session from a charter */
   async spawn(charter: AgentCharter, mode: 'lightweight' | 'standard' | 'full' = 'standard'): Promise<AgentSessionInfo> {
-    // TODO: PRD 4 — Create SDK session with compiled charter config
-    // TODO: PRD 4 — Inject history.md and decisions.md via onSessionStart
-    // TODO: PRD 4 — Register in session pool
-    // TODO: PRD 4 — Emit lifecycle events
-    throw new Error('Not implemented');
+    const span = tracer.startSpan('squad.agent.spawn');
+    span.setAttribute('agent.name', charter.name);
+    span.setAttribute('agent.role', charter.role);
+    span.setAttribute('spawn.mode', mode);
+    try {
+      const now = new Date();
+      const info: AgentSessionInfo = {
+        charter,
+        sessionId: randomUUID(),
+        state: 'active',
+        createdAt: now,
+        lastActiveAt: now,
+        responseMode: mode,
+      };
+
+      this.agents.set(charter.name, info);
+      recordAgentSpawn(charter.name, mode);
+
+      if (this.eventBus) {
+        await this.eventBus.emit({
+          type: 'session.created',
+          sessionId: info.sessionId ?? undefined,
+          agentName: charter.name,
+          payload: { mode },
+          timestamp: now,
+        });
+      }
+
+      return info;
+    } catch (err) {
+      recordAgentError(charter.name, err instanceof Error ? err.constructor.name : 'unknown');
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
 
   /** Resume an existing agent session */
   async resume(agentName: string): Promise<AgentSessionInfo> {
-    // TODO: PRD 4 — Call SquadClient.resumeSession()
-    // TODO: PRD 4 — Restore context and state
-    throw new Error('Not implemented');
+    const span = tracer.startSpan('squad.agent.resume');
+    span.setAttribute('agent.name', agentName);
+    try {
+      const agent = this.agents.get(agentName);
+      if (!agent) {
+        throw new Error(`Agent '${agentName}' not found`);
+      }
+
+      agent.state = 'active';
+      agent.lastActiveAt = new Date();
+      return agent;
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
 
   /** Get info about a specific agent */
@@ -167,8 +252,35 @@ export class AgentSessionManager {
 
   /** Destroy an agent session */
   async destroy(agentName: string): Promise<void> {
-    // TODO: PRD 4 — Graceful shutdown with onSessionEnd hook
-    // TODO: PRD 4 — Persist final state to history.md
-    this.agents.delete(agentName);
+    const span = tracer.startSpan('squad.agent.destroy');
+    span.setAttribute('agent.name', agentName);
+    try {
+      const agent = this.agents.get(agentName);
+      if (!agent) return;
+
+      if (this.eventBus) {
+        await this.eventBus.emit({
+          type: 'session.destroyed',
+          sessionId: agent.sessionId ?? undefined,
+          agentName,
+          payload: {},
+          timestamp: new Date(),
+        });
+      }
+
+      const durationMs = agent.createdAt ? Date.now() - agent.createdAt.getTime() : 0;
+      recordAgentDuration(agentName, durationMs, 'success');
+      recordAgentDestroy(agentName);
+
+      agent.state = 'destroyed';
+      this.agents.delete(agentName);
+    } catch (err) {
+      recordAgentError(agentName, err instanceof Error ? err.constructor.name : 'unknown');
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
 }

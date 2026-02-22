@@ -113,6 +113,18 @@
     "./runtime/cost-tracker": {
       "types": "./dist/runtime/cost-tracker.d.ts",
       "import": "./dist/runtime/cost-tracker.js"
+    },
+    "./runtime/otel": {
+      "types": "./dist/runtime/otel.d.ts",
+      "import": "./dist/runtime/otel.js"
+    },
+    "./runtime/otel-bridge": {
+      "types": "./dist/runtime/otel-bridge.d.ts",
+      "import": "./dist/runtime/otel-bridge.js"
+    },
+    "./runtime/otel-metrics": {
+      "types": "./dist/runtime/otel-metrics.d.ts",
+      "import": "./dist/runtime/otel-metrics.js"
     }
   },
   "files": [
@@ -129,11 +141,30 @@
   "dependencies": {
     "@github/copilot-sdk": "^0.1.25"
   },
+  "peerDependencies": {
+    "@opentelemetry/api": "^1.9.0"
+  },
+  "peerDependenciesMeta": {
+    "@opentelemetry/api": {
+      "optional": true
+    }
+  },
+  "optionalDependencies": {
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.57.2",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.57.2",
+    "@opentelemetry/resources": "^1.30.0",
+    "@opentelemetry/sdk-metrics": "^1.30.0",
+    "@opentelemetry/sdk-node": "^0.57.2",
+    "@opentelemetry/sdk-trace-base": "^1.30.0",
+    "@opentelemetry/sdk-trace-node": "^1.30.0",
+    "@opentelemetry/semantic-conventions": "^1.28.0"
+  },
   "devDependencies": {
+    "@opentelemetry/api": "^1.9.0",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   },
-  "keywords":[
+  "keywords": [
     "copilot",
     "multi-agent",
     "squad",

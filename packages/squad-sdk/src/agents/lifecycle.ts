@@ -14,6 +14,10 @@ import { resolveModel, type ModelResolutionOptions, type TaskType } from './mode
 import { ConfigurationError, SessionLifecycleError } from '../adapter/errors.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
+import { trace, SpanStatusCode } from '@opentelemetry/api';
+import { recordAgentSpawn, recordAgentDestroy, recordAgentError } from '../runtime/otel-metrics.js';
+
+const tracer = trace.getTracer('squad-sdk');
 
 /**
  * Agent handle status.
@@ -131,6 +135,9 @@ export class AgentLifecycleManager {
    * @returns Agent handle for control and communication
    */
   async spawnAgent(options: SpawnAgentOptions): Promise<AgentHandle> {
+    const span = tracer.startSpan('squad.lifecycle.spawnAgent');
+    span.setAttribute('agent.name', options.agentName);
+    span.setAttribute('task.type', options.taskType ?? 'code');
     const {
       agentName,
       task,
@@ -206,6 +213,7 @@ export class AgentLifecycleManager {
       });
       
       this.agents.set(session.sessionId, handle);
+      recordAgentSpawn(agentName, 'lifecycle');
       
       // Step 6: Send initial task
       await handle.sendMessage(task);
@@ -213,6 +221,9 @@ export class AgentLifecycleManager {
       return handle;
       
     } catch (error) {
+      recordAgentError(agentName, error instanceof Error ? error.constructor.name : 'unknown');
+      span.setStatus({ code: SpanStatusCode.ERROR, message: error instanceof Error ? error.message : String(error) });
+      span.recordException(error instanceof Error ? error : new Error(String(error)));
       throw new SessionLifecycleError(
         `Failed to spawn agent '${agentName}': ${error instanceof Error ? error.message : String(error)}`,
         {
@@ -223,6 +234,8 @@ export class AgentLifecycleManager {
         false,
         error instanceof Error ? error : undefined
       );
+    } finally {
+      span.end();
     }
   }
   
@@ -233,8 +246,19 @@ export class AgentLifecycleManager {
    * @param handle - Agent handle to destroy
    */
   async destroyAgent(handle: AgentHandle): Promise<void> {
-    await handle.destroy();
-    this.agents.delete(handle.sessionId);
+    const span = tracer.startSpan('squad.lifecycle.destroyAgent');
+    span.setAttribute('agent.name', handle.agentName);
+    try {
+      await handle.destroy();
+      this.agents.delete(handle.sessionId);
+      recordAgentDestroy(handle.agentName);
+    } catch (err) {
+      span.setStatus({ code: SpanStatusCode.ERROR, message: err instanceof Error ? err.message : String(err) });
+      span.recordException(err instanceof Error ? err : new Error(String(err)));
+      throw err;
+    } finally {
+      span.end();
+    }
   }
   
   /**

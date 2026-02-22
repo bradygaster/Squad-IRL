@@ -8,6 +8,12 @@
  */
 
 import type { EventBus } from './event-bus.js';
+import {
+  recordTokenUsage,
+  recordTimeToFirstToken,
+  recordResponseDuration,
+  recordTokensPerSecond,
+} from './otel-metrics.js';
 
 // ============================================================================
 // Event Types
@@ -94,6 +100,11 @@ export class StreamingPipeline {
   private attachedSessions: Set<string> = new Set();
   private usageData: UsageEvent[] = [];
 
+  /** Per-session message start timestamps for latency tracking. */
+  private messageStartTimes: Map<string, number> = new Map();
+  /** Per-session flag tracking whether first token has been recorded. */
+  private firstTokenRecorded: Map<string, boolean> = new Map();
+
   /** Register a handler for message deltas. */
   onDelta(handler: DeltaHandler): () => void {
     this.deltaHandlers.add(handler);
@@ -110,6 +121,15 @@ export class StreamingPipeline {
   onReasoning(handler: ReasoningHandler): () => void {
     this.reasoningHandlers.add(handler);
     return () => this.reasoningHandlers.delete(handler);
+  }
+
+  /**
+   * Mark the start of a new message for a session.
+   * Call this before sending a message to enable TTFT and duration tracking.
+   */
+  markMessageStart(sessionId: string): void {
+    this.messageStartTimes.set(sessionId, Date.now());
+    this.firstTokenRecorded.set(sessionId, false);
   }
 
   /** Wire up handlers to a session's event stream. */
@@ -146,12 +166,33 @@ export class StreamingPipeline {
 
     switch (event.type) {
       case 'message_delta':
+        // Record TTFT on first delta (index === 0) for this message
+        if (event.index === 0 && !this.firstTokenRecorded.get(event.sessionId)) {
+          this.firstTokenRecorded.set(event.sessionId, true);
+          const startTime = this.messageStartTimes.get(event.sessionId);
+          if (startTime !== undefined) {
+            recordTimeToFirstToken(Date.now() - startTime);
+          }
+        }
         await this.dispatchDelta(event);
         break;
-      case 'usage':
+      case 'usage': {
         this.usageData.push(event);
         await this.dispatchUsage(event);
+        recordTokenUsage(event);
+        // Record response duration and tokens/sec when usage arrives
+        const msgStart = this.messageStartTimes.get(event.sessionId);
+        if (msgStart !== undefined) {
+          const durationMs = Date.now() - msgStart;
+          recordResponseDuration(durationMs);
+          if (durationMs > 0 && event.outputTokens > 0) {
+            recordTokensPerSecond((event.outputTokens / durationMs) * 1000);
+          }
+          this.messageStartTimes.delete(event.sessionId);
+          this.firstTokenRecorded.delete(event.sessionId);
+        }
         break;
+      }
       case 'reasoning_delta':
         await this.dispatchReasoning(event);
         break;
@@ -199,6 +240,8 @@ export class StreamingPipeline {
     this.reasoningHandlers.clear();
     this.attachedSessions.clear();
     this.usageData = [];
+    this.messageStartTimes.clear();
+    this.firstTokenRecorded.clear();
   }
 
   // ---------- Private ----------

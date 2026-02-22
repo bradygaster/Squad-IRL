@@ -1,13 +1,18 @@
 /**
  * Squad Interactive Shell — entry point
  *
- * Provides header chrome, readline input loop, and clean exit handling.
- * Ink-based UI will be wired in a follow-up (#242+).
+ * Renders the Ink-based shell UI with AgentPanel, MessageStream, and InputPrompt.
+ * StreamBridge wires streaming events into component state.
  */
 
 import { createRequire } from 'node:module';
-import * as readline from 'node:readline/promises';
-import { createCompleter } from './autocomplete.js';
+import React from 'react';
+import { render } from 'ink';
+import { App } from './components/App.js';
+import type { ShellApi } from './components/App.js';
+import { SessionRegistry } from './sessions.js';
+import { ShellRenderer } from './render.js';
+import { StreamBridge } from './stream-bridge.js';
 
 export { SessionRegistry } from './sessions.js';
 export { StreamBridge } from './stream-bridge.js';
@@ -29,56 +34,55 @@ export { detectTerminal, safeChar, boxChars } from './terminal.js';
 export type { TerminalCapabilities } from './terminal.js';
 export { createCompleter } from './autocomplete.js';
 export type { CompleterFunction, CompleterResult } from './autocomplete.js';
+export { App } from './components/App.js';
+export type { ShellApi, AppProps } from './components/App.js';
 
 const require = createRequire(import.meta.url);
 const pkg = require('../../../package.json') as { version: string };
 
-function printHeader(): void {
-  const version = `Squad v${pkg.version}`;
-  const help = 'Type /help for commands';
-  const width = Math.max(version.length, help.length) + 4;
-  const pad = (text: string): string => `│  ${text.padEnd(width - 4)}│`;
-
-  console.log(`╭${'─'.repeat(width - 1)}╮`);
-  console.log(pad(version));
-  console.log(pad(help));
-  console.log(`╰${'─'.repeat(width - 1)}╯`);
-}
-
-const EXIT_COMMANDS = new Set(['exit', '/quit']);
-
 export async function runShell(): Promise<void> {
-  printHeader();
+  const registry = new SessionRegistry();
+  const renderer = new ShellRenderer();
+  const teamRoot = process.cwd();
 
-  // Agent names will be populated from team discovery; empty for now
-  const agentNames: string[] = [];
-  const completer = createCompleter(agentNames);
+  let shellApi: ShellApi | undefined;
+  const streamBuffers = new Map<string, string>();
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    completer,
+  // StreamBridge wires streaming pipeline events into Ink component state.
+  // The bridge is ready to receive events once the coordinator is connected.
+  const _bridge = new StreamBridge(registry, {
+    onContent: (agentName: string, delta: string) => {
+      const existing = streamBuffers.get(agentName) ?? '';
+      const accumulated = existing + delta;
+      streamBuffers.set(agentName, accumulated);
+      shellApi?.setStreamingContent({ agentName, content: accumulated });
+      shellApi?.refreshAgents();
+    },
+    onComplete: (message) => {
+      if (message.agentName) streamBuffers.delete(message.agentName);
+      shellApi?.addMessage(message);
+      shellApi?.refreshAgents();
+    },
+    onError: (agentName: string, error: Error) => {
+      shellApi?.addMessage({
+        role: 'system',
+        content: `❌ ${agentName}: ${error.message}`,
+        timestamp: new Date(),
+      });
+    },
   });
 
-  // Graceful Ctrl+C handling
-  process.on('SIGINT', () => {
-    console.log('\n👋 Squad out.');
-    rl.close();
-  });
+  const { waitUntilExit } = render(
+    React.createElement(App, {
+      registry,
+      renderer,
+      teamRoot,
+      version: pkg.version,
+      onReady: (api: ShellApi) => { shellApi = api; },
+    }),
+    { exitOnCtrlC: false },
+  );
 
-  try {
-    for await (const line of rl) {
-      const trimmed = line.trim();
-      if (EXIT_COMMANDS.has(trimmed)) {
-        console.log('👋 Squad out.');
-        break;
-      }
-      // Placeholder — command handling comes with future issues
-      if (trimmed.length > 0) {
-        console.log(`[echo] ${trimmed}`);
-      }
-    }
-  } finally {
-    rl.close();
-  }
+  await waitUntilExit();
+  console.log('👋 Squad out.');
 }
