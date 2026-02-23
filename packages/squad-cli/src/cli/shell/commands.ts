@@ -38,7 +38,7 @@ export function executeCommand(
     case 'agents':
       return handleAgents(context);
     default:
-      return { handled: false, output: `Unknown command: /${command}. Type /help for available commands.` };
+      return { handled: false, output: `Hmm, /${command}? Type /help for commands.` };
   }
 }
 
@@ -46,11 +46,11 @@ function handleStatus(context: CommandContext): CommandResult {
   const agents = context.registry.getAll();
   const active = context.registry.getActive();
   const lines = [
-    `Squad Status:`,
-    `  Team root: ${context.teamRoot}`,
-    `  Registered agents: ${agents.length}`,
-    `  Active: ${active.length}`,
-    `  Messages: ${context.messageHistory.length}`,
+    `Your Team:`,
+    `  Root: ${context.teamRoot}`,
+    `  Size: ${agents.length}`,
+    `  Active now: ${active.length}`,
+    `  In conversation: ${context.messageHistory.length}`,
   ];
   if (active.length > 0) {
     lines.push('', '  Working:');
@@ -65,14 +65,14 @@ function handleHistory(args: string[], context: CommandContext): CommandResult {
   const limit = args[0] ? parseInt(args[0], 10) : 10;
   const recent = context.messageHistory.slice(-limit);
   if (recent.length === 0) {
-    return { handled: true, output: 'No message history yet.' };
+    return { handled: true, output: 'No messages yet.' };
   }
   const lines = recent.map(m => {
     const prefix = m.agentName ?? m.role;
     const time = m.timestamp.toLocaleTimeString();
     return `  [${time}] ${prefix}: ${m.content.slice(0, 100)}${m.content.length > 100 ? '...' : ''}`;
   });
-  return { handled: true, output: `Recent messages (${recent.length}):\n${lines.join('\n')}` };
+  return { handled: true, output: `Last ${recent.length} message${recent.length !== 1 ? 's' : ''}:\n${lines.join('\n')}` };
 }
 
 function handleClear(): CommandResult {
@@ -84,25 +84,16 @@ function handleHelp(): CommandResult {
   return {
     handled: true,
     output: [
-      'Available commands:',
-      '  /status   — Check squad status and active agents',
-      '              Example: /status',
-      '  /history  — Review recent message history',
-      '              Example: /history 20',
-      '  /agents   — List all registered agents',
-      '              Example: /agents',
+      'Commands:',
+      "  /status   — Check your team & what's happening",
+      '  /history  — See recent messages',
+      '  /agents   — List all team members',
       '  /clear    — Clear the screen',
-      '              Example: /clear',
-      '  /help     — Show available commands',
-      '              Example: /help',
-      '  /quit     — Exit the shell',
-      '              Example: /quit',
+      '  /quit     — Exit',
       '',
-      'Direct addressing:',
-      '  @AgentName message  — Send directly to an agent',
-      '              Example: @Cheritto fix the layout bug',
-      '  AgentName, message  — Same as above',
-      '              Example: Cheritto, fix the layout bug',
+      'Talk to agents:',
+      '  @AgentName message',
+      '  AgentName, message',
     ].join('\n'),
   };
 }
@@ -110,11 +101,11 @@ function handleHelp(): CommandResult {
 function handleAgents(context: CommandContext): CommandResult {
   const agents = context.registry.getAll();
   if (agents.length === 0) {
-    return { handled: true, output: 'No agents registered.' };
+    return { handled: true, output: 'No team members yet.' };
   }
   const lines = agents.map(a => {
     const icon = a.status === 'working' ? '🔵' : a.status === 'streaming' ? '🟢' : a.status === 'error' ? '🔴' : '⚪';
     return `  ${icon} ${a.name} (${a.role}) — ${a.status}`;
   });
-  return { handled: true, output: `Agents:\n${lines.join('\n')}` };
+  return { handled: true, output: `Team Members:\n${lines.join('\n')}` };
 }

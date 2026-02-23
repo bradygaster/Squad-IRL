@@ -763,3 +763,133 @@ describe('ThinkingIndicator integration with MessageStream', () => {
     expect(frame).toContain('streaming');
   });
 });
+
+// ============================================================================
+// 9. Rich progress indicators (#335)
+// ============================================================================
+
+describe('Rich progress indicators', () => {
+  // -- AgentPanel progress display --
+
+  it('working agent shows "(working)" in status line', () => {
+    const agents = [makeAgent({ name: 'Keaton', status: 'working' })];
+    const { lastFrame } = render(h(AgentPanel, { agents }));
+    const frame = lastFrame()!;
+    expect(frame).toContain('Keaton');
+    expect(frame).toContain('working');
+  });
+
+  it('streaming agent shows "(streaming)" in status line', () => {
+    const agents = [makeAgent({ name: 'Keaton', status: 'streaming' })];
+    const { lastFrame } = render(h(AgentPanel, { agents }));
+    const frame = lastFrame()!;
+    expect(frame).toContain('Keaton');
+    expect(frame).toContain('streaming');
+  });
+
+  it('active agent shows pulsing dot in roster', () => {
+    const agents = [makeAgent({ name: 'Keaton', status: 'working' })];
+    const { lastFrame } = render(h(AgentPanel, { agents }));
+    expect(lastFrame()!).toMatch(/[●◉○]/);
+  });
+
+  it('agent with activityHint shows hint in status line', () => {
+    const agents = [makeAgent({ name: 'Keaton', status: 'working', activityHint: 'Reviewing architecture' })];
+    const { lastFrame } = render(h(AgentPanel, { agents }));
+    const frame = lastFrame()!;
+    expect(frame).toContain('Reviewing architecture');
+  });
+
+  it('agent status shows format: Name (working) — hint', () => {
+    const agents = [makeAgent({ name: 'Keaton', status: 'working', activityHint: 'Reading file' })];
+    const { lastFrame } = render(h(AgentPanel, { agents }));
+    const frame = lastFrame()!;
+    expect(frame).toContain('Keaton');
+    expect(frame).toContain('(working');
+    expect(frame).toContain('Reading file');
+  });
+
+  it('idle agent does not show activity hint even if set', () => {
+    const agents = [makeAgent({ name: 'Keaton', status: 'idle', activityHint: 'stale hint' })];
+    const { lastFrame } = render(h(AgentPanel, { agents }));
+    const frame = lastFrame()!;
+    // Idle agents are in the "ready" section, not the active status lines
+    expect(frame).not.toContain('stale hint');
+  });
+
+  // -- MessageStream activity feed --
+
+  it('MessageStream shows activity feed when agentActivities provided', () => {
+    const activities = new Map([['Keaton', 'reading file']]);
+    const { lastFrame } = render(
+      h(MessageStream, {
+        messages: [makeMessage({ role: 'user', content: 'hello' })],
+        agentActivities: activities,
+      })
+    );
+    const frame = lastFrame()!;
+    expect(frame).toContain('📋');
+    expect(frame).toContain('Keaton');
+    expect(frame).toContain('reading file');
+  });
+
+  it('MessageStream shows multiple agent activities', () => {
+    const activities = new Map([
+      ['Keaton', 'reading file'],
+      ['Hockney', 'running tests'],
+    ]);
+    const { lastFrame } = render(
+      h(MessageStream, {
+        messages: [],
+        agentActivities: activities,
+      })
+    );
+    const frame = lastFrame()!;
+    expect(frame).toContain('Keaton');
+    expect(frame).toContain('Hockney');
+    expect(frame).toContain('reading file');
+    expect(frame).toContain('running tests');
+  });
+
+  it('MessageStream hides activity feed when map is empty', () => {
+    const activities = new Map();
+    const { lastFrame } = render(
+      h(MessageStream, {
+        messages: [makeMessage({ role: 'user', content: 'hello' })],
+        agentActivities: activities,
+      })
+    );
+    const frame = lastFrame()!;
+    expect(frame).not.toContain('📋');
+  });
+
+  it('MessageStream works without agentActivities prop (backward compat)', () => {
+    const { lastFrame } = render(
+      h(MessageStream, {
+        messages: [makeMessage({ role: 'user', content: 'hello' })],
+      })
+    );
+    const frame = lastFrame()!;
+    expect(frame).toContain('hello');
+    expect(frame).not.toContain('📋');
+  });
+
+  // -- Combined: activity feed + thinking indicator --
+
+  it('activity feed and thinking indicator coexist during processing', () => {
+    const activities = new Map([['Keaton', 'searching codebase']]);
+    const { lastFrame } = render(
+      h(MessageStream, {
+        messages: [makeMessage({ role: 'user', content: 'find the bug' })],
+        processing: true,
+        streamingContent: null,
+        agentActivities: activities,
+      })
+    );
+    const frame = lastFrame()!;
+    expect(frame).toContain('📋');
+    expect(frame).toContain('searching codebase');
+    // ThinkingIndicator should also be showing
+    expect(frame).toMatch(/[⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏]/);
+  });
+});

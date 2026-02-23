@@ -13,6 +13,7 @@ import { InputPrompt } from './InputPrompt.js';
 import { parseInput, type ParsedInput } from '../router.js';
 import { executeCommand } from '../commands.js';
 import { loadWelcomeData } from '../lifecycle.js';
+import { isNoColor } from '../terminal.js';
 import type { WelcomeData } from '../lifecycle.js';
 import type { SessionRegistry } from '../sessions.js';
 import type { ShellRenderer } from '../render.js';
@@ -23,6 +24,7 @@ export interface ShellApi {
   addMessage: (msg: ShellMessage) => void;
   setStreamingContent: (content: { agentName: string; content: string } | null) => void;
   setActivityHint: (hint: string | undefined) => void;
+  setAgentActivity: (agentName: string, activity: string | undefined) => void;
   refreshAgents: () => void;
 }
 
@@ -44,6 +46,7 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
   const [streamingContent, setStreamingContent] = useState<{ agentName: string; content: string } | null>(null);
   const [processing, setProcessing] = useState(false);
   const [activityHint, setActivityHint] = useState<string | undefined>(undefined);
+  const [agentActivities, setAgentActivities] = useState<Map<string, string>>(new Map());
   const [welcome, setWelcome] = useState<WelcomeData | null>(null);
   const messagesRef = useRef<ShellMessage[]>([]);
 
@@ -66,6 +69,17 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
       },
       setStreamingContent,
       setActivityHint,
+      setAgentActivity: (agentName: string, activity: string | undefined) => {
+        setAgentActivities(prev => {
+          const next = new Map(prev);
+          if (activity) {
+            next.set(agentName, activity);
+          } else {
+            next.delete(agentName);
+          }
+          return next;
+        });
+      },
       refreshAgents: () => {
         setAgents([...registry.getAll()]);
       },
@@ -116,7 +130,7 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
       if (!onDispatch) {
         setMessages(prev => [...prev, {
           role: 'system' as const,
-          content: '⚠️ SDK not connected — agent routing unavailable.',
+          content: '🔌 SDK not connected. Check your setup.',
           timestamp: new Date(),
         }]);
         return;
@@ -138,11 +152,13 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
   const agentCount = welcome?.agents.length ?? 0;
   const activeCount = agents.filter(a => a.status === 'streaming' || a.status === 'working').length;
 
+  const noColor = isNoColor();
+
   return (
     <Box flexDirection="column">
-      <Box flexDirection="column" borderStyle="round" borderColor="cyan" paddingX={1}>
+      <Box flexDirection="column" borderStyle="round" borderColor={noColor ? undefined : 'cyan'} paddingX={1}>
         <Box gap={1}>
-          <Text bold color="cyan">◆ SQUAD</Text>
+          <Text bold color={noColor ? undefined : 'cyan'}>◆ SQUAD</Text>
           <Text dimColor>v{version}</Text>
           {welcome?.description ? (
             <>
@@ -158,16 +174,15 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
             <Text dimColor>  {agentCount} agent{agentCount !== 1 ? 's' : ''} ready · {activeCount} active</Text>
           </>
         ) : (
-          <Text dimColor>{"  Run 'squad init' to set up your team"}</Text>
+          <Text dimColor>{"  Run 'squad init' to get started"}</Text>
         )}
         <Text>{' '}</Text>
         {welcome?.focus ? <Text dimColor>📍 {welcome.focus}</Text> : null}
-        <Text dimColor>↑/↓ history · @Agent to direct</Text>
-        <Text dimColor>/help commands · Ctrl+C quit</Text>
+        <Text dimColor>↑↓ history · @Agent to direct · /help · Ctrl+C exit</Text>
       </Box>
 
       <AgentPanel agents={agents} streamingContent={streamingContent} />
-      <MessageStream messages={messages} agents={agents} streamingContent={streamingContent} processing={processing} activityHint={activityHint} />
+      <MessageStream messages={messages} agents={agents} streamingContent={streamingContent} processing={processing} activityHint={activityHint} agentActivities={agentActivities} />
       <InputPrompt onSubmit={handleSubmit} disabled={processing} />
     </Box>
   );

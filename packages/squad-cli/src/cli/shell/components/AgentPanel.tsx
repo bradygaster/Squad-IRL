@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
 import { getRoleEmoji } from '../lifecycle.js';
+import { isNoColor } from '../terminal.js';
 import type { AgentSession } from '../types.js';
 
 interface AgentPanelProps {
@@ -10,34 +11,43 @@ interface AgentPanelProps {
 
 const PULSE_FRAMES = ['●', '◉', '○', '◉'];
 
-/** Pulsing dot for active agents — draws the eye. */
+/** Pulsing dot for active agents — draws the eye. Static in NO_COLOR mode. */
 const PulsingDot: React.FC = () => {
+  const noColor = isNoColor();
   const [frame, setFrame] = useState(0);
 
   useEffect(() => {
+    if (noColor) return;
     const timer = setInterval(() => {
       setFrame(f => (f + 1) % PULSE_FRAMES.length);
     }, 300);
     return () => clearInterval(timer);
-  }, []);
+  }, [noColor]);
 
+  if (noColor) return <Text>●</Text>;
   return <Text color="green">{PULSE_FRAMES[frame]}</Text>;
 };
 
-/** Elapsed time since agent started working. */
-function agentElapsed(agent: AgentSession): string {
+/** Elapsed seconds since agent started working. */
+function agentElapsedSec(agent: AgentSession): number {
   const active = agent.status === 'streaming' || agent.status === 'working';
-  if (!active) return '';
-  const seconds = Math.floor((Date.now() - agent.startedAt.getTime()) / 1000);
+  if (!active) return 0;
+  return Math.floor((Date.now() - agent.startedAt.getTime()) / 1000);
+}
+
+/** Format elapsed time for display. */
+function formatElapsed(seconds: number): string {
   if (seconds < 1) return '';
-  return ` (${seconds}s)`;
+  return `${seconds}s`;
 }
 
 export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent }) => {
+  const noColor = isNoColor();
+
   if (agents.length === 0) {
     return (
       <Box flexDirection="column" paddingX={1} marginTop={1}>
-        <Text dimColor>No agents active. Type a message to start, or run /help for commands.</Text>
+        <Text dimColor>No agents active. Send a message to start. /help for commands.</Text>
       </Box>
     );
   }
@@ -65,7 +75,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent
               <Text
                 dimColor={!active && !errored}
                 bold={active}
-                color={active ? 'green' : errored ? 'red' : undefined}
+                color={noColor ? undefined : active ? 'green' : errored ? 'red' : undefined}
               >
                 {getRoleEmoji(agent.role)} {agent.name}
               </Text>
@@ -73,26 +83,38 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent
                 <Box marginLeft={0}>
                   <Text> </Text>
                   <PulsingDot />
-                  <Text color="green" bold> ▶ Active</Text>
+                  {noColor
+                    ? <Text bold> [Active]</Text>
+                    : <Text color="green" bold> ▶ Active</Text>}
                 </Box>
               )}
-              {errored && <Text color="red"> ✖</Text>}
+              {errored && (
+                noColor
+                  ? <Text bold> [Error] ✖</Text>
+                  : <Text color="red"> ✖</Text>
+              )}
             </Box>
           );
         })}
       </Box>
 
-      {/* Status line */}
+      {/* Status line — rich progress for active agents */}
       {activeAgents.length > 0 ? (
         <Box flexDirection="column">
-          {activeAgents.map(a => (
-            <Text key={a.name} color="yellow">
-              {'  '}{getRoleEmoji(a.role)} {a.name} {a.status === 'streaming' ? 'streaming' : 'working'}{agentElapsed(a)}
-            </Text>
-          ))}
+          {activeAgents.map(a => {
+            const sec = agentElapsedSec(a);
+            const elapsed = formatElapsed(sec);
+            const statusLabel = a.status === 'streaming' ? 'streaming' : 'working';
+            const hint = a.activityHint;
+            return (
+              <Text key={a.name} color={noColor ? undefined : 'yellow'}>
+                {'  '}{getRoleEmoji(a.role)} {a.name} ({statusLabel}{elapsed ? `, ${elapsed}` : ''}){hint ? ` — ${hint}` : ''}
+              </Text>
+            );
+          })}
         </Box>
       ) : (
-        <Text dimColor>{'  '}{agents.length} agent{agents.length !== 1 ? 's' : ''} ready · all idle</Text>
+        <Text dimColor>{'  '}{agents.length} agent{agents.length !== 1 ? 's' : ''} ready</Text>
       )}
 
       {/* Separator between panel and message stream */}

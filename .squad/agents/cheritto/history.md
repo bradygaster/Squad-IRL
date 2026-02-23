@@ -55,3 +55,19 @@
   - Every slash command in /help now includes an example usage line
 - 2 pre-existing test failures in `repl-ux.test.ts` (empty AgentPanel expects `''` but gets empty-state message) — not related to this PR
 - PR #356 on branch `squad/330-p1-ux-polish`
+
+### 2026-02-23: Rich progress indicators (#335)
+- Added `activityHint?: string` to `AgentSession` type in `types.ts`
+- Added `updateActivityHint()` to `SessionRegistry` in `sessions.ts` — clears on idle/error
+- AgentPanel status line now shows: `Name (working, 12s) — Reviewing architecture`
+  - Format: `(statusLabel, elapsed) — activityHint` — only for active agents
+- MessageStream: new `agentActivities` prop (Map<string, string>) renders `📋 Name is activity` lines
+  - Activity feed sits between messages and ThinkingIndicator
+  - Empty map or missing prop = no feed (backward compatible)
+- App.tsx: new `agentActivities` state + `setAgentActivity()` in ShellApi interface
+- shell/index.ts: tool_call events now push per-agent activities via `setAgentActivity` + `updateActivityHint`
+  - Activity hints stripped of trailing `...` for clean display
+  - Cleared on agent finish via `setAgentActivity(name, undefined)`
+- 11 new tests in `test/repl-ux.test.ts` section 9 covering AgentPanel progress + MessageStream activity feed
+- 4 pre-existing test failures (2 empty panel, 2 idle→ready text mismatch from #338 copy polish)
+- PR #357 on branch `squad/335-progress-indicators`

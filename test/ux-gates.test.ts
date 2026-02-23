@@ -70,7 +70,7 @@ describe('UX Gates', () => {
     const output = harness.captureFrame();
     
     expect(output).toMatch(/Squad Status/i);
-    expect(output).toMatch(/Active squad/i);
+    expect(output).toMatch(/Here:/i);
   });
 
   it('Init --mode help text is well-formed', async () => {
@@ -80,6 +80,6 @@ describe('UX Gates', () => {
     const output = harness.captureFrame();
     
     expect(output).toContain('--mode remote <path>');
-    expect(output).toContain('Init linked to a remote team root');
+    expect(output).toContain('Link to a remote team root');
   });
 });

@@ -246,6 +246,7 @@ export async function runShell(): Promise<void> {
     registry.updateStatus(agentName, 'streaming');
     shellApi?.refreshAgents();
     shellApi?.setActivityHint(`${agentName} is connecting...`);
+    shellApi?.setAgentActivity(agentName, 'connecting...');
 
     let accumulated = '';
     const onDelta = (event: { type: string; [key: string]: unknown }): void => {
@@ -273,6 +274,9 @@ export async function runShell(): Promise<void> {
         };
         const hint = hintMap[toolName] ?? `Using ${toolName}...`;
         shellApi?.setActivityHint(hint);
+        registry.updateActivityHint(agentName, hint.replace(/\.\.\.$/, ''));
+        shellApi?.setAgentActivity(agentName, hint.replace(/\.\.\.$/, '').toLowerCase());
+        shellApi?.refreshAgents();
       }
     };
     try { session.on('tool_call', onToolCall); } catch { /* event may not exist */ }
@@ -289,6 +293,7 @@ export async function runShell(): Promise<void> {
       try { session.off('tool_call', onToolCall); } catch { /* ignore */ }
       shellApi?.setStreamingContent(null);
       shellApi?.setActivityHint(undefined);
+      shellApi?.setAgentActivity(agentName, undefined);
       if (accumulated) {
         shellApi?.addMessage({
           role: 'agent',

@@ -8,23 +8,38 @@ export interface TerminalCapabilities {
   platform: NodeJS.Platform;
   isWindows: boolean;
   isTTY: boolean;
+  /** True when NO_COLOR=1, TERM=dumb, or color is otherwise suppressed. */
+  noColor: boolean;
 }
 
 /**
  * Detect terminal capabilities for cross-platform compatibility.
  */
+/**
+ * Returns true when the environment requests no color output.
+ * Respects the NO_COLOR standard (https://no-color.org/) and TERM=dumb.
+ */
+export function isNoColor(): boolean {
+  return (
+    process.env['NO_COLOR'] != null && process.env['NO_COLOR'] !== '' ||
+    process.env['TERM'] === 'dumb'
+  );
+}
+
 export function detectTerminal(): TerminalCapabilities {
   const plat = platform();
   const isTTY = Boolean(process.stdout.isTTY);
+  const noColor = isNoColor();
 
   return {
-    supportsColor: isTTY && (process.env['FORCE_COLOR'] !== '0'),
-    supportsUnicode: plat !== 'win32' || Boolean(process.env['WT_SESSION']), // Windows Terminal supports unicode
+    supportsColor: !noColor && isTTY && (process.env['FORCE_COLOR'] !== '0'),
+    supportsUnicode: plat !== 'win32' || Boolean(process.env['WT_SESSION']),
     columns: process.stdout.columns || 80,
     rows: process.stdout.rows || 24,
     platform: plat,
     isWindows: plat === 'win32',
     isTTY,
+    noColor,
   };
 }
 

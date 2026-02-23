@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text, useInput } from 'ink';
+import { isNoColor } from '../terminal.js';
 
 interface InputPromptProps {
   onSubmit: (value: string) => void;
@@ -14,19 +15,20 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
   prompt = '> ',
   disabled = false 
 }) => {
+  const noColor = isNoColor();
   const [value, setValue] = useState('');
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [spinFrame, setSpinFrame] = useState(0);
 
-  // Animate spinner when disabled (processing)
+  // Animate spinner when disabled (processing) — static in NO_COLOR mode
   useEffect(() => {
-    if (!disabled) return;
+    if (!disabled || noColor) return;
     const timer = setInterval(() => {
       setSpinFrame(f => (f + 1) % SPINNER_FRAMES.length);
     }, 80);
     return () => clearInterval(timer);
-  }, [disabled]);
+  }, [disabled, noColor]);
 
   useInput((input, key) => {
     if (disabled) return;
@@ -75,20 +77,29 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
   if (disabled) {
     return (
       <Box marginTop={1}>
-        <Text color="cyan" bold>◆ squad </Text>
-        <Text color="cyan">{SPINNER_FRAMES[spinFrame]}</Text>
-        <Text color="cyan" bold>{'> '}</Text>
+        {noColor ? (
+          <>
+            <Text bold>◆ squad </Text>
+            <Text>[working...]</Text>
+          </>
+        ) : (
+          <>
+            <Text color="cyan" bold>◆ squad </Text>
+            <Text color="cyan">{SPINNER_FRAMES[spinFrame]}</Text>
+            <Text color="cyan" bold>{'> '}</Text>
+          </>
+        )}
       </Box>
     );
   }
 
   return (
     <Box marginTop={1}>
-      <Text color="cyan" bold>◆ squad{'> '}</Text>
+      <Text color={noColor ? undefined : 'cyan'} bold>◆ squad{'> '}</Text>
       <Text>{value}</Text>
-      <Text color="cyan">▌</Text>
+      <Text color={noColor ? undefined : 'cyan'} bold>▌</Text>
       {!value && (
-        <Text dimColor> Type a message or @agent-name...</Text>
+        <Text dimColor> Type a message or @agent...</Text>
       )}
     </Box>
   );

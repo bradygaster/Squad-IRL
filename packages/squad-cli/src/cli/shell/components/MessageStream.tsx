@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Text } from 'ink';
 import { getRoleEmoji } from '../lifecycle.js';
+import { isNoColor } from '../terminal.js';
 import { ThinkingIndicator } from './ThinkingIndicator.js';
 import type { ShellMessage, AgentSession } from '../types.js';
 
@@ -10,6 +11,7 @@ interface MessageStreamProps {
   streamingContent?: { agentName: string; content: string } | null;
   processing?: boolean;
   activityHint?: string;
+  agentActivities?: Map<string, string>;
   maxVisible?: number;
 }
 
@@ -26,6 +28,7 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
   streamingContent,
   processing = false,
   activityHint,
+  agentActivities,
   maxVisible = 50,
 }) => {
   const visible = messages.slice(-maxVisible);
@@ -72,6 +75,8 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
     return null;
   };
 
+  const noColor = isNoColor();
+
   return (
     <Box flexDirection="column" flexGrow={1} marginTop={1}>
       {visible.map((msg, i) => {
@@ -86,8 +91,8 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
             <Box gap={1}>
               {msg.role === 'user' ? (
                 <>
-                  <Text color="cyan" bold>❯ you:</Text>
-                  <Text color="cyan" wrap="wrap">{msg.content}</Text>
+                  <Text color={noColor ? undefined : 'cyan'} bold>❯ you:</Text>
+                  <Text color={noColor ? undefined : 'cyan'} wrap="wrap">{msg.content}</Text>
                 </>
               ) : msg.role === 'system' ? (
                 <>
@@ -96,7 +101,7 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
                 </>
               ) : (
                 <>
-                  <Text color="green" bold>{emoji ? `${emoji} ` : ''}{msg.agentName ?? 'agent'}:</Text>
+                  <Text color={noColor ? undefined : 'green'} bold>{emoji ? `${emoji} ` : ''}{msg.agentName ?? 'agent'}:</Text>
                   <Text wrap="wrap">{msg.content}</Text>
                   {duration && <Text dimColor>({duration})</Text>}
                 </>
@@ -109,14 +114,23 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
       {/* Streaming content with live cursor */}
       {streamingContent && streamingContent.content && (
         <Box gap={1}>
-          <Text color="green" bold>
+          <Text color={noColor ? undefined : 'green'} bold>
             {roleMap.has(streamingContent.agentName)
               ? `${getRoleEmoji(roleMap.get(streamingContent.agentName)!)} `
               : ''}
             {streamingContent.agentName}:
           </Text>
           <Text wrap="wrap">{streamingContent.content}</Text>
-          <Text color="cyan">▌</Text>
+          <Text color={noColor ? undefined : 'cyan'}>▌</Text>
+        </Box>
+      )}
+
+      {/* Agent activity feed — real-time lines showing what agents are doing */}
+      {agentActivities && agentActivities.size > 0 && (
+        <Box flexDirection="column">
+          {Array.from(agentActivities.entries()).map(([name, activity]) => (
+            <Text key={name} dimColor>📋 {name} is {activity}</Text>
+          ))}
         </Box>
       )}
 

@@ -659,7 +659,7 @@ describe('commands.ts — executeCommand', () => {
     it('returns help text', () => {
       const result = executeCommand('help', [], context);
       expect(result.handled).toBe(true);
-      expect(result.output).toContain('Available commands');
+      expect(result.output).toContain('Commands:');
       expect(result.output).toContain('/status');
       expect(result.output).toContain('/agents');
     });
@@ -669,21 +669,22 @@ describe('commands.ts — executeCommand', () => {
     it('shows status with no agents', () => {
       const result = executeCommand('status', [], context);
       expect(result.handled).toBe(true);
-      expect(result.output).toContain('Registered agents: 0');
+      expect(result.output).toContain('Your Team:');
+      expect(result.output).toContain('Size: 0');
     });
 
     it('shows registered agents count', () => {
       registry.register('a', 'r1');
       registry.register('b', 'r2');
       const result = executeCommand('status', [], context);
-      expect(result.output).toContain('Registered agents: 2');
+      expect(result.output).toContain('Size: 2');
     });
 
     it('shows active agents details', () => {
       registry.register('worker', 'role');
       registry.updateStatus('worker', 'working');
       const result = executeCommand('status', [], context);
-      expect(result.output).toContain('Active: 1');
+      expect(result.output).toContain('Active now: 1');
       expect(result.output).toContain('worker');
     });
   });
@@ -692,7 +693,7 @@ describe('commands.ts — executeCommand', () => {
     it('shows "No agents registered" when empty', () => {
       const result = executeCommand('agents', [], context);
       expect(result.handled).toBe(true);
-      expect(result.output).toContain('No agents registered');
+      expect(result.output).toContain('No team members yet');
     });
 
     it('lists all agents with status icons', () => {
@@ -709,7 +710,7 @@ describe('commands.ts — executeCommand', () => {
     it('shows "No message history" when empty', () => {
       const result = executeCommand('history', [], context);
       expect(result.handled).toBe(true);
-      expect(result.output).toContain('No message history yet');
+      expect(result.output).toContain('No messages yet');
     });
 
     it('shows recent messages with default limit 10', () => {
@@ -721,7 +722,7 @@ describe('commands.ts — executeCommand', () => {
         });
       }
       const result = executeCommand('history', [], context);
-      expect(result.output).toContain('(10)');
+      expect(result.output).toContain('Last 10 messages:');
       expect(result.output).toContain('Message 19'); // Last message
     });
 
@@ -730,7 +731,7 @@ describe('commands.ts — executeCommand', () => {
         messageHistory.push({ role: 'user', content: `Msg ${i}`, timestamp: new Date() });
       }
       const result = executeCommand('history', ['5'], context);
-      expect(result.output).toContain('(5)');
+      expect(result.output).toContain('Last 5 messages:');
     });
 
     it('truncates long messages at 100 chars', () => {
@@ -770,7 +771,7 @@ describe('commands.ts — executeCommand', () => {
     it('returns handled: false with error message', () => {
       const result = executeCommand('foobar', [], context);
       expect(result.handled).toBe(false);
-      expect(result.output).toContain('Unknown command: /foobar');
+      expect(result.output).toContain('Hmm, /foobar?');
       expect(result.output).toContain('Type /help');
     });
   });

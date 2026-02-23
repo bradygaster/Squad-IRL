@@ -32,7 +32,16 @@ export class SessionRegistry {
 
   updateStatus(name: string, status: AgentSession['status']): void {
     const session = this.sessions.get(name);
-    if (session) session.status = status;
+    if (session) {
+      session.status = status;
+      // Clear activity hint when agent goes idle or errors
+      if (status === 'idle' || status === 'error') session.activityHint = undefined;
+    }
+  }
+
+  updateActivityHint(name: string, hint: string | undefined): void {
+    const session = this.sessions.get(name);
+    if (session) session.activityHint = hint;
   }
 
   remove(name: string): boolean {

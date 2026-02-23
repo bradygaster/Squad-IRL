@@ -10,6 +10,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Text } from 'ink';
+import { isNoColor } from '../terminal.js';
 
 export interface ThinkingIndicatorProps {
   isThinking: boolean;
@@ -49,23 +50,27 @@ function formatElapsed(ms: number): string {
   return `${sec}s`;
 }
 
+/** Static dots for NO_COLOR mode (no animation). */
+const STATIC_SPINNER = '...';
+
 export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
   isThinking,
   elapsedMs,
   activityHint,
 }) => {
+  const noColor = isNoColor();
   const [frame, setFrame] = useState(0);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const phraseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Spinner animation — 80ms per frame
+  // Spinner animation — 80ms per frame (disabled in NO_COLOR)
   useEffect(() => {
-    if (!isThinking) return;
+    if (!isThinking || noColor) return;
     const timer = setInterval(() => {
       setFrame(f => (f + 1) % SPINNER_FRAMES.length);
     }, 80);
     return () => clearInterval(timer);
-  }, [isThinking]);
+  }, [isThinking, noColor]);
 
   // Phrase rotation — every 2.5s
   useEffect(() => {
@@ -89,14 +94,37 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
   if (!isThinking) return null;
 
   const elapsedSec = Math.floor(elapsedMs / 1000);
-  const color = indicatorColor(elapsedSec);
   const elapsedStr = formatElapsed(elapsedMs);
+  const spinnerChar = noColor ? STATIC_SPINNER : (SPINNER_FRAMES[frame] ?? '⠋');
+
+  // NO_COLOR: no color props, use text labels
+  if (noColor) {
+    if (activityHint) {
+      return (
+        <Box gap={1}>
+          <Text>{spinnerChar}</Text>
+          <Text>⏳ {activityHint}</Text>
+          {elapsedStr ? <Text>({elapsedStr})</Text> : null}
+        </Box>
+      );
+    }
+    const phrase = THINKING_PHRASES[phraseIndex] ?? THINKING_PHRASES[0]!;
+    return (
+      <Box gap={1}>
+        <Text>{spinnerChar}</Text>
+        <Text>⏳ {phrase}...</Text>
+        {elapsedStr ? <Text>({elapsedStr})</Text> : null}
+      </Box>
+    );
+  }
+
+  const color = indicatorColor(elapsedSec);
 
   // Layer 2: Activity hint takes priority when available (Copilot-style)
   if (activityHint) {
     return (
       <Box gap={1}>
-        <Text color={color}>{SPINNER_FRAMES[frame] ?? '⠋'}</Text>
+        <Text color={color}>{spinnerChar}</Text>
         <Text color={color} italic>{activityHint}</Text>
         {elapsedStr ? <Text dimColor>({elapsedStr})</Text> : null}
       </Box>
@@ -107,7 +135,7 @@ export const ThinkingIndicator: React.FC<ThinkingIndicatorProps> = ({
   const phrase = THINKING_PHRASES[phraseIndex] ?? THINKING_PHRASES[0]!;
   return (
     <Box gap={1}>
-      <Text color={color}>{SPINNER_FRAMES[frame] ?? '⠋'}</Text>
+      <Text color={color}>{spinnerChar}</Text>
       <Text color={color} dimColor italic>{phrase}...</Text>
       {elapsedStr ? <Text dimColor>({elapsedStr})</Text> : null}
     </Box>
