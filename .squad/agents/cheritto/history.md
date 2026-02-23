@@ -40,3 +40,18 @@
 - 14 new tests in `test/ghost-response.test.ts` covering unit + integration + backoff timing
 - Pattern: `withGhostRetry` is pure (no closure deps); `ghostRetry` is the shell-bound wrapper inside `runShell()`
 - PR on branch `squad/332-ghost-response`
+
+### 2026-02-25: P1 UX polish from Marquez audit (#330)
+- Fixed all 8 P1 items identified in Marquez's comprehensive UX audit
+- Files changed: `commands.ts`, `AgentPanel.tsx`, `InputPrompt.tsx`, `MessageStream.tsx`, `App.tsx`
+- Key changes:
+  - Help descriptions now use consistent imperative verbs (Check, Review, List, Clear, Show, Exit)
+  - Added `▶ Active` text label alongside pulsing dot for focus indicator clarity
+  - Keyboard hints split into two lines to avoid wrapping in narrow terminals
+  - System message prefix changed from `◇` to `▸` (small right triangle)
+  - Separators use `process.stdout.columns` (capped at 120) instead of hardcoded 50
+  - Input placeholder now reads "Type a message or @agent-name..." to reinforce @-addressing
+  - Disabled prompt stays cyan (was incorrectly turning yellow, breaking visual consistency)
+  - Every slash command in /help now includes an example usage line
+- 2 pre-existing test failures in `repl-ux.test.ts` (empty AgentPanel expects `''` but gets empty-state message) — not related to this PR
+- PR #356 on branch `squad/330-p1-ux-polish`

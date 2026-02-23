@@ -73,6 +73,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent
                 <Box marginLeft={0}>
                   <Text> </Text>
                   <PulsingDot />
+                  <Text color="green" bold> ▶ Active</Text>
                 </Box>
               )}
               {errored && <Text color="red"> ✖</Text>}
@@ -96,7 +97,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent
 
       {/* Separator between panel and message stream */}
       <Box marginTop={0}>
-        <Text dimColor>{'┄'.repeat(50)}</Text>
+        <Text dimColor>{'┄'.repeat(Math.min(process.stdout.columns ?? 80, 120) - 2)}</Text>
       </Box>
     </Box>
   );

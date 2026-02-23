@@ -2902,3 +2902,57 @@ Brady wants telemetry from both CLI and Copilot agent surfaces. The two modes ne
 - **Existing CLI telemetry:** Now tagged with `squad.mode = 'cli'` — no breaking change.
 - **Dashboard queries:** Filter by `squad.mode` or `service.name` to isolate surfaces.
 
+
+# Decision: ThinkingIndicator two-layer architecture
+
+**Date:** 2026-02-24
+**By:** Cheritto (TUI Engineer)
+**Issue:** #331 — Engaging thinking feedback
+**PR:** #351
+
+## Decision
+
+Extracted the inline ThinkingIndicator from MessageStream.tsx into a standalone `ThinkingIndicator.tsx` component with a two-layer design:
+
+1. **Layer 1 (Claude-style):** 10 rotating thinking phrases cycled every 2.5s — "Analyzing...", "Considering...", etc.
+2. **Layer 2 (Copilot-style):** Activity hints from SDK `tool_call` events — "Reading file...", "Spawning specialist...", etc. Takes priority over Layer 1 when available.
+
+## Why
+
+- Standalone component is reusable (AgentPanel could use it too if needed)
+- Two-layer priority system means we always show *something* engaging (Layer 1) but upgrade to specific info when we have it (Layer 2)
+- `setActivityHint` on ShellApi lets the streaming pipeline push hints without coupling to React internals
+
+## Team impact
+
+- **Marquez:** May want to adjust phrase list or rotation timing — both are exported constants
+- **Kovash:** MessageStream interface now has optional `activityHint` prop
+- **Breedan:** 16 new tests in `test/repl-ux.test.ts` sections 7 + 8
+- **Foundation for 3.1 (rich progress):** ThinkingIndicator can be extended with progress bars, sub-task tracking
+
+# Decision: Ghost response retry pattern
+
+**By:** Cheritto (TUI Engineer)
+**Date:** 2026-02-25
+**PR:** squad/332-ghost-response
+**Closes:** #332
+
+## What
+
+Ghost responses (empty `sendAndWait()` results) are now detected and retried automatically with exponential backoff.
+
+## Design
+
+- `withGhostRetry(sendFn, options)` is a pure, exported function — no closure dependencies on shell state.
+- The shell-bound `ghostRetry()` wrapper inside `runShell()` wires UI feedback (retry/exhaustion messages) via callbacks.
+- Both `dispatchToAgent()` and `dispatchToCoordinator()` use the same retry path.
+- On each retry, `accumulated` is reset before re-calling `awaitStreamedResponse()` so the delta handler re-accumulates from the new response.
+
+## Why
+
+The SDK occasionally fires `session.idle` before `assistant.message`, causing `sendAndWait()` to resolve with `undefined`. Without retry, the user sees nothing — a silent failure. Exponential backoff (1s, 2s, 4s) avoids hammering the backend while giving the LLM time to recover.
+
+## Team impact
+
+- If anyone adds new dispatch paths, they should use `ghostRetry()` (inside `runShell()`) or `withGhostRetry()` (standalone) to handle empty responses.
+- The `GhostRetryOptions` interface is exported for testing and extensibility.

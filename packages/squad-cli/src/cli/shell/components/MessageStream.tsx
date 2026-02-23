@@ -82,7 +82,7 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
 
         return (
           <React.Fragment key={i}>
-            {isNewTurn && <Text dimColor>{'─'.repeat(50)}</Text>}
+            {isNewTurn && <Text dimColor>{'─'.repeat(Math.min(process.stdout.columns ?? 80, 120) - 2)}</Text>}
             <Box gap={1}>
               {msg.role === 'user' ? (
                 <>
@@ -91,7 +91,7 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
                 </>
               ) : msg.role === 'system' ? (
                 <>
-                  <Text dimColor>◇ system:</Text>
+                  <Text dimColor>▸ system:</Text>
                   <Text dimColor wrap="wrap">{msg.content}</Text>
                 </>
               ) : (

@@ -75,9 +75,9 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
   if (disabled) {
     return (
       <Box marginTop={1}>
-        <Text color="yellow" bold>◆ squad </Text>
-        <Text color="yellow">{SPINNER_FRAMES[spinFrame]}</Text>
-        <Text color="yellow" bold>{'> '}</Text>
+        <Text color="cyan" bold>◆ squad </Text>
+        <Text color="cyan">{SPINNER_FRAMES[spinFrame]}</Text>
+        <Text color="cyan" bold>{'> '}</Text>
       </Box>
     );
   }
@@ -88,7 +88,7 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
       <Text>{value}</Text>
       <Text color="cyan">▌</Text>
       {!value && (
-        <Text dimColor> type a message or /help</Text>
+        <Text dimColor> Type a message or @agent-name...</Text>
       )}
     </Box>
   );

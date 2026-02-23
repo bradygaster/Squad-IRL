@@ -162,7 +162,8 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
         )}
         <Text>{' '}</Text>
         {welcome?.focus ? <Text dimColor>📍 {welcome.focus}</Text> : null}
-        <Text dimColor>↑/↓ history · @Agent to direct · /help commands · Ctrl+C quit</Text>
+        <Text dimColor>↑/↓ history · @Agent to direct</Text>
+        <Text dimColor>/help commands · Ctrl+C quit</Text>
       </Box>
 
       <AgentPanel agents={agents} streamingContent={streamingContent} />
