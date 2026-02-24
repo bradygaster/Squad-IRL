@@ -1,35 +1,63 @@
 ---
-updated_at: 2026-02-24T02:05:00Z
-focus_area: Epic #323 — CLI Quality & UX (Phase 1: Quality Review Findings)
-active_issues: [323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 365, 366, 367, 368, 369, 370, 371]
-wave: testing
-quality_review: complete
+updated_at: 2026-02-24T04:30:00Z
+focus_area: Next-Wave PRD (Wave A - Polish & Consistency, 17 items)
+prs_merged_session: ["#444", "#445", "#446", "#447"]
+issues_closed_session: ["#400", "#389", "#417", "#391", "#402", "#405", "#404", "#407", "#431", "#429"]
+issues_filed_session: ["#448", "#449", "#450", "#451", "#452", "#453", "#454", "#455", "#456", "#457", "#458", "#459"]
+prd_location: .squad/identity/prd-next-waves.md
+next_phase: Execute Wave A (Polish & Consistency, 17 items)
+process: All work through PRs with squad member review before merge
 ---
 
 # What We're Focused On
 
-**Status:** Quality review complete. 5 agents assessed CLI. 7 new issues filed (4 P0, 3 P1). Blocking issues #365–#368 must be resolved before Phase 1 execution.
+**Status:** Next-wave PRD written. PRs #444–#447 merged this session. Issues #400, #389, #417, #391, #402, #405, #404, #407, #431, #429 closed. New issues #448–#459 filed.
 
-**⚠️ Repo: bradygaster/squad-pr ONLY — not bradygaster/squad.**
+**Location:** `.squad/identity/prd-next-waves.md` — 4-wave execution plan (A: Polish, B: Reliability, C: Testing, D: Delight)
 
-## Epic #323: CLI Quality & UX
+## Session Summary
 
-### Phase 1: Testing Wave (ready to start)
-- #325 Cheritto → Fix 2-minute timeout (P0 blocker)
-- #324 Keaton + Waingro → Dogfood CLI with real repos
-- #326 Breedan → Expand E2E test coverage
-- #327 Waingro → Hostile QA: break everything
-- #328 Nate → Accessibility audit
-- #329 Cheritto → P0 UX blockers from Marquez audit
+### PRs Merged
+- #444
+- #445
+- #446
+- #447 (Fenster: Version format canonical standard)
 
-### Phase 2: Improvement (blocked on Phase 1)
-- #330–#334: P1 UX polish, thinking feedback, ghost response, bug fixes, error hardening
+### Issues Closed
+- #400
+- #389
+- #417 (Stale root bundle)
+- #391
+- #402
+- #405 (ASCII separators)
+- #404 (ASCII separators)
+- #407 (NO_COLOR exit message)
+- #431 (Version format)
+- #429 (Version format)
 
-### Phase 3: Breathtaking (blocked on Phase 2)
-- #335–#341: Progress indicators, terminal adaptivity, animations, copy polish, accessibility, P2 UX, wow moment
+### Issues Filed
+- #448–#459 (Wave A Polish items)
 
-## Critical Bug
-Hard-coded `120_000ms` timeout in `sendAndWait` at `packages/squad-cli/src/cli/shell/index.ts:123`. Must fix first (#325).
+## Next Phase
 
-## New Agents
-Cheritto (TUI), Breedan (E2E), Waingro (hostile QA), Nate (accessibility), Marquez (UX design) — all chartered and ready.
+**Execute Wave A: Polish & Consistency (17 items)**
+
+Focus areas:
+1. **Text-over-emoji convention** (#340) — remove emoji, use ASCII separators
+2. **First-run wow moment** (#341) — init ceremony + first-launch marker
+3. **First-30-second UX** (#419–#423, #426) — help structure, spinner feedback
+4. **ASCII-only separators** (#405, #404, #407) — consistency across all surfaces
+5. **Version format** (#431, #429) — bare semver canonical standard
+
+## Process
+
+All work flows through PRs with squad member review before merge.
+
+---
+
+## Earlier Phase (Complete)
+
+Epic #323 — CLI Quality & UX (Phase 1: Testing Wave) — Complete
+- Quality review complete: 5 agents assessed CLI
+- 7 new P0/P1 issues identified and resolved
+- All Phase 1 blockers cleared (#365–#368)

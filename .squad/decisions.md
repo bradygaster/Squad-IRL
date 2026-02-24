@@ -3310,3 +3310,249 @@ UX audit identified 11 improvement areas: 3 P0 (help text structure, stub comman
 ### Why
 
 UX consistency and user trust depend on clear, structured help and hidden unfinished features. The ~2-3 day polish window exists now; accumulated inconsistencies prevent reaching A-tier.
+
+# Decision: ASCII-only separators and NO_COLOR exit message
+
+**By:** Cheritto
+**Date:** 2026-02-27
+**Context:** Fixing #405, #404, #407
+
+## What
+- All banner separators now use ASCII hyphens (\-\) instead of Unicode middot (\·\) or em dash (\—\)
+- Exit message uses \--\ instead of \◆\ diamond, with ANSI color that respects NO_COLOR
+- Roster agent names render without emoji — text only
+
+## Why
+P2 UX conventions established emoji removal and ASCII separators. These three issues were the remaining spots where Unicode/emoji leaked through. The exit message now follows the same NO_COLOR pattern used throughout the shell.
+
+## Impact
+Any future banner or status text should use ASCII hyphens for separators. Keep emoji out of status/system messages.
+
+# Decision: Version format canonical standard
+
+**Author:** Fenster  
+**Date:** 2026-02-24  
+**PR:** #447  
+**Issues:** #431, #429
+
+## Decision
+
+Bare semver (e.g., \ .8.5.1\) is the canonical format for all version commands (\--version\, \-v\, \ersion\ subcommand, \/version\ shell command). Display contexts (help text, shell banner) use \squad v{VERSION}\ for branding.
+
+## Rationale
+
+- Matches existing P0 regression test expectations (bare semver, no prefix)
+- Script-friendly — bare semver is easier to parse in CI/CD pipelines
+- Consistent with \
+pm --version\ convention
+- Display contexts (help text, banner) still get the branded \squad v{VERSION}\ format
+
+## Impact
+
+All three entry points now produce identical version output:
+- \cli-entry.ts\ (proper entry): \--version\, \-v\, \ersion\ → bare semver
+- \cli.js\ (deprecated bundle): \--version\, \-v\, \ersion\ → bare semver (dynamic via getPackageVersion())
+- Shell \/version\: bare semver
+
+# Decision: REPL Experience Audit — Comprehensive Timeout, UX, and Test Coverage Analysis
+
+**By:** Kovash (REPL & Interactive Shell Expert)
+**Date:** 2026-02-24
+**Context:** Brady directive — "I'm shocked there are no REPL end-to-end integration tests." Full audit of the 2-minute timeout and dead air moments.
+
+## Executive Summary
+
+Conducted comprehensive REPL audit focusing on timeout handling, SDK connection latency, and streaming pipeline. Filed 7 GitHub issues (#418, #425, #428, #430, #432, #433, #434) with detailed reproduction steps, root cause analysis, and proposed fixes.
+
+**Critical Findings:**
+1. **10-minute timeout too aggressive** — all operations (simple queries, complex refactors) share same timeout, causing premature failures
+2. **Cold SDK connection dead air** — 3-5 second freeze on first message with no user feedback
+3. **Input buffering drops keystrokes** — backspace/arrows silently ignored during agent processing
+4. **Coordinator streaming invisible** — message_delta events accumulate but never render to user
+5. **Ghost response retry exhausts 40+ minutes** — auto-retries 3x without user consent or progressive warnings
+6. **Zero E2E integration tests** — 106 component tests but no full user flow coverage
+7. **No cancel mechanism** — Ctrl+C exits entire shell, SDK abort() exists but never called
+
+## Decision
+
+All issues filed with detailed technical analysis. Framework in place for all downstream fixes. Reference architectures documented for timeout tiers, streaming visibility, test harness, and cancellation.
+
+**Signed:** Kovash (REPL & Interactive Shell Expert)
+**Date:** 2026-02-24
+
+# Decision: First 30 Seconds UX Standard
+
+**By:** Marquez (CLI UX Designer)
+**Date:** 2026-02-24
+**Status:** Proposed
+
+## Decision
+
+Squad must delight users in the first 30 seconds. Any moment that creates confusion, frustration, or "is it broken?" anxiety is a blocker for release.
+
+**The First 30 Second Rule:**
+1. Help text must be scannable in ≤3 seconds
+2. Default behavior must be obvious without reading docs
+3. Wait states >2 seconds must show status ("Connecting...", "Waking up [Agent]...")
+4. Animations must never block input
+5. The primary action path (install → init → first message → first response) must feel **instant** at every step
+
+## Why This Matters
+
+Brady's directive: "The impatient user bails at second 7."
+
+Analysis of current first-run experience shows users bail at 0:18 (6 seconds after hitting enter) because:
+- No feedback during SDK connection (5-second silence)
+- Spinner with no context ("what is it doing?")
+- Help text is a 50-line wall (can't find "how to start")
+
+**Industry standard:** Modern CLIs (gh, docker, npm) provide instant feedback at every async operation. Squad matches this or loses users.
+
+## What Changes
+
+Filed 6 issues (#419-#423, #426) targeting first-30-second pain points:
+- Help text structure (P0)
+- SDK connection feedback (P0)
+- Spinner context (P0)
+- Default behavior clarity (P0)
+- Welcome animation speed (P1)
+- Tagline consistency (P1)
+
+All P0 issues must be resolved before v1.0 release.
+
+## Team Impact
+
+- **Cheritto:** Welcome animation, spinner context
+- **Fenster/Edie:** Help text structure
+- **Kujan:** SDK connection status
+- **Marquez:** UX review approval on PRs that touch first-run experience
+
+# Decision: Help text: Progressive disclosure over overwhelming defaults
+
+**When:** 2026-02-25
+**Context:** Issues #419 and #424. \/help\ was showing 9 lines—overwhelming for new users in a terminal shell.
+**Decision:** Split help into default (4 lines essentials) and \/help full\ (complete reference).
+
+## Rationale
+
+- **Cognitive load:** First-time users benefit from seeing the 3-5 most essential commands, not everything at once.
+- **Self-serve:** Users who want details ask for them explicitly (\/help full\). This respects the user's agency.
+- **Scannability:** 4 lines fit on one screen; 9 lines require scrolling or visual searching.
+- **Consistency:** Matches CLI patterns like \git help\ (intro) vs \git help --all\ (everything).
+
+## What changed
+
+- Default \/help\: 4 lines (commands on 2 lines, callout to full help)
+- \/help full\: 9 lines (everything, previous behavior)
+- Terminal-width detection still applies to both
+
+## Tone implications
+
+- The callout "Type /help full for complete docs" is **not** a forced upsell. It's a quiet pointer.
+- No marketing language ("discover more details!", "unlock advanced commands"). Just "if you need it, it's there."
+- This pattern can apply to other shell commands later (e.g., \/status\ vs \/status detailed\).
+
+## Files changed
+
+- \packages/squad-cli/src/cli/shell/commands.ts\ — \handleHelp()\ function
+
+## PR
+
+https://github.com/bradygaster/squad-pr/pull/438
+
+# Decision: First 30 Seconds UX Standards (Waingro Hostile QA Assessment)
+
+**Date:** 2026-02-24  
+**Author:** Waingro (Hostile QA)  
+**Status:** Proposed
+
+## Context
+
+During hostile QA testing of the first-time user journey (\squad --help\ → \squad init\ → \squad\ → first message), identified 3 P1 friction points that create bailout risk in the first 30 seconds:
+
+1. **Stale root bundle** — \cli.js\ is v0.6.0-alpha.0, contradicts documented behavior
+2. **Help wall of text** — 44 lines, 16 commands, user must scan to find 2 essential ones
+3. **Dead air on launch** — 2-4 seconds of silence before welcome banner, no loading indicator
+
+## Decision
+
+Establish UX standards for the critical first 30 seconds:
+
+### Standard 1: No Stale Entry Points
+
+**Rule:** All CLI entry points must run from a single source of truth.
+
+**Rationale:** Having multiple entry points (\cli.js\, \packages/squad-cli/dist/cli-entry.js\) with different versions creates confusion and violates principle of least surprise.
+
+**Action:**
+- Remove root \cli.js\ OR regenerate from latest source on every build
+- Document canonical entry point clearly
+- Add CI check to prevent version drift
+
+### Standard 2: Help Respects Impatient Users
+
+**Rule:** Default help shows ≤10 lines, covers 80% use case (getting started).
+
+**Rationale:** First-time users need exactly 2 commands (\init\ and shell). Advanced commands (\scrub-emails\, \spire\, \plugin marketplace\) are noise at this stage.
+
+**Action:**
+- Split help into quick (default) and extended (\--all\)
+- Quick help format:
+  \\\
+  squad v0.8.5.1
+
+  Get started:
+    squad init     Create your agent team
+    squad          Launch interactive shell
+
+  More:
+    squad help --all    All commands
+    squad doctor        Check setup
+  \\\
+
+**Comparison:** GitHub CLI \gh help\ shows 8 core commands, hides 20+ additional ones.
+
+### Standard 3: No Dead Air Exceeding 1 Second
+
+**Rule:** Any operation taking >1s must show progress feedback within 500ms.
+
+**Rationale:** Dead silence creates "is this broken?" anxiety. Every second of silence increases bailout risk.
+
+**Action:**
+- Shell launch: print \◆ Loading squad...\ or spinner before Ink render
+- First message: pre-warm SDK connection during shell initialization
+- Init: skip animations in non-TTY, cap TTY animations to 500ms total
+
+**Measurement:** Use speed gate tests to enforce thresholds.
+
+## Issues Filed
+
+- #417 (P1) — Stale root bundle
+- #424 (P1) — Help wall of text
+- #427 (P1) — Shell launch dead air
+- #429 (P2) — Version format inconsistency
+- #431 (P2) — Empty args behavior (defensible, low priority)
+
+## Related Work
+
+- #387, #395, #397, #399, #401 — Speed gates filed 2025-07-25
+- Speed gate tests at \	est/speed-gates.test.ts\
+
+## Success Metrics
+
+**Before:**
+- Help: 44 lines, 1331ms
+- Shell launch: 2-4s dead air
+- Root entry point: runs wrong command
+
+**After:**
+- Help: ≤10 lines (quick), 1331ms acceptable (Node.js startup floor)
+- Shell launch: <1s to first feedback
+- Single entry point, always correct behavior
+
+## Review Requested
+
+- **Marquez** (UX design) — approve help tier structure
+- **Keaton** (Architect) — approve entry point consolidation strategy
+- **Cheritto** (CLI lead) — implement loading indicators
+
