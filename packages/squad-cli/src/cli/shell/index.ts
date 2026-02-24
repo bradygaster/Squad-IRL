@@ -526,5 +526,7 @@ export async function runShell(): Promise<void> {
   try { await lifecycle.shutdown(); } catch (err) { debugLog('Failed to shutdown lifecycle:', err); }
   try { await telemetry.shutdown(); } catch (err) { debugLog('Failed to shutdown telemetry:', err); }
 
-  console.log('◆ Squad out.');
+  // NO_COLOR-aware exit message with ANSI color
+  const nc = process.env['NO_COLOR'] != null && process.env['NO_COLOR'] !== '';
+  console.log(nc ? '-- Squad out.' : '\x1b[36m--\x1b[0m Squad out.');
 }

@@ -177,7 +177,7 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
           {bannerReady && <Text dimColor>v{version}</Text>}
           {bannerReady && !compact && welcome?.description ? (
             <>
-              <Text dimColor>—</Text>
+              <Text dimColor>-</Text>
               <Text dimColor wrap="wrap">{welcome.description}</Text>
             </>
           ) : null}
@@ -185,30 +185,30 @@ export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version,
         {bannerReady && !compact && <Text>{' '}</Text>}
         {bannerReady && !compact && rosterAgents.length > 0 ? (
           <>
-            <Box flexWrap="wrap" gap={1}>
+            <Box flexWrap="wrap" columnGap={1}>
               {rosterAgents.map((a, i) => (
-                <Text key={a.name} dimColor={bannerDim}>{a.emoji} {a.name}{i < rosterAgents.length - 1 ? ' ·' : ''}</Text>
+                <Text key={a.name} dimColor={bannerDim}>{a.name}{i < rosterAgents.length - 1 ? ' -' : ''}</Text>
               ))}
             </Box>
-            <Text dimColor>  {agentCount} agent{agentCount !== 1 ? 's' : ''} ready · {activeCount} active</Text>
+            <Text dimColor>  {agentCount} agent{agentCount !== 1 ? 's' : ''} ready - {activeCount} active</Text>
           </>
         ) : bannerReady && compact && agentCount > 0 ? (
-          <Text dimColor>{agentCount} agent{agentCount !== 1 ? 's' : ''} · {activeCount} active</Text>
+          <Text dimColor>{agentCount} agent{agentCount !== 1 ? 's' : ''} - {activeCount} active</Text>
         ) : bannerReady && rosterAgents.length === 0 ? (
           <Text dimColor>{"  Run 'squad init' to get started"}</Text>
         ) : null}
         {bannerReady && !compact && <Text>{' '}</Text>}
         {bannerReady && wide && welcome?.focus ? <Text dimColor>Focus: {welcome.focus}</Text> : null}
-        {bannerReady && <Text dimColor>{compact ? '/help · Ctrl+C exit' : 'Just type what you need — Squad routes it · @Agent to direct · /help · Ctrl+C exit'}</Text>}
+        {bannerReady && <Text dimColor>{compact ? '/help - Ctrl+C exit' : 'Just type what you need — Squad routes it - @Agent to direct - /help - Ctrl+C exit'}</Text>}
       </Box>
 
       {bannerReady && welcome?.isFirstRun ? (
-        <Box flexDirection="column" paddingX={1} paddingY={1}>
+        <Box flexDirection="column" paddingX={1} paddingY={compact ? 0 : 1}>
           <Text color={noColor ? undefined : 'green'} bold>Your squad is assembled.</Text>
-          <Text> </Text>
-          <Text>Try: <Text bold color={noColor ? undefined : 'cyan'}>What should we build first?</Text></Text>
-          <Text dimColor>Squad automatically routes your message to the best agent.</Text>
-          <Text dimColor>Or use <Text bold>@{leadAgent}</Text> to message an agent directly.</Text>
+          {!compact && <Text> </Text>}
+          <Text>Try: <Text bold color={noColor ? undefined : 'cyan'}>{compact ? 'What should we build?' : 'What should we build first?'}</Text></Text>
+          {!compact && <Text dimColor>Squad automatically routes your message to the best agent.</Text>}
+          {!compact && <Text dimColor>Or use <Text bold>@{leadAgent}</Text> to message an agent directly.</Text>}
         </Box>
       ) : null}
 
