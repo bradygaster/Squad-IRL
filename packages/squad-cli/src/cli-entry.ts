@@ -115,9 +115,25 @@ async function main(): Promise<void> {
     return;
   }
 
-  // No args → launch interactive shell
+  // No args → check if .squad/ exists
   if (!cmd) {
-    await runShell();
+    const squadPath = resolveSquad(process.cwd());
+    const globalPath = resolveGlobalSquadPath();
+    const globalSquadDir = path.join(globalPath, '.squad');
+    const hasSquad = squadPath || fs.existsSync(globalSquadDir);
+    
+    if (hasSquad) {
+      // Squad exists, launch shell
+      await runShell();
+    } else {
+      // No squad found, show helpful message and suggest init
+      console.log(`\n${BOLD}squad${RESET} v${VERSION}`);
+      console.log(`Add an AI agent team to any project\n`);
+      console.log(`No squad found here. Get started with:`);
+      console.log(`  ${BOLD}squad init${RESET}       Create .squad/ in this repo`);
+      console.log(`  ${BOLD}squad init --global${RESET}  Create personal squad\n`);
+      console.log(`Or run ${BOLD}squad help${RESET} for all commands.\n`);
+    }
     return;
   }
 

@@ -79,6 +79,8 @@ function handleHistory(args: string[], context: CommandContext): CommandResult {
 }
 
 function handleClear(): CommandResult {
+  // Send ANSI escape code to actually clear the terminal screen
+  process.stdout.write('\x1B[2J\x1B[H');
   return { handled: true, clear: true };
 }
 

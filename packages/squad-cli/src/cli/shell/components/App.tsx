@@ -37,7 +37,7 @@ export interface AppProps {
   onDispatch?: (parsed: ParsedInput) => Promise<void>;
 }
 
-const EXIT_WORDS = new Set(['exit']);
+const EXIT_WORDS = new Set(['exit', 'quit', 'q']);
 
 export const App: React.FC<AppProps> = ({ registry, renderer, teamRoot, version, onReady, onDispatch }) => {
   const { exit } = useApp();

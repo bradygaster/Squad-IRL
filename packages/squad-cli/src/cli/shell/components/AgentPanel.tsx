@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Text } from 'ink';
 import { getRoleEmoji } from '../lifecycle.js';
-import { isNoColor, useTerminalWidth } from '../terminal.js';
+import { isNoColor, useTerminalWidth, detectTerminal, boxChars } from '../terminal.js';
 import { useCompletionFlash } from '../useAnimation.js';
 import type { AgentSession } from '../types.js';
 
@@ -46,6 +46,8 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent
   const noColor = isNoColor();
   const width = useTerminalWidth();
   const compact = width <= 60;
+  const caps = detectTerminal();
+  const box = boxChars(caps);
 
   // Tick every second to update elapsed times
   const [, setTick] = useState(0);
@@ -93,7 +95,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent
           );
         })}
         <Box marginTop={0}>
-          <Text dimColor>{'─'.repeat(sepWidth)}</Text>
+          <Text dimColor>{box.h.repeat(sepWidth)}</Text>
         </Box>
       </Box>
     );
@@ -163,7 +165,7 @@ export const AgentPanel: React.FC<AgentPanelProps> = ({ agents, streamingContent
 
       {/* Separator between panel and message stream */}
       <Box marginTop={0}>
-        <Text dimColor>{'─'.repeat(sepWidth)}</Text>
+        <Text dimColor>{box.h.repeat(sepWidth)}</Text>
       </Box>
     </Box>
   );

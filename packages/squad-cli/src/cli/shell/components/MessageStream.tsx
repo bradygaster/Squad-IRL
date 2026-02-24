@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Box, Text } from 'ink';
 import { getRoleEmoji } from '../lifecycle.js';
-import { isNoColor, useTerminalWidth } from '../terminal.js';
+import { isNoColor, useTerminalWidth, detectTerminal, boxChars } from '../terminal.js';
 import { useMessageFade } from '../useAnimation.js';
 import { ThinkingIndicator } from './ThinkingIndicator.js';
 import type { ShellMessage, AgentSession } from '../types.js';
@@ -82,6 +82,8 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
   const noColor = isNoColor();
   const width = useTerminalWidth();
   const sepWidth = Math.min(width, 120) - 2;
+  const caps = detectTerminal();
+  const box = boxChars(caps);
 
   return (
     <Box flexDirection="column" flexGrow={1} marginTop={1}>
@@ -94,7 +96,7 @@ export const MessageStream: React.FC<MessageStreamProps> = ({
 
         return (
           <React.Fragment key={i}>
-            {isNewTurn && <Text dimColor>{'─'.repeat(sepWidth)}</Text>}
+            {isNewTurn && <Text dimColor>{box.h.repeat(sepWidth)}</Text>}
             <Box gap={1}>
               {msg.role === 'user' ? (
                 <>
