@@ -1,5 +1,8 @@
 # Project Boards
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to visualize workflow tracking:**
 ```
 Create a project board for v0.5.0 with columns for each workflow stage

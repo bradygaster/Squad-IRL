@@ -63,7 +63,7 @@ export type BenchmarkFn = () => Promise<void> | void;
 export function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return 0;
   const idx = Math.ceil((p / 100) * sorted.length) - 1;
-  return sorted[Math.max(0, idx)];
+  return sorted[Math.max(0, idx)]!;
 }
 
 /**
@@ -91,8 +91,8 @@ export async function measureIterations(
   const sum = timings.reduce((a, b) => a + b, 0);
   return {
     avg: sum / timings.length,
-    min: timings[0],
-    max: timings[timings.length - 1],
+    min: timings[0]!,
+    max: timings[timings.length - 1]!,
     p95: percentile(timings, 95),
     p99: percentile(timings, 99),
     timings,
@@ -238,7 +238,7 @@ export class BenchmarkSuite {
         current = line.slice(3).trim().toLowerCase();
         sections[current] = [];
       } else if (current) {
-        sections[current].push(line);
+        sections[current]!.push(line);
       }
     }
     JSON.stringify(sections);

@@ -193,6 +193,10 @@
     "sdk"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/bradygaster/squad-pr#readme",
+  "bugs": {
+    "url": "https://github.com/bradygaster/squad-pr/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/bradygaster/squad.git",

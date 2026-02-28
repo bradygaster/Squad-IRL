@@ -1,5 +1,8 @@
 # Migration & Troubleshooting
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 Upgrade paths, beta-to-v1 migration, npm migration, and common fixes.
 
 ---

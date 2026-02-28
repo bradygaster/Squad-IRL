@@ -91,7 +91,7 @@ export async function runImport(dest: string, importPath: string, force: boolean
   // Write agents
   const agentNames = Object.keys(manifest.agents);
   for (const name of agentNames) {
-    const agent = manifest.agents[name];
+    const agent = manifest.agents[name]!;
     const agentDir = path.join(squadDir, 'agents', name);
     fs.mkdirSync(agentDir, { recursive: true });
 
@@ -112,7 +112,7 @@ export async function runImport(dest: string, importPath: string, force: boolean
   for (const skillContent of manifest.skills) {
     const nameMatch = skillContent.match(/^name:\s*["']?(.+?)["']?\s*$/m);
     const skillName = nameMatch
-      ? nameMatch[1].trim().toLowerCase().replace(/\s+/g, '-')
+      ? nameMatch[1]!.trim().toLowerCase().replace(/\s+/g, '-')
       : `skill-${manifest.skills.indexOf(skillContent)}`;
     const skillDir = path.join(squadDir, 'skills', skillName);
     fs.mkdirSync(skillDir, { recursive: true });

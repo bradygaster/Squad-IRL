@@ -1,0 +1,14 @@
+{
+  "name": "@mono/cli",
+  "version": "1.0.0",
+  "bin": {
+    "mono": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@mono/core": "workspace:*"
+  }
+}

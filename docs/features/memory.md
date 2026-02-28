@@ -1,5 +1,8 @@
 # Memory System
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to query team decisions:**
 ```
 What decisions has the team made about testing strategy?

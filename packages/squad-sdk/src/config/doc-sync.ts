@@ -64,7 +64,7 @@ export function syncDocToConfig(
 
   // --- Model preferences → models.default ---
   if (doc.modelPreferences.length > 0) {
-    config.models.default = doc.modelPreferences[0];
+    config.models.default = doc.modelPreferences[0]!;
   }
 
   // --- Routing hints → routing rules ---
@@ -82,7 +82,7 @@ export function syncDocToConfig(
 
   // --- Capabilities / tools → first agent entry (if any) ---
   if (config.agents.length > 0) {
-    const agent = config.agents[0];
+    const agent = config.agents[0]!;
     if (doc.tools.length > 0) {
       agent.tools = doc.tools;
     }
@@ -233,7 +233,7 @@ export function detectDrift(
 
   // --- Tools ---
   if (config.agents.length > 0) {
-    const agentTools = config.agents[0].tools ?? [];
+    const agentTools = config.agents[0]!.tools ?? [];
     const docToolSet = new Set(doc.tools);
     const configToolSet = new Set(agentTools);
 

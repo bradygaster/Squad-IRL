@@ -46,32 +46,32 @@ export function parseCharterMetadata(content: string): {
 
   const identityMatch = content.match(/##\s+Identity\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (identityMatch) {
-    const section = identityMatch[1];
+    const section = identityMatch[1]!;
     const nameMatch = section.match(/\*\*Name:\*\*\s*(.+)/i);
-    if (nameMatch) result.name = nameMatch[1].trim();
+    if (nameMatch) result.name = nameMatch[1]!.trim();
 
     const roleMatch = section.match(/\*\*Role:\*\*\s*(.+)/i);
-    if (roleMatch) result.role = roleMatch[1].trim();
+    if (roleMatch) result.role = roleMatch[1]!.trim();
 
     const expertiseMatch = section.match(/\*\*Expertise:\*\*\s*(.+)/i);
     if (expertiseMatch) {
-      result.skills = expertiseMatch[1].split(',').map(s => s.trim()).filter(Boolean);
+      result.skills = expertiseMatch[1]!.split(',').map(s => s.trim()).filter(Boolean);
     }
   }
 
   const modelMatch = content.match(/##\s+Model\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (modelMatch) {
-    const preferredMatch = modelMatch[1].match(/\*\*Preferred:\*\*\s*(.+)/i);
-    if (preferredMatch) result.model = preferredMatch[1].trim();
+    const preferredMatch = modelMatch[1]!.match(/\*\*Preferred:\*\*\s*(.+)/i);
+    if (preferredMatch) result.model = preferredMatch[1]!.trim();
   }
 
   const toolsMatch = content.match(/##\s+Tools?\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (toolsMatch) {
-    result.tools = toolsMatch[1]
+    result.tools = toolsMatch[1]!
       .split('\n')
       .map(line => {
         const m = line.match(/^\s*[-*]\s+`?([^`\s]+)`?/);
-        return m ? m[1].trim() : null;
+        return m ? m[1]!.trim() : null;
       })
       .filter((t): t is string => t !== null);
   }

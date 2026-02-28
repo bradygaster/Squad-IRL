@@ -67,6 +67,14 @@
 ### 📌 Team update (2026-02-22T041800Z): Version alignment complete, both packages published to npm at 0.8.0 — decided by Kobayashi, Coordinator
 Kobayashi aligned all version strings to 0.8.0 (SDK package, CLI package, VERSION export, root private flag). Coordinator published @bradygaster/squad-sdk@0.8.0 and @bradygaster/squad-cli@0.8.0 to npm registry. Version bump signals clear break from 0.7.0 stubs. Release infrastructure production-ready. Both packages live and resolvable on npm.
 
+### 2026-02-24: Merge workflow — PR #552 + #553 → dev branch
+**Status:** Complete (both PRs merged with squash)
+- **PR #552:** feat(ralph): routing-aware triage, PR monitoring, board state tracking — ✅ merged
+- **PR #553:** Add personal squad consult mode — ✅ merged
+- **Process:** PR #553 merged first; PR #552 encountered base branch conflict on first attempt (retried successfully)
+- **Verification:** Both PRs report `state: MERGED`
+- **Dev branch:** Fetched latest after both merges complete
+
 ### 2026-02-22: CI/CD Readiness Assessment Complete
 **Status:** PASSED with critical version misalignment flagged.
 
@@ -226,3 +234,40 @@ Kobayashi aligned all version strings to 0.8.0 (SDK package, CLI package, VERSIO
 - **Local branches:** 97 local branches remain (many not yet fully merged). Pattern observed: squad/* and fix/* branches in flight for active work. Deletions will be selective once those PRs merge.
 
 **Key Learning:** Repository maintains high branch volume during active squad development. Remote pruning revealed a 20-branch cleanup opportunity (merged but not deleted). Local branch strategy deferred to Brady for active work assessment.
+
+### 2026-02-26: Comprehensive Remote Branch Audit — Brady requested
+**Status:** COMPLETED — Full branch analysis performed across all 40 remote branches.
+- **Analysis Method:** For each remote branch (excluding origin/main, HEAD, gh-pages):
+  - Commits ahead of origin/main (unique work not in main)
+  - Commits behind origin/main (staleness indicator)
+  - Latest commit message
+  - Associated PR status (merged, open, closed, or none)
+- **Categorization Logic:**
+  - 🔴 **KEEP (8 branches):** Active work with new commits not in main. No PR or PR still in progress/closed. Requires resolution (merge or rebase).
+  - 🟡 **REVIEW (11 branches):** Merged into main but branch has new commits post-merge. Likely rebased history or team additions after squash-merge. Need rebase or deletion strategy.
+  - 🟢 **DELETE (21 branches):** Fully merged into main with zero unique commits remaining, or PR closed without merge. Safe for deletion.
+- **Key Findings:**
+  - **KEEP branches (active work):** fix/issue-428 (2 commits), squad/368-fix-stale-tests (2, CLOSED PR), squad/513-ux-improvements (2, CLOSED), squad/514-docs-batch (1, CLOSED), squad/517-help-ux (1, CLOSED), squad/518-naming-consistency (4, CLOSED), squad/525-help-surfaces-mcmanus (2, CLOSED), squad/kovash-status-style-390-v2 (1, CLOSED PR)
+  - **REVIEW branches (merged but drift):** bradygaster/dev (7 commits, PR#301 merged), squad/325-fix-timeout (15 commits, PR#347 merged), squad/326-e2e-coverage (2, PR#348), squad/327-hostile-qa (1, PR#350), squad/328-accessibility-audit (1, PR#344), squad/329-p0-ux-blockers (1, PR#349), squad/330-p1-ux-polish (3, PR#356), squad/332-ghost-response (1, PR#355), squad/333-fix-p0-bugs (4, PR#351), squad/334-error-hardening (1, PR#354), squad/343-dual-telemetry (1, PR#352)
+  - **DELETE branches (clean):** 21 branches fully merged with zero ahead commits. Includes fix/critical-ux-batch-1, insider, wave1-3 branches, older squad issues (325-343).
+- **Insight:** 11 "REVIEW" branches with merged PRs but post-merge commits indicate either: (a) team members added learnings/history docs after squash-merge, or (b) branches rebased after merge. This is normal in squad workflow (.squad/history, decisions appended). These can be safely deleted once history is synced to main.
+- **Recommendation to Brady:**
+  - Delete all 21 🟢 DELETE branches immediately (no risk, work is in main)
+  - For 11 🟡 REVIEW branches: pull latest from main to sync history, then delete (post-merge history is already on main)
+  - For 8 🔴 KEEP branches: resolve PRs or rebase onto main before deletion
+- **Process:** Used `git rev-list --count` for ahead/behind metrics, `gh pr list --state all` for PR status. Data gathered in single PowerShell loop across all 40 branches.
+
+### 2026-02-26: Merge dev→main→dev workflow — Brady requested
+**Status:** EXECUTED — Complete forward merge from dev through main and back to working branch.
+- **Merge Sequence:**
+  1. **dev→main:** Fetched origin, checked out main, pulled latest, merged origin/dev (no conflicts). Contains PRs #552 and #553 from dev.
+  2. **main→dev:** Checked out dev, pulled latest, merged origin/main (fast-forward).
+  3. **dev→working branch:** Checked out squad/532-dogfood-repl, merged dev (no conflicts).
+- **Git History Verified:** `git log --oneline -10` confirms both PR commits present:
+  - `a68f669` (origin/main, origin/dev): Merge remote-tracking branch 'origin/dev'
+  - `502af32`: feat(ralph): routing-aware triage, PR monitoring, board state tracking (#552)
+  - `b151b18`: Add personal squad consult mode (#553)
+  - Squad/532-dogfood-repl now includes both PRs plus latest main state
+- **Files Changed:** 29 files total across dev→main merge (workflow templates, docs, package versions, test additions for ralph triage & monitor)
+- **Learning:** Stash/pop workflow necessary when switching branches with uncommitted changes to .squad/agents/*/history.md (union merge driver active). Merge drivers preserve append-only state integrity during multi-branch sync.
+- **Key Point:** PR #547 untouched throughout (per directive). All work focused on #552 + #553 forward merge.

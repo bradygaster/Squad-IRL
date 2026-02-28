@@ -53,7 +53,7 @@ const migrations: Migration[] = [
  * Compare semver strings: -1 (a<b), 0 (a==b), 1 (a>b)
  */
 function compareSemver(a: string, b: string): number {
-  const stripPre = (v: string) => v.split('-')[0];
+  const stripPre = (v: string) => v.split('-')[0]!;
   const pa = stripPre(a).split('.').map(Number);
   const pb = stripPre(b).split('.').map(Number);
   

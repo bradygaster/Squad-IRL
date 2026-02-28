@@ -178,7 +178,7 @@ export async function appendToHistory(
       // Section exists, append to it
       const fullMatch = match[0];
       const sectionContent = match[1];
-      const updatedSection = `${sectionHeader}\n${sectionContent.trimEnd()}${entry}`;
+      const updatedSection = `${sectionHeader}\n${sectionContent!.trimEnd()}${entry}`;
       updatedContent = historyContent.replace(fullMatch, updatedSection);
     } else {
       // Section doesn't exist, create it at the end
@@ -248,7 +248,7 @@ export async function readHistory(
       const match = historyContent.match(sectionRegex);
       
       if (match) {
-        parsed[key] = match[1].trim();
+        parsed[key] = match[1]!.trim();
       }
     }
     

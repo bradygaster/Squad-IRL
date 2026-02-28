@@ -1,5 +1,8 @@
 # Squad — Your AI Development Team
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Describe what you're building. Get a team of specialists that live in your repo.**
 
 Squad is a multi-agent runtime for GitHub Copilot. You talk to your team in plain English — they fan out, build in parallel, and land pull requests in minutes.

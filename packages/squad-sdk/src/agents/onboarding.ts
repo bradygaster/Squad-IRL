@@ -454,7 +454,7 @@ export async function addAgentToConfig(
         confidence: 'high'
       }`;
     
-    const updatedRules = match[1].trim() + ',\n' + newRule;
+    const updatedRules = match[1]!.trim() + ',\n' + newRule;
     const updatedContent = content.replace(
       rulesPattern,
       `rules: [\n${updatedRules}\n    ]`

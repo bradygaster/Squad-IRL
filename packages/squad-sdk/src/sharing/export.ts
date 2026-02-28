@@ -104,7 +104,7 @@ function readRoutingRules(projectDir: string): ExportRoutingRule[] {
   for (const line of lines) {
     const match = line.match(/^\s*[-*]\s+`?([^`]+)`?\s*→\s*(\w+)/);
     if (match) {
-      rules.push({ pattern: match[1].trim(), agent: match[2].trim() });
+      rules.push({ pattern: match[1]!.trim(), agent: match[2]!.trim() });
     }
   }
   return rules;

@@ -120,6 +120,46 @@ Close the shell and return to your terminal.
 squad > /quit
 ```
 
+### `/sessions` — List saved sessions
+
+View past shell sessions. Shows the 10 most recent sessions with their ID prefix, timestamp, and message count.
+
+```
+squad > /sessions
+```
+
+Output:
+```
+Saved Sessions (3 total)
+  1. a1b2c3d4  6/15/2026, 2:30:00 PM  (12 messages)
+  2. e5f6a7b8  6/14/2026, 10:15:00 AM  (8 messages)
+  3. c9d0e1f2  6/13/2026, 4:45:00 PM  (23 messages)
+
+Use /resume <id-prefix> to restore a session.
+```
+
+### `/resume <id>` — Restore a past session
+
+Resume a previous session by providing the first few characters of its ID. The session's full message history is restored into the current shell.
+
+```
+squad > /resume a1b2
+✓ Restored session a1b2c3d4 (12 messages)
+```
+
+If no match is found:
+```
+squad > /resume xyz
+No session found matching "xyz". Try /sessions to list.
+```
+
+Typical workflow — pick up where you left off:
+```
+squad > /sessions
+squad > /resume a1b2
+squad > @Keaton, where were we on the auth work?
+```
+
 ---
 
 ## Addressing Agents
@@ -317,7 +357,7 @@ squad > /history
 
 Scroll through what happened. Every decision is logged. Every task is recorded.
 
-### Tip 3: Name agents explicitly for urgent work
+### Tip 5: Name agents explicitly for urgent work
 
 For critical tasks:
 
@@ -327,7 +367,7 @@ squad > @Keaton, this is critical: we need the deployment script fixed in the ne
 
 The explicit mention ensures the lead coordinator sees it first.
 
-### Tip 4: Use your shell session as a workspace
+### Tip 6: Use your shell session as a workspace
 
 The shell is your thinking space. You can:
 - Ask follow-up questions mid-task (`@McManus, did you finish the form?`)

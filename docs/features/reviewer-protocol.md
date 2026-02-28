@@ -1,5 +1,8 @@
 # Reviewer Rejection Protocol
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to request a code review:**
 ```
 Review the changes in src/auth/ and check for security issues

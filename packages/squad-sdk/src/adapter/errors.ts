@@ -331,7 +331,7 @@ export class ErrorFactory {
 
     if (message.includes('rate limit') || message.includes('429') || message.includes('quota')) {
       const retryMatch = message.match(/retry after (\d+)/i);
-      const retryAfter = retryMatch ? parseInt(retryMatch[1], 10) : undefined;
+      const retryAfter = retryMatch ? parseInt(retryMatch[1]!, 10) : undefined;
       return new RateLimitError(
         `Rate limit exceeded: ${message}`,
         fullContext,

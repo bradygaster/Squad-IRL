@@ -197,53 +197,53 @@ export function parseCharterMarkdown(content: string): ParsedCharter {
   // Extract ## Identity section
   const identityMatch = content.match(/##\s+Identity\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (identityMatch) {
-    const identityContent = identityMatch[1];
+    const identityContent = identityMatch[1]!;
     
     // Parse identity fields
     const nameMatch = identityContent.match(/\*\*Name:\*\*\s*(.+)/i);
-    if (nameMatch) result.identity.name = nameMatch[1].trim();
+    if (nameMatch) result.identity.name = nameMatch[1]!.trim();
     
     const roleMatch = identityContent.match(/\*\*Role:\*\*\s*(.+)/i);
-    if (roleMatch) result.identity.role = roleMatch[1].trim();
+    if (roleMatch) result.identity.role = roleMatch[1]!.trim();
     
     const expertiseMatch = identityContent.match(/\*\*Expertise:\*\*\s*(.+)/i);
     if (expertiseMatch) {
-      result.identity.expertise = expertiseMatch[1]
+      result.identity.expertise = expertiseMatch[1]!
         .split(',')
         .map(e => e.trim())
         .filter(e => e.length > 0);
     }
     
     const styleMatch = identityContent.match(/\*\*Style:\*\*\s*(.+)/i);
-    if (styleMatch) result.identity.style = styleMatch[1].trim();
+    if (styleMatch) result.identity.style = styleMatch[1]!.trim();
   }
   
   // Extract ## What I Own section
   const ownershipMatch = content.match(/##\s+What I Own\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (ownershipMatch) {
-    result.ownership = ownershipMatch[1].trim();
+    result.ownership = ownershipMatch[1]!.trim();
   }
   
   // Extract ## Boundaries section
   const boundariesMatch = content.match(/##\s+Boundaries\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (boundariesMatch) {
-    result.boundaries = boundariesMatch[1].trim();
+    result.boundaries = boundariesMatch[1]!.trim();
   }
   
   // Extract ## Model section
   const modelMatch = content.match(/##\s+Model\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (modelMatch) {
-    const modelContent = modelMatch[1];
+    const modelContent = modelMatch[1]!;
     const preferredMatch = modelContent.match(/\*\*Preferred:\*\*\s*(.+)/i);
     if (preferredMatch) {
-      result.modelPreference = preferredMatch[1].trim();
+      result.modelPreference = preferredMatch[1]!.trim();
     }
   }
   
   // Extract ## Collaboration section
   const collaborationMatch = content.match(/##\s+Collaboration\s*\n([\s\S]*?)(?=\n##|\n---|$)/i);
   if (collaborationMatch) {
-    result.collaboration = collaborationMatch[1].trim();
+    result.collaboration = collaborationMatch[1]!.trim();
   }
   
   return result;

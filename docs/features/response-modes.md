@@ -1,5 +1,8 @@
 # Response Modes
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to get concise answers:**
 ```
 Respond in terse mode — just the facts
@@ -18,22 +21,18 @@ Squad automatically picks the right response mode based on complexity — from i
 
 Not every request needs the full agent machinery. Squad automatically selects a response mode based on the complexity of your message.
 
----
-
-## The Four Modes
-
 | Mode | Time | What Happens | When Used |
 |------|------|-------------|-----------|
-| **Direct** | ~2–3s | Coordinator answers from memory — no agent spawned | Status checks, factual questions |
-| **Lightweight** | ~8–12s | One agent, minimal prompt — no charter/history/decisions reads | Small fixes, quick follow-ups |
+| **Direct** | ~2–3s | Coordinator answers without spawning an agent | Status checks, factual questions |
+| **Lightweight** | ~8–12s | One agent, minimal prompt — skips charter, history, and decisions | Small fixes, quick follow-ups |
 | **Standard** | ~25–35s | Full agent spawn with charter, history, and decisions | Normal work requests |
-| **Full** | ~40–60s | Multi-agent parallel spawn | Complex multi-domain tasks |
+| **Full** | ~40–60s | Multiple agents spawn in parallel, each with full context | Complex multi-domain tasks |
 
 ---
 
 ## Direct
 
-The coordinator handles it alone. No sub-agent is spawned.
+The coordinator handles it alone — no sub-agent is spawned. This isn't a response mode in the SDK sense; the coordinator answers the question itself using context it already has (team roster, decisions, history).
 
 ```
 > What port does the server run on?
@@ -41,7 +40,7 @@ The coordinator handles it alone. No sub-agent is spawned.
 > Who's on the team?
 ```
 
-Fast answers from context the coordinator already has.
+Fast answers from context the coordinator already has. If the coordinator responds with `DIRECT:`, no agent session is created.
 
 ## Lightweight
 

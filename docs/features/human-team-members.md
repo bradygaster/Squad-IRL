@@ -1,5 +1,8 @@
 # Human Team Members
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to add a human specialist:**
 ```
 Add Sarah (sarah@example.com) as a frontend developer to the team

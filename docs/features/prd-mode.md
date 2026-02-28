@@ -1,5 +1,8 @@
 # PRD Mode
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to generate a requirements document:**
 ```
 Write a PRD for a user authentication system with OAuth support

@@ -1,5 +1,8 @@
 # Memory & Knowledge
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 Squad remembers everything — coding conventions, architecture decisions, deployment patterns, your personal preferences. Memory grows with every session, compounding across three layers so agents stop making the same mistakes and start anticipating your needs.
 
 ---

@@ -148,22 +148,24 @@ function setPath(obj: Record<string, unknown>, dotPath: string, value: unknown):
   const parts = dotPath.split('.');
   let current: Record<string, unknown> = obj;
   for (let i = 0; i < parts.length - 1; i++) {
-    if (!(parts[i] in current) || typeof current[parts[i]] !== 'object') {
-      current[parts[i]] = {};
+    const part = parts[i]!;
+    if (!(part in current) || typeof current[part] !== 'object') {
+      current[part] = {};
     }
-    current = current[parts[i]] as Record<string, unknown>;
+    current = current[part] as Record<string, unknown>;
   }
-  current[parts[parts.length - 1]] = value;
+  current[parts[parts.length - 1]!] = value;
 }
 
 function deletePath(obj: Record<string, unknown>, dotPath: string): void {
   const parts = dotPath.split('.');
   let current: Record<string, unknown> = obj;
   for (let i = 0; i < parts.length - 1; i++) {
-    if (!(parts[i] in current) || typeof current[parts[i]] !== 'object') {
+    const part = parts[i]!;
+    if (!(part in current) || typeof current[part] !== 'object') {
       return;
     }
-    current = current[parts[i]] as Record<string, unknown>;
+    current = current[part] as Record<string, unknown>;
   }
-  delete current[parts[parts.length - 1]];
+  delete current[parts[parts.length - 1]!];
 }

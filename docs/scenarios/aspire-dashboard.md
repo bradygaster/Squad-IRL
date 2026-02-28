@@ -1,5 +1,8 @@
 # Using Squad with the Aspire Dashboard
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this:**
 ```
 squad aspire

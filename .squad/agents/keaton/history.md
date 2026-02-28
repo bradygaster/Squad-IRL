@@ -7,6 +7,27 @@
 
 ## Learnings
 
+### 📌 Team update (2026-02-28T17:15:00Z): Backlog gap issues filed (8 items) — Brady's directive
+- **Status:** Completed — Keaton (lead) filed all 8 missing backlog items from `.squad/identity/now.md`
+- **Outcome:** 8 new issues filed and routed to owners:
+  - #583: Add homepage/bugs to package.json (squad:rabin, should-fix polish)
+  - #584: Document alpha→v1.0 breaking change policy (squad:mcmanus, should-fix polish)
+  - #585: Add noUncheckedIndexedAccess to tsconfig (squad:edie, post-M1 type safety)
+  - #586: Tighten ~26 any types in SDK (squad:edie, post-M1 type safety)
+  - #587: Add architecture overview doc (squad:mcmanus, post-M1 docs)
+  - #589: One real Copilot SDK integration test (squad:kujan, post-M1 testing)
+  - #590: npm audit fix for ReDoS warnings (squad:baer, post-M1 security hygiene)
+  - #591: Aspire dashboard docker pull test fails (squad:hockney, type:bug, post-M1)
+- **Impact:** All known backlog items now have explicit GitHub tracking. Team owns issue routing. Wave E planning complete with full backlog visibility.
+- **Decision record:** `.squad/decisions/inbox/keaton-backlog-gap-issues.md`
+
+### 📌 Team update (2026-02-28T15:34:36Z): 28 issues filed + decisions.md trimmed 226KB→10.3KB
+- **Status:** Completed — Keaton (lead), Hockney, McManus, Waingro coordinated parallel issue filing sprint
+- **Outcome:** 4 CLI critical gaps (#554–#557), 10 test gaps (#558–#567), 10 doc audit gaps (#568–#575, #577–#578), 4 dogfood UX gaps (#576, #579–#581) all filed and labeled for routing
+- **decisions.md cleanup:** Trimmed from 226KB (223 entries) to 10.3KB (35 entries); full history in decisions-archive.md
+- **Impact:** Team context bloat eliminated; CLI improvements have explicit GitHub tracking; Wave E planning ready with actionable issue list
+- **Session log:** `.squad/log/2026-02-28T15-34-36Z-issue-filing-sprint.md` — decided by Keaton, McManus, Hockney, Waingro
+
 ### 2026-02-24T18:42:00Z: Waves A–D Completion Assessment (Brady handoff catch-up)
 - **Task:** Brady's session crashed. Verify Wave A–D completion per PRD, check issue states, assess what remains.
 - **Findings:** All 30 PRD-referenced issues are CLOSED. Waves A (13 issues), B (7 issues), C (E2E + integration, merged into timeline), D Batch 1 (6 issues). Test count: 2930 passing. Repository clean — no open PRs. Only 1 open issue: #324 (dogfood testing, P0).
@@ -259,7 +280,47 @@ Keaton's split plan produced definitive SDK/CLI mapping with clean DAG (CLI → 
 - **Stack:** TypeScript (strict mode, ESM-only), Node.js ≥20, @github/copilot-sdk, Vitest, esbuild
 - **Created:** 2026-02-21
 
+## 📌 Core Context — Keaton's Focus Areas
+
+**Architectural Decisions:** Keaton owns proposal-first workflow, SDK/CLI split design, observability patterns, wave planning and readiness assessments, cleanup audits, public release decisions. Pattern: decisions that compound — each architectural choice makes future features easier.
+
+**Recent Work (Feb 2026):** 
+- SDK/CLI split executed (154 files migrated, clean DAG: CLI → SDK → Copilot SDK)
+- Waves A–D completion verified (30 issues closed, 2930→2931 tests)
+- Wave D readiness assessment + 6 issues filed (#488–#493)
+- Public release readiness verdict (🟡 ready with caveats: need dogfood closure #324, architecture docs)
+- Issue #306 cleanup audit (47 findings cataloged: 18 hardcoded, 16 code quality, 8 tests, 5 UX)
+- GitHub Pages publishing architecture reviewed (build.js is production-ready)
+- PR #300 (upstream inheritance) review: Request Changes (4 blockers: no proposal, weak types, no sanitization, undocumented fallback)
+- Ralph smart triage review: ✅ Approved
+
+**Known Blockers:**
+- #324: Dogfood CLI (only open issue, blocks Wave E + release confidence)
+- Root `src/` directory still exists (time bomb: parallel structure with workspace packages)
+- Observability (9 P0/P1 issues) needed before production release
+
+**Wave E Planning:** 28 issues just filed (2026-02-28) from parallel agent sprint: 4 CLI gaps, 10 test gaps, 10 doc gaps, 4 UX gaps. decisions.md trimmed 226KB→10.3KB. Ready for Wave E Batch 1 prioritization.
+
 ## Learnings
+
+### 2026-02-25T02:00:00Z: Issue #532 Analysis — REPL Dogfooding Gap
+- **Task:** Analyze issue #532 (Resolve dogfooding gap — test REPL against real-world repositories). Define concrete acceptance criteria, identify test coverage gaps, decompose into actionable sub-tasks.
+- **Finding:** REPL itself is complete (shipped Waves A–C). What's missing is **confidence** that it works on real diverse codebases — not test-fixtures. Current test suite covers: REPL UX rendering (✅), hostile inputs (✅ 95 strings), human journeys on mocks (✅), but zero testing against real Python/Node/Go/Rust/Java repos or monorepos.
+- **Test coverage audit:**
+  - ✅ e2e-shell.test.ts, repl-ux.test.ts, shell-integration.test.ts, cli-shell-comprehensive.test.ts: All mocked SDK + test-fixtures only. No real codebases.
+  - ✅ hostile-integration.test.ts: 95 nasty input strings, covers parseInput/executeCommand/rendering.
+  - ✅ human-journeys.test.ts: 6 real user scenarios, mocked SDK under hood.
+  - ❌ **Gap 1:** No real repository interaction (Python, Node, Go, Rust, monorepo, etc.)
+  - ❌ **Gap 2:** No large file handling (>10MB, nested >50 levels, 100+ files)
+  - ❌ **Gap 3:** No mixed-language repo testing (polyglot teams, tooling integration)
+  - ❌ **Gap 4:** No performance profiling (token usage, latency vs. mocks)
+  - ❌ **Gap 5:** No encoding/special char handling (non-UTF8, symlinks, Windows CRLF)
+- **Acceptance criteria defined:** (1) 5–8 real-world test scenarios implemented, (2) test harness created (repl-dogfood.test.ts), (3) manual dogfood session logs findings, (4) blockers filed as GitHub issues, (5) performance metrics captured, (6) Wave D launch confidence established.
+- **Punch list created:** 11 concrete work items — 4 for Waingro (dogfood repos definition, manual sessions, issue filing), 6 for Hockney (test harness, scenario tests, metrics, CI integration), 1 for Keaton (review + roadmap).
+- **Effort estimate:** 10–12 hours (2–3 people, 2–3 days).
+- **Decision:** Route to Waingro (primary dogfooder) + Hockney (test implementation). No feature work — pure research + infrastructure + triage.
+- **Output:** Decision file `.squad/decisions/inbox/keaton-532-scope.md` with full analysis, test scenarios (5–8 repos), implementation plan, and punch list.
+- **Pattern:** Dogfood is a distinct phase from feature shipping. For post-beta releases, always dogfood on real diverse codebases before Wave launch. Define upfront: repo diversity rationale, expected edge cases, metrics to capture, blocker triage process.
 
 ### 2026-02-24T18:42:00Z: Waves A–D Completion Assessment (Brady handoff catch-up)
 - **Task:** Brady's session crashed. Verify Wave A–D completion per PRD, check issue states, assess what remains.
@@ -301,6 +362,18 @@ Keaton's split plan produced definitive SDK/CLI mapping with clean DAG (CLI → 
 - **Proposal location:** Session state file `docs-restructure-plan.md`
 - **Status:** Awaiting Brady's approval before execution
 - **Next step:** If approved, assign merge work to agents (5 concept pages are biggest effort, ~2-3 hours each)
+
+### 2026-02-24T23:15:00Z: CLI Critical Gap Issues Filed (Brady request)
+- **Context:** Fenster and Hockney's CLI analysis found critical gaps in orchestration logs. Brady requested filing 4 GitHub issues to track them.
+- **Gaps identified:**
+  - Issue #554: `--preview` flag undocumented and untested (0% coverage, users can't discover)
+  - Issue #556: `--timeout` flag undocumented and untested (0% coverage, feature unusable)
+  - Issue #557: `upgrade --self` is dead code (0% coverage, creates confusion)
+  - Issue #555: `run` subcommand is a stub (0% coverage, non-functional)
+- **All issues filed** with labels: `squad:fenster`, `squad`, `type:bug`
+- **Assignment:** Fenster for CLI domain expertise
+- **Impact:** Team now has explicit GitHub tracking for Fenster's CLI improvements. Clear ownership and acceptance criteria.
+- **Decision memo:** `.squad/decisions/inbox/keaton-cli-gap-issues.md`
 
 ### 2026-02-23: Docs Site Engine & Beta Content (#185, #188)
 - **Task:** Build a minimal static site generator for markdown documentation + landing page with navigation sidebar
@@ -533,3 +606,51 @@ Keaton's split plan produced definitive SDK/CLI mapping with clean DAG (CLI → 
   - Observability (Saul/OTel) is NOT blocking replatform but IS needed for production. Plan for Wave F (post-alpha).
 - **Pattern Observed:** Team built a solid foundation (Waves A–D). External contributors are shipping quality PRs. Ecosystem growing (James + Shayne + Tamir). Dogfooding + community feedback will drive next wave priorities — this is healthy.
 - **Confidence Level:** 🟡 READY WITH CAVEATS. Ship after #532 closes. Messaging is clear. Architecture holds. Distribution proven. Next 2 weeks: stabilize with community, iterate on UX, plan Wave E based on real usage.
+
+---
+
+## 2026-02-28: decisions.md Cleanup — Context Window Relief
+
+**Requested by:** Brady (urgent, release push)
+**Action:** Aggressively trimmed decisions.md from 226KB (223 entries) to 10.3KB (35 entries) — 95% reduction.
+
+**What stayed (35 entries):**
+- Core architectural decisions (strict mode, ESM-only, Node 20+, hooks-over-prompts)
+- Active process rules (proposal-first, tone ceiling, merge drivers)
+- Active user directives (Brady's preferences, repo scope, docs pause, PR #547 hold)
+- Current UX conventions (status vocabulary, tagline, separators, version format)
+- Runtime patterns (EventBus, sendAndWait, extractDelta, coordinator routing)
+
+**What was archived (188 entries):**
+- Completed implementation details (OTel wiring, shell components, spawn infrastructure)
+- One-time setup decisions (version alignment, branch protection, changesets)
+- PR review findings (PR #300 upstream inheritance reviews)
+- Massive audit reports (cleanup audit, readiness assessment, UX audits)
+- Wave/phase planning documents (testing epic PRD, Wave D assessment)
+- Superseded decisions (GitHub-native distribution, old version alignments)
+- ~5 exact duplicates from merge=union duplication
+
+**Output:**
+- .squad/decisions.md — 10.3 KB, 35 active entries
+- .squad/decisions-archive.md — 230 KB, full original preserved as archive
+
+## 📋 SHIP PLAN (2026-02-28T23:45:00Z) — Battle Plan: 45 → 0 Open Issues
+
+**By:** Keaton  
+**Context:** Brady requested zero open issues for alpha ship. Created comprehensive battle plan.
+
+**Result:**
+- **Triage complete:** All 45 open issues categorized
+- **Execution plan created:** Wave 1–4 strategy with agent assignments
+- **Aggressiveness:** 28 issues strategically deferred post-alpha with clear labels (not abandoned)
+- **Blocking issues:** 3 must-ship blockers identified
+- **Quick-wins:** 8 issues <30min each, parallelizable
+- **Documentation:** Full plan in .squad/decisions/inbox/keaton-ship-plan.md
+
+**Key Decisions:**
+- Close liberally: 28 deferred items maintain user trust via deferred-post-alpha label
+- Parallel execution: 6+ agents work independently (no merge-order dependencies)
+- Brady's directive: PR #547 untouched per decisions.md directive
+- Target: 11 fixed + 34 closed = 45 → 0 open issues
+
+**Next:** Wave 1 execution (keaton dogfood + hockney UX fixes)

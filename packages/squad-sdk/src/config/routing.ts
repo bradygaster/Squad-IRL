@@ -161,8 +161,8 @@ export function parseRoutingMarkdown(content: string): RoutingConfig {
       
       if (cells.length >= 2) {
         const workType = cells[0];
-        const routeTo = cells[1];
-        const examples = cells.length >= 3 ? cells[2].split(',').map(ex => ex.trim()) : undefined;
+        const routeTo = cells[1]!;
+        const examples = cells.length >= 3 ? cells[2]!.split(',').map(ex => ex.trim()) : undefined;
         
         // Parse agent names (may be comma-separated or single)
         const agents = routeTo.split(',').map(a => a.trim()).filter(a => a.length > 0);

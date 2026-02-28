@@ -53,8 +53,8 @@ export function parseFrontmatter(
   const match = raw.match(/^---\s*\n([\s\S]*?)---\s*\n?([\s\S]*)$/);
   if (!match) return { meta, body };
 
-  const frontmatter = match[1];
-  body = match[2].trim();
+  const frontmatter = match[1]!;
+  body = match[2]!.trim();
 
   for (const line of frontmatter.split('\n')) {
     const colonIdx = line.indexOf(':');
@@ -66,7 +66,7 @@ export function parseFrontmatter(
     // Parse inline arrays: [a, b, c]
     const arrayMatch = value.match(/^\[(.+)\]$/);
     if (arrayMatch) {
-      meta[key] = arrayMatch[1].split(',').map((s) => s.trim()).filter(Boolean);
+      meta[key] = arrayMatch[1]!.split(',').map((s) => s.trim()).filter(Boolean);
     } else {
       meta[key] = value;
     }

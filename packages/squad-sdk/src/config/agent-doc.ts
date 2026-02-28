@@ -77,7 +77,7 @@ export function parseAgentDoc(markdown: string): AgentDocMetadata {
   // Try to extract the agent name from the first H1 heading
   const h1Match = markdown.match(/^#\s+(.+)/m);
   if (h1Match) {
-    result.name = h1Match[1].trim();
+    result.name = h1Match[1]!.trim();
   }
 
   // Split into sections by ## headings
@@ -127,7 +127,7 @@ function splitSections(markdown: string): [string, string][] {
 
   while ((match = regex.exec(markdown)) !== null) {
     indices.push({
-      heading: match[1],
+      heading: match[1]!,
       start: match.index + match[0].length,
       end: markdown.length, // will be narrowed below
     });
@@ -138,11 +138,11 @@ function splitSections(markdown: string): [string, string][] {
       // Body runs until the next ## heading line starts
       const nextHeadingPos = markdown.lastIndexOf(
         '\n',
-        markdown.indexOf(`## ${indices[i + 1].heading}`, indices[i].start),
+        markdown.indexOf(`## ${indices[i + 1]!.heading}`, indices[i]!.start),
       );
-      indices[i].end = nextHeadingPos >= 0 ? nextHeadingPos : indices[i + 1].start;
+      indices[i]!.end = nextHeadingPos >= 0 ? nextHeadingPos : indices[i + 1]!.start;
     }
-    results.push([indices[i].heading, markdown.slice(indices[i].start, indices[i].end)]);
+    results.push([indices[i]!.heading, markdown.slice(indices[i]!.start, indices[i]!.end)]);
   }
 
   return results;
@@ -156,7 +156,7 @@ function parseBulletList(text: string): string[] {
   for (const line of text.split('\n')) {
     const m = line.match(/^\s*[-*]\s+(.+)/);
     if (m) {
-      items.push(m[1].trim());
+      items.push(m[1]!.trim());
     }
   }
   return items;
@@ -170,7 +170,7 @@ function parseIdentitySection(body: string, result: AgentDocMetadata): void {
   // Identity Name always takes precedence over H1 heading
   const nameMatch = body.match(/\*?\*?Name:?\*?\*?\s*(.+)/i);
   if (nameMatch) {
-    result.name = nameMatch[1].trim();
+    result.name = nameMatch[1]!.trim();
   }
 
   // **Description:** or **Role:**
@@ -178,7 +178,7 @@ function parseIdentitySection(body: string, result: AgentDocMetadata): void {
     body.match(/\*?\*?Description:?\*?\*?\s*(.+)/i) ??
     body.match(/\*?\*?Role:?\*?\*?\s*(.+)/i);
   if (descMatch) {
-    result.description = descMatch[1].trim();
+    result.description = descMatch[1]!.trim();
   }
 
   // Model preference inside identity
@@ -193,7 +193,7 @@ function parseModelHints(text: string, result: AgentDocMetadata): void {
   const modelLine =
     text.match(/\*?\*?(?:Preferred\s+)?Model:?\*?\*?\s*(.+)/i);
   if (modelLine) {
-    const models = modelLine[1]
+    const models = modelLine[1]!
       .split(/[,;]/)
       .map((m) => m.trim())
       .filter((m) => m.length > 0);

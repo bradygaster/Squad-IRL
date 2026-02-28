@@ -113,7 +113,7 @@ export function generateMigrationInstructions(from: InstallMethod, to: InstallMe
   }
 
   for (let i = 0; i < plan.steps.length; i++) {
-    const step = plan.steps[i];
+    const step = plan.steps[i]!;
     lines.push(`${i + 1}. ${step.description}`);
     if (step.command) {
       lines.push('');

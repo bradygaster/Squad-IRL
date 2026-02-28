@@ -1,5 +1,8 @@
 # SDK Integration Guide
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Issue:** #34 (M0-10)
 
 ---

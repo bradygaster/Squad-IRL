@@ -1,5 +1,8 @@
 # Migration Guide — v0.5.1 → v0.6.0
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 > **⚠️ INTERNAL ONLY — DO NOT PUBLISH**
 
 **Issue:** #41 (M6-2)

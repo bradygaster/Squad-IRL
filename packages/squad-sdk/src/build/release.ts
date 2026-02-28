@@ -205,7 +205,7 @@ export function validateRelease(manifest: ReleaseManifest): ReleaseValidationErr
     errors.push({ field: 'artifacts', message: 'Artifacts must be an array', severity: 'error' });
   } else {
     for (let i = 0; i < manifest.artifacts.length; i++) {
-      const a = manifest.artifacts[i];
+      const a = manifest.artifacts[i]!;
       if (!a.name) {
         errors.push({ field: `artifacts[${i}].name`, message: 'Artifact name is required', severity: 'error' });
       }

@@ -325,7 +325,7 @@ export class AgentLifecycleManager {
    */
   private extractModelPreference(charterContent: string): string | undefined {
     const modelMatch = charterContent.match(/##\s+Model\s*\n[\s\S]*?\*\*Preferred:\*\*\s*(.+)/i);
-    return modelMatch ? modelMatch[1].trim() : undefined;
+    return modelMatch ? modelMatch[1]!.trim() : undefined;
   }
 }
 

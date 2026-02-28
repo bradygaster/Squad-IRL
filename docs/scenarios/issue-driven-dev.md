@@ -1,5 +1,8 @@
 # Issue-Driven Development with Squad
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this:**
 ```
 Connect to myorg/recipe-app

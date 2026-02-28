@@ -213,7 +213,7 @@ export function mergeLegacyWithConfig(
     config.models.defaultModel === DEFAULT_CONFIG.models.defaultModel
   ) {
     // Only use legacy model if config still has the default
-    mergedModels.defaultModel = legacy.modelPreferences[0];
+    mergedModels.defaultModel = legacy.modelPreferences[0]!;
   }
 
   // Build merged routing
@@ -265,7 +265,7 @@ function extractAgentDefs(
   let match: RegExpExecArray | null;
 
   while ((match = sectionPattern.exec(content)) !== null) {
-    const name = match[1].toLowerCase();
+    const name = match[1]!.toLowerCase();
     const role = match[2]?.trim();
     if (!seen.has(name) && name.length > 1) {
       seen.add(name);
@@ -276,8 +276,8 @@ function extractAgentDefs(
   // Pattern 2: **Name** — Role (bold name with dash)
   const boldPattern = /\*\*(\w+)\*\*\s*[-—]\s*(.+)/g;
   while ((match = boldPattern.exec(content)) !== null) {
-    const name = match[1].toLowerCase();
-    const role = match[2].trim();
+    const name = match[1]!.toLowerCase();
+    const role = match[2]!.trim();
     if (!seen.has(name) && name.length > 1) {
       seen.add(name);
       agents.push({ name, role });

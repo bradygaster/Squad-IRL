@@ -50,10 +50,10 @@ export function readInstalledVersion(filePath: string): string | null {
     const content = fs.readFileSync(filePath, 'utf8');
     // Try to read from HTML comment first (new format)
     const commentMatch = content.match(/<!-- version: ([0-9.]+(?:-[a-z]+)?) -->/);
-    if (commentMatch) return commentMatch[1];
+    if (commentMatch) return commentMatch[1]!;
     // Fallback: try old frontmatter format for backward compatibility during upgrade
     const frontmatterMatch = content.match(/^version:\s*"([^"]+)"/m);
-    return frontmatterMatch ? frontmatterMatch[1] : '0.0.0';
+    return frontmatterMatch ? frontmatterMatch[1]! : '0.0.0';
   } catch {
     return '0.0.0';
   }

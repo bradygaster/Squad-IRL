@@ -293,10 +293,69 @@ ${BOLD}EXAMPLES${RESET}
   ${DIM}# Force Docker mode${RESET}
   squad aspire --docker
 `,
+    upstream: `
+${BOLD}squad upstream${RESET} — Manage Upstream Squad Sources
+
+${BOLD}USAGE${RESET}
+  squad upstream add <source> [--name <name>] [--ref <branch>]
+  squad upstream remove <name>
+  squad upstream list
+  squad upstream sync [name]
+
+${BOLD}DESCRIPTION${RESET}
+  Manage upstream Squad sources — external configurations from local
+  directories, git repositories, or export files that can be synced
+  into your squad.
+
+${BOLD}OPTIONS${RESET}
+  add <source>          Add an upstream (path, git URL, or .json export)
+    --name <name>       Custom name (auto-derived if omitted)
+    --ref <branch>      Git branch/tag (default: main)
+  remove <name>         Remove an upstream by name
+  list                  Show all configured upstreams
+  sync [name]           Sync all or a specific upstream
+
+${BOLD}EXAMPLES${RESET}
+  ${DIM}# Add a git upstream${RESET}
+  squad upstream add https://github.com/org/squad-config.git
+
+  ${DIM}# Add a local upstream with custom name${RESET}
+  squad upstream add ../shared-squad --name shared
+
+  ${DIM}# Sync all upstreams${RESET}
+  squad upstream sync
+`,
+    shell: `
+${BOLD}squad shell${RESET} — Launch Interactive Shell
+
+${BOLD}USAGE${RESET}
+  squad shell [--preview] [--timeout <seconds>]
+
+${BOLD}DESCRIPTION${RESET}
+  Starts the interactive Squad REPL. Messages are routed to the
+  right agent automatically based on content and team expertise.
+
+${BOLD}OPTIONS${RESET}
+  --preview              Show team summary without launching shell
+  --timeout <seconds>    Set REPL inactivity timeout (default: 600)
+
+${BOLD}EXAMPLES${RESET}
+  ${DIM}# Start interactive shell${RESET}
+  squad shell
+
+  ${DIM}# Preview team before launching${RESET}
+  squad shell --preview
+`,
   };
 
-  // Handle 'watch' alias → triage
-  const key = cmd === 'watch' ? 'triage' : cmd;
+  // Handle aliases
+  const aliases: Record<string, string> = {
+    watch: 'triage',
+    loop: 'triage',
+    hire: 'init',
+    heartbeat: 'doctor',
+  };
+  const key = aliases[cmd] ?? cmd;
   return help[key];
 }
 
@@ -348,8 +407,6 @@ async function main(): Promise<void> {
 
     console.log(`\n${BOLD}Development${RESET}`);
     console.log(`  ${BOLD}shell${RESET}          Launch interactive shell`);
-    console.log(`  ${BOLD}run${RESET}            Send a message to a specific agent`);
-    console.log(`                 <agent> [prompt]`);
 
     console.log(`\n${BOLD}Team Management${RESET}`);
     console.log(`  ${BOLD}triage${RESET}         Watch issues and auto-triage ${DIM}(alias: watch, loop)${RESET}`);
@@ -512,7 +569,6 @@ async function main(): Promise<void> {
     const { migrateDirectory } = await import('./cli/core/migrate-directory.js');
     
     const migrateDir = args.includes('--migrate-directory');
-    const selfUpgrade = args.includes('--self');
     const dest = hasGlobal ? resolveGlobalSquadPath() : process.cwd();
     
     // Handle --migrate-directory flag
@@ -524,7 +580,6 @@ async function main(): Promise<void> {
     // Run upgrade
     await runUpgrade(dest, { 
       migrateDirectory: migrateDir,
-      self: selfUpgrade
     });
     
     return;
@@ -641,16 +696,6 @@ async function main(): Promise<void> {
     return;
   }
 
-  // run <agent> [prompt] → send a message to a specific agent (#504)
-  if (cmd === 'run') {
-    const agent = args[1];
-    if (!agent) {
-      fatal('Run: squad run <agent> [prompt]');
-    }
-    console.log(`Coming soon — use the REPL shell to interact with agents: ${BOLD}squad${RESET}`);
-    return;
-  }
-
   // Unknown command
   fatal(`Unknown command: ${cmd}. Run 'squad help' for commands.`);
 }
@@ -663,6 +708,10 @@ main().catch(err => {
     const msg = err instanceof Error ? err.message : String(err);
     const friendly = msg.replace(/^Error:\s*/i, '');
     console.error(`${RED}✗${RESET} ${friendly}`);
+    // Show stack trace only when SQUAD_DEBUG is enabled
+    if (process.env['SQUAD_DEBUG'] === '1' && err instanceof Error && err.stack) {
+      console.error(`\n${DIM}${err.stack}${RESET}`);
+    }
   }
   console.error(`\n${DIM}Tip: Run 'squad doctor' for help. Set SQUAD_DEBUG=1 for details.${RESET}`);
   process.exit(1);

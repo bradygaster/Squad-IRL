@@ -1,5 +1,8 @@
 # Team Setup & Init Mode
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to initialize for a specific stack:**
 ```
 Set up a team for a React + Node.js API with PostgreSQL

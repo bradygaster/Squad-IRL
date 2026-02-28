@@ -1,0 +1,6 @@
+{
+  "version": "1.0",
+  "invalid-json": true,
+  missing-value: 123,
+  "trailing-comma": "test",
+}

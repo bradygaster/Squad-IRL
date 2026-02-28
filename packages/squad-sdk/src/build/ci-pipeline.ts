@@ -186,7 +186,7 @@ export function validatePipelineConfig(config: CIPipelineConfig): PipelineValida
     errors.push('Pipeline must have at least one step');
   } else {
     for (let i = 0; i < config.steps.length; i++) {
-      const step = config.steps[i];
+      const step = config.steps[i]!;
       if (!step.name) errors.push(`Step ${i} missing name`);
       if (!step.command) errors.push(`Step ${i} missing command`);
     }

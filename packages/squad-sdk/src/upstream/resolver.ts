@@ -135,7 +135,7 @@ function resolveFromExport(name: string, exportPath: string): ResolvedUpstream {
     if (Array.isArray(manifest.skills)) {
       for (const skillContent of manifest.skills) {
         const nameMatch = skillContent.match(/^name:\s*["']?(.+?)["']?\s*$/m);
-        const skillName = nameMatch ? nameMatch[1].trim() : 'unknown';
+        const skillName = nameMatch ? nameMatch[1]!.trim() : 'unknown';
         resolved.skills.push({ name: skillName, content: skillContent });
       }
     }

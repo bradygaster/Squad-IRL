@@ -119,7 +119,7 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
     if (key.upArrow && history.length > 0) {
       const newIndex = historyIndex === -1 ? history.length - 1 : Math.max(0, historyIndex - 1);
       setHistoryIndex(newIndex);
-      setValue(history[newIndex]);
+      setValue(history[newIndex]!);
       return;
     }
     
@@ -131,7 +131,7 @@ export const InputPrompt: React.FC<InputPromptProps> = ({
           setValue('');
         } else {
           setHistoryIndex(newIndex);
-          setValue(history[newIndex]);
+          setValue(history[newIndex]!);
         }
       }
       return;

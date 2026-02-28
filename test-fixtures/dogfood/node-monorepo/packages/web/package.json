@@ -1,0 +1,13 @@
+{
+  "name": "@mono/web",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "tsc",
+    "dev": "vite",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "react": "^18.0.0",
+    "@mono/core": "workspace:*"
+  }
+}

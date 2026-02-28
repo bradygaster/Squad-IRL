@@ -184,8 +184,8 @@ export function parseTeamMarkdown(content: string): { agents: ParsedAgent[]; war
       // Match patterns like: - **Role:** Lead, - Role: Lead, * **Skills:** x, y
       const kvMatch = trimmed.match(/^[-*]*\s*\*{0,2}(role|skills?|model|status|preferred\s*model|aliases?|auto[-\s]*assign)\s*:?\s*\*{0,2}\s*:?\s*(.+)/i);
       if (kvMatch) {
-        const key = kvMatch[1].toLowerCase().replace(/[\s-]+/g, '');
-        const value = kvMatch[2].replace(/^\*+\s*/, '').trim();
+        const key = kvMatch[1]!.toLowerCase().replace(/[\s-]+/g, '');
+        const value = kvMatch[2]!.replace(/^\*+\s*/, '').trim();
 
         switch (key) {
           case 'role':
@@ -332,10 +332,10 @@ export function parseRoutingRulesMarkdown(
       const cells = trimmed.split('|').map((c) => c.trim()).filter(Boolean);
       if (cells.length >= 2) {
         const workType = cells[0];
-        const agents = cells[1].split(',').map((a) => a.trim()).filter(Boolean);
+        const agents = cells[1]!.split(',').map((a) => a.trim()).filter(Boolean);
         const examples =
           cells.length >= 3
-            ? cells[2].split(',').map((e) => e.trim()).filter(Boolean)
+            ? cells[2]!.split(',').map((e) => e.trim()).filter(Boolean)
             : undefined;
 
         if (workType && agents.length > 0) {
@@ -396,7 +396,7 @@ export function parseDecisionsMarkdown(
       for (const bl of bodyLines) {
         const authorMatch = bl.trim().match(AUTHOR_LINE);
         if (authorMatch) {
-          author = authorMatch[1].trim();
+          author = authorMatch[1]!.trim();
           break;
         }
       }
@@ -420,15 +420,15 @@ export function parseDecisionsMarkdown(
     const headingMatch = trimmed.match(/^(###?)\s+(.+)/);
     if (headingMatch) {
       flush();
-      const hashes = headingMatch[1];
-      let titleText = headingMatch[2];
+      const hashes = headingMatch[1]!;
+      let titleText: string = headingMatch[2]!;
       currentHeadingLevel = hashes.length;
 
       // Extract date from heading like "### 2026-02-21: Title"
       const dateMatch = titleText.match(DATE_IN_HEADING);
       if (dateMatch) {
         currentDate = dateMatch[1];
-        titleText = dateMatch[2];
+        titleText = dateMatch[2]!;
       }
 
       currentTitle = titleText;

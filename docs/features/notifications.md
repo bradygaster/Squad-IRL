@@ -1,5 +1,8 @@
 # Squad Pings You
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to get notified on completion:**
 ```
 Notify me when the build finishes

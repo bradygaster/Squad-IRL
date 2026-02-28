@@ -96,7 +96,7 @@ export async function upstreamCommand(args: string[]): Promise<void> {
 
     const type = detectSourceType(source);
     const nameIdx = args.indexOf('--name');
-    const name = (nameIdx !== -1 && args[nameIdx + 1]) ? args[nameIdx + 1] : deriveName(source, type);
+    const name = (nameIdx !== -1 && args[nameIdx + 1]) ? args[nameIdx + 1]! : deriveName(source, type);
     if (!isValidUpstreamName(name)) {
       fatal(`Invalid upstream name "${name}". Use only alphanumeric characters, hyphens, underscores, and dots.`);
     }
@@ -116,7 +116,7 @@ export async function upstreamCommand(args: string[]): Promise<void> {
     };
     if (type === 'git') {
       const refIdx = args.indexOf('--ref');
-      const ref = (refIdx !== -1 && args[refIdx + 1]) ? args[refIdx + 1] : 'main';
+      const ref = (refIdx !== -1 && args[refIdx + 1]) ? args[refIdx + 1]! : 'main';
       if (!isValidGitRef(ref)) {
         fatal(`Invalid git ref "${ref}". Use only alphanumeric characters, hyphens, underscores, dots, and slashes.`);
       }

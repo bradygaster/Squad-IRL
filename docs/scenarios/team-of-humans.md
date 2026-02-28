@@ -1,5 +1,8 @@
 # Squad Alongside a Team of Human Developers
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this:**
 ```
 My team is all human devs — I just want Squad to help with coordination and memory

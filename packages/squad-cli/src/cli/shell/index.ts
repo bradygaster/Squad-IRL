@@ -126,6 +126,14 @@ export async function withGhostRetry(
 }
 
 export async function runShell(): Promise<void> {
+  // Ink requires a TTY for raw mode input — bail out early when piped (#576)
+  if (!process.stdin.isTTY) {
+    console.error('✗ Squad shell requires an interactive terminal (TTY).');
+    console.error('  Piped or redirected stdin is not supported.');
+    console.error("  Tip: Run 'squad --preview' for non-interactive usage.");
+    process.exit(1);
+  }
+
   // Show immediate feedback — users need to see something within 100ms
   console.error('◆ Loading Squad shell...');
 
@@ -158,7 +166,7 @@ export async function runShell(): Promise<void> {
   // Initialize OpenTelemetry if endpoint is configured (e.g. Aspire dashboard)
   const telemetry = initSquadTelemetry({ serviceName: 'squad-cli', mode: 'cli' });
   if (telemetry.tracing || telemetry.metrics) {
-    console.error('🔭 Telemetry active — exporting to ' + process.env['OTEL_EXPORTER_OTLP_ENDPOINT']);
+    debugLog('🔭 Telemetry active — exporting to ' + process.env['OTEL_EXPORTER_OTLP_ENDPOINT']);
   }
 
   // Shell-level observability metrics (opt-in via SQUAD_TELEMETRY=1)
@@ -632,8 +640,10 @@ export async function runShell(): Promise<void> {
       recordShellError('dispatch', err instanceof Error ? err.constructor.name : 'unknown');
       const errorMsg = err instanceof Error ? err.message : String(err);
       const friendly = errorMsg.replace(/^Error:\s*/i, '');
+      // Only show raw error detail when SQUAD_DEBUG=1; otherwise keep it generic
+      const detail = process.env['SQUAD_DEBUG'] === '1' ? friendly : 'Something went wrong processing your message.';
       if (shellApi) {
-        const guidance = genericGuidance(friendly);
+        const guidance = genericGuidance(detail);
         shellApi.addMessage({
           role: 'system',
           content: formatGuidance(guidance),

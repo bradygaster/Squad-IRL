@@ -92,7 +92,7 @@ export async function spawnParallel(
       // Rejection from spawnSingle shouldn't happen (it catches internally),
       // but handle defensively
       return {
-        agentName: configs[index].agentName,
+        agentName: configs[index]!.agentName,
         status: 'failed' as const,
         error: result.reason?.message || String(result.reason),
         startTime: new Date(),

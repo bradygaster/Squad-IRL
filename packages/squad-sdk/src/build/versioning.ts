@@ -22,7 +22,7 @@ export interface ConventionalCommit {
  * Parse a conventional commit message into structured parts.
  */
 export function parseConventionalCommit(message: string): ConventionalCommit {
-  const line = message.split('\n')[0].trim();
+  const line = message.split('\n')[0]!.trim();
 
   // Match: type(scope)!: description  or  type!: description  or  type: description
   const match = line.match(/^(\w+)(?:\(([^)]*)\))?(!)?\s*:\s*(.+)$/);
@@ -34,9 +34,9 @@ export function parseConventionalCommit(message: string): ConventionalCommit {
   const breaking = bang === '!' || /^BREAKING[ -]CHANGE\b/i.test(message);
 
   return {
-    type: type.toLowerCase(),
+    type: type!.toLowerCase(),
     scope: scope ?? null,
-    description: description.trim(),
+    description: description!.trim(),
     breaking,
   };
 }
@@ -54,9 +54,9 @@ export function bumpVersion(current: string, type: 'major' | 'minor' | 'patch' |
   }
 
   let [, majorStr, minorStr, patchStr, preTag, preNum] = prereleaseMatch;
-  let major = parseInt(majorStr, 10);
-  let minor = parseInt(minorStr, 10);
-  let patch = parseInt(patchStr, 10);
+  let major = parseInt(majorStr!, 10);
+  let minor = parseInt(minorStr!, 10);
+  let patch = parseInt(patchStr!, 10);
 
   switch (type) {
     case 'major':

@@ -1,5 +1,8 @@
 # Sample Prompts
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Copy any of these, open Copilot, select Squad, and paste.** Each one is a ready-to-go project that shows a different Squad capability.
 
 ---

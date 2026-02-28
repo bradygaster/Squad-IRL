@@ -5,6 +5,8 @@
 [![Status](https://img.shields.io/badge/status-alpha-blueviolet)](#status)
 [![Platform](https://img.shields.io/badge/platform-GitHub%20Copilot-blue)](#about-squad)
 
+> ⚠️ **Alpha Software** — Squad is experimental. APIs and CLI commands may change between releases. We'll document breaking changes in [CHANGELOG.md](CHANGELOG.md).
+
 ---
 
 ## What is Squad?
@@ -59,25 +61,24 @@ Squad proposes a team — each member named from a persistent thematic cast. You
 
 ---
 
-## All Commands (16 commands)
+## All Commands (15 commands)
 
 | Command | What it does |
 |---------|-------------|
-| `squad init` | **Init** — scaffold Squad in the current directory (idempotent — safe to run multiple times); use `--global` to init in personal squad directory |
-| `squad init --mode remote <path>` | Initialize linked to a remote team root (dual-root mode — project state in `.squad/`, team identity in a shared location) |
-| `squad upgrade` | Update Squad-owned files to latest; never touches your team state; use `--global` to upgrade personal squad |
-| `squad upgrade --migrate-directory` | Rename `.ai-team/` → `.squad/` (legacy migration) |
+| `squad init` | **Init** — scaffold Squad in the current directory (idempotent — safe to run multiple times); use `--global` to init in personal squad directory, `--mode remote <path>` for dual-root mode |
+| `squad upgrade` | Update Squad-owned files to latest; never touches your team state; use `--global` to upgrade personal squad, `--migrate-directory` to rename `.ai-team/` → `.squad/` |
 | `squad status` | Show which squad is active and why |
-| `squad triage` | Watch issues and auto-triage to team (`watch` is an alias); use `--interval <minutes>` to set polling frequency (default: 10) |
+| `squad triage` | Watch issues and auto-triage to team (`watch` and `loop` are aliases); use `--interval <minutes>` to set polling frequency (default: 10) |
 | `squad copilot` | Add the Copilot coding agent (@copilot) to your squad |
 | `squad plugin marketplace add\|remove\|list\|browse` | Manage plugin marketplaces |
 | `squad export` | Export squad to a portable JSON snapshot |
 | `squad import <file>` | Import squad from an export file |
-| `squad doctor` | Check your setup and diagnose issues |
+| `squad doctor` | Check your setup and diagnose issues (`heartbeat` is an alias) |
 | `squad link <team-repo-path>` | Connect to a remote team |
 | `squad aspire` | Open Aspire dashboard for observability |
 | `squad upstream add\|remove\|list\|sync` | Manage upstream Squad sources |
 | `squad shell` | Launch interactive shell explicitly |
+| `squad run <agent> [prompt]` | Send a message to a specific agent |
 | `squad scrub-emails [directory]` | Remove email addresses from Squad state files (default: `.squad/`) |
 
 ---

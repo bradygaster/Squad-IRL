@@ -1,5 +1,8 @@
 # Label Taxonomy
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to apply workflow labels:**
 ```
 Apply the go:yes label to issue #42 and target it for v0.5.0

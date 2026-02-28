@@ -20,7 +20,6 @@ const currentDir = dirname(currentFile);
 
 export interface UpgradeOptions {
   migrateDirectory?: boolean;
-  self?: boolean;
 }
 
 export interface UpdateInfo {
@@ -40,11 +39,11 @@ function readInstalledVersion(agentPath: string): string {
     
     // Try HTML comment first (new format)
     const commentMatch = content.match(/<!-- version: ([0-9.]+(?:-[a-z]+(?:\.\d+)?)?) -->/);
-    if (commentMatch) return commentMatch[1];
+    if (commentMatch) return commentMatch[1]!;
     
     // Fallback to frontmatter (old format)
     const frontmatterMatch = content.match(/^version:\s*"([^"]+)"/m);
-    return frontmatterMatch ? frontmatterMatch[1] : '0.0.0';
+    return frontmatterMatch ? frontmatterMatch[1]! : '0.0.0';
   } catch {
     return '0.0.0';
   }
@@ -54,7 +53,7 @@ function readInstalledVersion(agentPath: string): string {
  * Compare semver strings: -1 (a<b), 0 (a==b), 1 (a>b)
  */
 function compareSemver(a: string, b: string): number {
-  const stripPre = (v: string) => v.split('-')[0];
+  const stripPre = (v: string) => v.split('-')[0]!;
   const pa = stripPre(a).split('.').map(Number);
   const pb = stripPre(b).split('.').map(Number);
   

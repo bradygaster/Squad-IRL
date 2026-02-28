@@ -1,5 +1,8 @@
 # Per-Agent Model Selection
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 **Try this to prioritize quality for the session:**
 ```
 Have all agents use Opus for the rest of this session

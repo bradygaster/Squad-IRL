@@ -8,6 +8,9 @@ status: published
 hero: "amolchanov shipped the worktree foundation in PR #1. We never wrote it up. This fixes that."
 ---
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 amolchanov shipped the worktree foundation in PR #1. We never wrote it up. This fixes that.
 
 ## What Shipped

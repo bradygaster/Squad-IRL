@@ -10,6 +10,9 @@ hero: "We built an interactive shell that makes you forget you're talking to age
 
 # Wave 2: The REPL Moment
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 > _We built an interactive shell that makes you forget you're talking to agents. Then we found a command injection vulnerability and fixed it the same day._
 
 ## The Wow Moment

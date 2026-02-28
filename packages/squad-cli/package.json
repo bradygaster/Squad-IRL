@@ -126,7 +126,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "@bradygaster/squad-sdk": "workspace:*",
+    "@bradygaster/squad-sdk": "*",
     "ink": "^6.8.0",
     "react": "^19.2.4"
   },
@@ -144,6 +144,10 @@
     "cli"
   ],
   "license": "MIT",
+  "homepage": "https://github.com/bradygaster/squad-pr#readme",
+  "bugs": {
+    "url": "https://github.com/bradygaster/squad-pr/issues"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/bradygaster/squad.git",

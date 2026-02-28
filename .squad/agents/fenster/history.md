@@ -494,6 +494,10 @@ The upstream.ts command was fully implemented but never wired into cli-entry.ts.
 - The `watch` → `triage` alias needs explicit handling in the help lookup (not just in the routing)
 - PR #533 on branch `squad/511-per-command-help`, closes #511 and #512
 
+### 2026-02-28: CLI command test coverage analysis — 4 critical, 10 moderate gaps
+📌 Team update (2026-02-28T01:05:24Z): Exhaustive CLI command test coverage analysis complete. Consistency matrix created analyzing all 25 commands. Critical gaps found: --preview (undocumented, untested), --timeout (undocumented, untested), upgrade --self (dead code path), run subcommand (stub in help). Moderate gaps: untested aliases (--help/-h, --version/-v), missing per-command help (squad spawn --help, squad triage --help), flag parsing error handling, shell-specific flag behavior, config file precedence, env var fallback, timeout edge cases, agent spawn flags, REPL mode transitions, exit code consistency. Full analysis in .squad/orchestration-log/2026-02-28T01-05-24-fenster.md.
+
+
 ### 2026-02-27 : Watch PR/CI visibility added
 - Added PR polling to `watch.ts` via `ghPrList()` and `GhPullRequest` so Ralph now reports squad draft PRs, change-requested PRs, CI failures, and approved+green PRs ready to merge.
 - Kept issue triage flow intact and layered PR checks after issue handling, with an early PR check before emitting the board-clear message when no issue work is pending.
@@ -531,3 +535,48 @@ The upstream.ts command was fully implemented but never wired into cli-entry.ts.
 ### 2026-02-27 : Sync headers for duplicated templates
 - Added explicit sync notices to all three `ralph-triage.js` template copies so SDK triage parity ownership is documented in-file.
 - Added sync notices to all four `squad-heartbeat.yml` workflow copies to make multi-location maintenance requirements visible at the workflow definition header.
+
+---
+
+## 2026-02-28: Codebase Scan for Unfiled Issues
+
+**Task:** Brady requested scan of codebase for known issues not yet filed as GitHub issues.
+
+**Scope:** Checked for:
+1. TODO/FIXME/HACK/XXX comments in code
+2. TypeScript strict mode violations (@ts-ignore/@ts-expect-error)
+3. Skipped/todo tests (\.skip\(|\.todo\()
+4. Errant console.log statements
+5. Missing package.json fields
+
+**Findings:**
+
+✅ **No @ts-ignore/@ts-expect-error violations** — Strict mode compliance is solid across the codebase. Team decision on type safety is being followed faithfully.
+
+❌ **workspace:* protocol violation in squad-cli** (Issue #592 filed)
+- Location: `packages/squad-cli/package.json:129`
+- Current: `"@bradygaster/squad-sdk": "workspace:*"`
+- Violates: Team decision (2026-02-21) to use npm-native workspace resolution (version strings, not pnpm-specific protocol)
+- Fix: Replace with `"0.8.5.1"`
+
+❌ **Skipped test for SQUAD_DEBUG** (Issue #588 filed)
+- Location: `test/repl-streaming.test.ts:658`
+- Test placeholder: `it.todo('SQUAD_DEBUG env var enables diagnostic logging')`
+- Gap: No test coverage for debug mode activation
+- Needs: Implementation of diagnostic logging test case
+
+✅ **TODO comments in generated workflow templates** — Not code issues
+- Lines in `upgrade.ts` and `workflows.ts` are template strings inserted into GitHub Actions YAML files
+- These are intentional placeholders for users to fill in (build commands, release commands, etc.)
+- Correctly documented as templates, not actual code TODOs
+
+✅ **Console.log statements are intentional** — All are user-facing status/output
+- `aspire.ts`: Dashboard startup messages and OTel endpoint info
+- `copilot.ts`: Status and configuration messages
+- `watch.ts`: Error/status reporting for labeling operations
+- `shell/index.ts`: Loading and telemetry notifications
+
+✅ **Package.json fields** — Already tracked
+- Issue #583 already filed for missing `homepage` and `bugs` fields
+
+**Summary:** Codebase is clean. Type safety discipline is being maintained. Two legitimate issues filed (workspace protocol violation + skipped test). No broken or abandoned code patterns detected.

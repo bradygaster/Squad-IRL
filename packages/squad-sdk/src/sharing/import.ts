@@ -64,7 +64,7 @@ export function validateBundle(bundle: ExportBundle): BundleValidationError[] {
     errors.push({ field: 'agents', message: 'Missing or invalid agents array' });
   } else {
     for (let i = 0; i < bundle.agents.length; i++) {
-      const agent = bundle.agents[i];
+      const agent = bundle.agents[i]!;
       if (!agent.name) errors.push({ field: `agents[${i}].name`, message: 'Agent missing name' });
       if (!agent.content) errors.push({ field: `agents[${i}].content`, message: 'Agent missing content' });
     }

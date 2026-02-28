@@ -5,7 +5,97 @@
 - **Stack:** TypeScript (strict mode, ESM-only), Node.js ≥20, @github/copilot-sdk, Vitest, esbuild
 - **Created:** 2026-02-21
 
+## 📌 Core Context — McManus' Focus Areas
+
+**DevRel & Documentation:** McManus owns docs consistency audits, tone ceiling enforcement, brand compliance, user discoverability gaps, docs-as-code strategy. Decision: "Tone ceiling — always enforced. No hype, no hand-waving, no claims without citations. Every public-facing statement must be substantiated."
+
+**Recent Work (Feb 2026):**
+- Comprehensive docs audit (README, docs/ directory 62 pages, CLI help): 10 GitHub issues filed (#568–#575, #577–#578)
+- **High-priority gaps (5):** Missing `squad run` docs (#568), triage/watch/loop naming inconsistency (#569), consult mode guide sparse (#570), experimental banner missing 40+ docs (#571), Ralph smart triage routing docs missing (#572)
+- **Medium-priority gaps (3):** Response modes clarity (#573), README command count ambiguous (#574), dual-root mode guide missing (#575)
+- **Low-priority gaps (2):** VS Code integration stub (#577), session management examples missing (#578)
+- Root cause analysis: Feature-docs lag (PRs ship before docs), terminology decisions outpace updates, no brand compliance automation, advanced features lack discovery
+
+**Recommendations Recorded:**
+1. Add docs checklist to feature PRs (require docs before merge)
+2. Create doc template for new features (sections: motivation, examples, when-to-use)
+3. Add experimental banner linting (enforce via CI)
+4. Assign feature ownership to doc updates (PR + docs → same reviewer)
+5. Version docs with releases (keep whatsnew.md current)
+6. Monthly doc audit (catch drift between CLI help and user guides)
+
+**Next Sprint:** Brady to prioritize High-priority items before v1 release; McManus available for execution.
+
 ## Learnings
+
+### 📌 Team update (2026-02-28T15:34:36Z): 10 doc gaps filed + brand compliance audit completed
+- **Status:** Completed — McManus conducted comprehensive docs audit, filed 10 GitHub issues spanning feature docs, terminology, brand compliance, clarity, and reference
+- **Issues filed:** #568–#575, #577–#578 (missing `squad run` docs, consult mode guide, Ralph triage docs, triage/watch/loop naming, experimental banner, response modes clarity, dual-root guide, VS Code stub, session examples, README command count)
+- **5 High priority:** #568, #569, #570, #571, #572 (affect user discoverability and brand messaging)
+- **All labeled** for Brady triage; no broken links or stale content found
+- **Root cause identified:** Feature-docs lag (PRs ship before docs), terminology decisions outpace doc updates, no brand compliance automation
+- **Recommendations:** Add docs checklist to feature PRs, enforce experimental banner in CI, version docs with releases
+- **Impact:** Docs gaps actionable and prioritized for next sprint; compliance gaps identified before v1 release
+- **Session log:** `.squad/log/2026-02-28T15-34-36Z-issue-filing-sprint.md` — decided by Keaton, McManus, Hockney, Waingro
+
+### 2026-02-28: Documentation audit — gaps found and issues filed
+
+**Status:** Complete. 10 GitHub issues filed.
+
+**Audit scope:**
+- README.md command reference
+- docs/ directory (all guides, features, scenarios, references)
+- CLI help text (packages/squad-cli/src/cli-entry.ts)
+- User-facing guides (shell, installation, personal squad)
+
+**Key findings:**
+
+1. **Missing feature documentation (High priority):**
+   - `squad run <agent> [prompt]` command exists but help text says "Coming soon" and no docs exist (#568)
+   - Consult mode (PR #553) shipped but personal-squad.md lacks detail on what it enables (#570)
+   - Ralph's smart triage (PR #552) mentioned vaguely; no examples of routing-aware decisions (#572)
+
+2. **Naming inconsistencies (High priority):**
+   - Triage/watch/loop aliases: CLI says "triage (alias: watch, loop)" but docs use "watch" inconsistently (#569)
+   - Decision #76 recommends "triage" as primary, decision #69 recommends "loop" but users see all three
+
+3. **Experimental banner gaps (High priority):**
+   - 40+ user-facing docs missing the ⚠️ experimental banner (compliance with tone ceiling decision)
+   - Only 9 docs have it; most guides, features, and scenarios lack it (#571)
+
+4. **Clarity gaps (Medium priority):**
+   - Response modes documented but structure confusing (duplicate section, auto vs manual selection unclear) (#573)
+   - Init --mode remote (dual-root) has syntax but no guide on when/why to use (#575)
+   - Session management (/sessions, /resume) has one-liners but needs examples (#578)
+   - VS Code integration guide is a stub (#577)
+
+5. **Reference issues (Low-Medium priority):**
+   - README claims "16 commands" but count is ambiguous with aliases (#574)
+   - Some commands (like 'run') missing from README table
+
+**GitHub issues filed:**
+- #568: squad run command missing docs
+- #569: triage/watch/loop naming clarification
+- #570: consult mode guide needed
+- #571: experimental banner on 40+ docs
+- #572: Ralph smart triage documentation
+- #573: response modes clarity
+- #574: README command count inconsistency
+- #575: dual-root mode explanation
+- #577: VS Code integration stub
+- #578: session management examples
+
+**Assessment:**
+Documentation quality is solid in structure but suffers from:
+1. Lag between feature shipping (PRs #552, #553) and doc updates
+2. Inconsistent terminology (watch vs triage vs loop)
+3. Brand compliance gaps (experimental banner not pervasive)
+4. Under-documented advanced features (smart triage, consult mode, dual-root)
+
+**Recommendations:**
+- Assign feature docs to PRs at merge time (require docs before merging)
+- Use "Docs: " prefix in GitHub for visibility
+- Create a doc checklist template for feature PRs
 
 ### 2026-02-25: Ralph Documentation — Routing-aware triage and work monitoring
 

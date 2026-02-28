@@ -121,7 +121,7 @@ export function parseCoordinatorResponse(response: string): RoutingDecision {
       return {
         type: 'route',
         routes: [{
-          agent: agentMatch[1],
+          agent: agentMatch[1]!,
           task: taskMatch?.[1] ?? '',
           context: contextMatch?.[1],
         }],

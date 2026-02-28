@@ -1,5 +1,8 @@
 # Migration Guide: GitHub-native to npm
 
+> ⚠️ **Experimental** — Squad is alpha software. APIs, commands, and behavior may change between releases.
+
+
 ## Why Migrate?
 
 The Squad SDK has moved from GitHub-native distribution to npm packages. Benefits:
