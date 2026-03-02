@@ -11,7 +11,6 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve, basename } from 'node:path';
 import {
   setupConsultMode,
-  getPersonalSquadRoot,
   isConsultMode,
   PersonalSquadNotFoundError,
 } from '@bradygaster/squad-sdk';
@@ -37,7 +36,7 @@ export async function runConsult(cwd: string, args: string[]): Promise<void> {
         );
         if (isConsultMode(config)) {
           console.log('✅ Consult mode active');
-          console.log(`   Team root: ${config.teamRoot}`);
+          console.log(`   Team root: ${config.teamRoot ?? config.sourceSquad}`);
           console.log(`   Project: ${basename(cwd)}`);
         } else {
           console.log('ℹ️  Project has .squad/ but not in consult mode');

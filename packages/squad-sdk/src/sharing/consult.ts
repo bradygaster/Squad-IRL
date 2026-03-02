@@ -9,7 +9,6 @@
  *
  * Low-level utilities (used by high-level operations):
  * - detectLicense(): Identify project license type (permissive/copyleft/unknown)
- * - classifyLearnings(): Separate generic vs project-specific learnings
  * - logConsultation(): Write/append consultation log entries
  * - mergeToPersonalSquad(): Merge generic learnings to personal squad
  *
@@ -18,6 +17,7 @@
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import type { AgentHistory, HistoryEntry } from './history-split.js';
 import { resolveGlobalSquadPath } from '../resolution.js';
@@ -71,14 +71,17 @@ This project is in **consult mode**. Your personal squad has been copied into \`
  * Looks in the SDK package's templates directory.
  */
 function getSquadAgentTemplatePath(): string | null {
+  // Use fileURLToPath for cross-platform compatibility (handles Windows drive letters, URL encoding)
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  
   // Try relative to this file (in dist/)
-  const distPath = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../templates/squad.agent.md');
+  const distPath = path.resolve(currentDir, '../../templates/squad.agent.md');
   if (fs.existsSync(distPath)) {
     return distPath;
   }
   
   // Try relative to package root
-  const pkgPath = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../templates/squad.agent.md');
+  const pkgPath = path.resolve(currentDir, '../../../templates/squad.agent.md');
   if (fs.existsSync(pkgPath)) {
     return pkgPath;
   }
@@ -333,9 +336,9 @@ export async function setupConsultMode(
   const projectName = options.projectName || path.basename(projectRoot);
   const agentFile = path.resolve(projectRoot, '.github', 'agents', 'squad.agent.md');
 
-  // Check if we're in a git repository
-  const gitDir = path.resolve(projectRoot, '.git');
-  if (!fs.existsSync(gitDir)) {
+  // Check if we're in a git repository (handle worktrees/submodules where .git is a file)
+  const gitPath = path.resolve(projectRoot, '.git');
+  if (!fs.existsSync(gitPath)) {
     throw new Error('Not a git repository. Consult mode requires git.');
   }
 
@@ -363,7 +366,10 @@ export async function setupConsultMode(
     fs.cpSync(personalSquadRoot, squadDir, { recursive: true });
 
     // Write/overwrite config.json with consult: true
+    // Include SquadDirConfig fields so loadDirConfig() can read it
     const config = {
+      version: '1.0.0',
+      teamRoot: personalSquadRoot,
       consult: true,
       sourceSquad: personalSquadRoot,
       projectName,

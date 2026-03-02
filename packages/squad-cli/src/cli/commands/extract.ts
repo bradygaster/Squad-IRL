@@ -7,7 +7,7 @@
  * @module cli/commands/extract
  */
 
-import { existsSync, readFileSync, rmSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 import { resolve, basename } from 'node:path';
 import { createInterface } from 'node:readline';
 import {

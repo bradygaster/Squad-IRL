@@ -3,3 +3,5 @@
 .squad/agents/*/history.md merge=union
 .squad/log/** merge=union
 .squad/orchestration-log/** merge=union
+# Squad: union merge for append-only team state files
+.squad/decisions/decisions.md merge=union

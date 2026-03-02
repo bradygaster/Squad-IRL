@@ -10,6 +10,7 @@
 
 import { mkdir, writeFile, readFile, copyFile, readdir, appendFile, unlink } from 'fs/promises';
 import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { existsSync, cpSync, statSync, mkdirSync, writeFileSync, readFileSync, readdirSync } from 'fs';
 import { MODELS } from '../runtime/constants.js';
 import type { SquadConfig, ModelSelectionConfig, RoutingConfig } from '../runtime/config.js';
@@ -22,14 +23,17 @@ import type { SquadConfig, ModelSelectionConfig, RoutingConfig } from '../runtim
  * Get the SDK templates directory path.
  */
 export function getSDKTemplatesDir(): string | null {
+  // Use fileURLToPath for cross-platform compatibility (handles Windows drive letters, URL encoding)
+  const currentDir = dirname(fileURLToPath(import.meta.url));
+  
   // Try relative to this file (in dist/)
-  const distPath = join(dirname(new URL(import.meta.url).pathname), '../../templates');
+  const distPath = join(currentDir, '../../templates');
   if (existsSync(distPath)) {
     return distPath;
   }
   
   // Try relative to package root (for dev)
-  const pkgPath = join(dirname(new URL(import.meta.url).pathname), '../../../templates');
+  const pkgPath = join(currentDir, '../../../templates');
   if (existsSync(pkgPath)) {
     return pkgPath;
   }
@@ -45,7 +49,6 @@ function copyRecursiveSync(src: string, dest: string): void {
     mkdirSync(dest, { recursive: true });
   }
   
-  const entries = readFileSync !== undefined ? undefined : undefined; // Type check
   for (const entry of statSync(src).isDirectory() ? readdirSync(src) : []) {
     const srcPath = join(src, entry);
     const destPath = join(dest, entry);
@@ -631,7 +634,7 @@ No decisions recorded yet.
   
   const gitattributesPath = join(teamRoot, '.gitattributes');
   const unionRules = [
-    '.squad/decisions.md merge=union',
+    '.squad/decisions/decisions.md merge=union',
     '.squad/agents/*/history.md merge=union',
     '.squad/log/** merge=union',
     '.squad/orchestration-log/** merge=union',

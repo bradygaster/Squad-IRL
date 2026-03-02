@@ -154,7 +154,7 @@ describe('Squad Initialization', () => {
 
       const content = await readFile(gitattributesPath, 'utf-8');
       expect(content).toContain('history.md merge=union');
-      expect(content).toContain('.squad/decisions.md merge=union');
+      expect(content).toContain('.squad/decisions/decisions.md merge=union');
     });
 
     it('should create initial decisions.md', async () => {
