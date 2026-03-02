@@ -55,13 +55,13 @@ Here's the part that's hard to say with a straight face: the team that has to wo
 
 ## What We Learned
 
-- **The `files` field in `package.json` is respected by `npx github:` installs.** This wasn't obvious — npm downloads the full GitHub tarball via `codeload.github.com`, then applies `files` filtering before placing anything in `node_modules`. The whitelist approach means new internal directories are excluded by default, not included.
+- **The `files` field in `package.json` is respected by npm installs.** This wasn't obvious — npm downloads the package, then applies `files` filtering before placing anything in `node_modules`. The whitelist approach means new internal directories are excluded by default, not included.
 - **`.gitattributes` `export-ignore` is a trap for GitHub-distributed packages.** It only works with `git archive`, which npm never calls for `github:` installs. We almost added it before Kobayashi caught the discrepancy. Common misconception, now debunked.
 - **Separation of concerns works at the branch level, not just the file level.** The `files` field protects users. The branch strategy protects the repo's legibility. Both matter, for different audiences.
 
 ## What's Next
 
-Kobayashi's release workflow is built. The first release tag (`v0.1.0`) is waiting on Brady's go-ahead. Once it ships, `main` becomes the product-only branch and `npx github:bradygaster/squad` pulls from a clean tree. The Squad Squad keeps working on `dev`, in public, where anyone can watch.
+Kobayashi's release workflow is built. The first release tag (`v0.1.0`) is waiting on Brady's go-ahead. Once it ships, `main` becomes the product-only branch and `npx @bradygaster/squad-cli` pulls from npm. The Squad Squad keeps working on `dev`, in public, where anyone can watch.
 
 ---
 

@@ -81,16 +81,14 @@ Executes: node .../dist/cli-entry.js ["init"]
 
 Same execution flow as global install, but no persistent disk footprint.
 
-### GitHub Native (Development)
+### GitHub Native (Legacy — no longer supported)
 
 ```
 $ squad init
     ↓
-npx resolves github:bradygaster/squad → https://github.com/bradygaster/squad-pr.git#main
+npx resolves @bradygaster/squad-cli from npm registry
     ↓
-git clone https://github.com/bradygaster/squad-pr.git → /tmp/
-    ↓
-npm install (in clone)
+npm install (cached)
     ↓
 npm run build
     ↓

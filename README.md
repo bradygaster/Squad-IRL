@@ -33,7 +33,7 @@ npm install --save-dev @bradygaster/squad-cli
 npx squad init
 ```
 
-**Prefer GitHub-native?** You can still use `npx github:bradygaster/squad-pr`, though npm is recommended for faster installs and better dependency management. See [Migration Guide](docs/migration-github-to-npm.md) for context.
+**Or use npx (no install):** `npx @bradygaster/squad-cli` — see [Migration Guide](docs/migration-github-to-npm.md) if upgrading from the old GitHub-native distribution.
 
 ### 3. Authenticate with GitHub (for Issues, PRs, and Ralph)
 
@@ -147,21 +147,13 @@ Want the latest features before they ship?
 npm install --save-dev @bradygaster/squad-cli@insider
 ```
 
-Or with legacy GitHub-native distribution:
+For insider builds:
 
 ```bash
-npx github:bradygaster/squad-pr#insider
+npm install -g @bradygaster/squad-cli@insider
 ```
 
-### Legacy: GitHub-native Distribution
-
-If you prefer not to use npm, the original GitHub-native distribution is still available:
-
-```bash
-npx github:bradygaster/squad-pr
-```
-
-This resolves the package directly via git+ssh. Most users should prefer the npm approach above for faster installs and simpler dependency management. See [Migration Guide: GitHub-native to npm](docs/migration-github-to-npm.md) for more details.
+> **Note:** GitHub-native distribution (`npx github:bradygaster/squad`) has been removed. All distribution is now via npm. See [Migration Guide](docs/migration-github-to-npm.md) if upgrading from the old path.
 
 ---
 
@@ -661,7 +653,7 @@ npm run lint           # Type check (tsc --noEmit)
 - **GitHub Copilot CLI & VS Code** — Squad works on both CLI and VS Code
 - **`gh` CLI required** — GitHub Issues, PRs, Ralph, and Project Boards all need `gh auth login`
 - **Knowledge grows with use** — the first session is the least capable; agents improve as they accumulate history
-- **SSH agent required for install** — `npx github:bradygaster/squad-sdk` resolves via `git+ssh://`. If no SSH agent is running, npm's progress spinner hides git's passphrase prompt, making install appear frozen. Fix: start your SSH agent first (`ssh-add`), or use `npx --progress=false github:bradygaster/squad-sdk`
+- **npm distribution only** — Install via `npm install -g @bradygaster/squad-cli` or `npx @bradygaster/squad-cli`. GitHub-native distribution (`npx github:`) is no longer supported.
 
 ---
 

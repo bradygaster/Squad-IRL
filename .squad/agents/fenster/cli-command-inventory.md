@@ -869,8 +869,8 @@ FILES
 ## Zero-Dependency Entry Point (cli.js)
 
 **Location:** `C:\src\squad-pr\cli.js` (repo root)  
-**Purpose:** Bundled zero-dep shim for `npx github:bradygaster/squad-pr`  
-**Status:** ⚠️ Deprecated (shows deprecation notice on run)
+**Purpose:** Bundled zero-dep shim for legacy distribution  
+**Status:** ⚠️ Deprecated (shows deprecation notice directing users to `npm install -g @bradygaster/squad-cli`)
 
 **Commands in cli.js:** Same as cli-entry.ts (built from same source)
 

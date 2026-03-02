@@ -55,23 +55,23 @@ If this is NOT checked, STOP. Do not proceed.
   - [ ] Command structure reorganization
   - [ ] SDK API changes for programmatic integration
 - [ ] Created beta user upgrade guide section in `docs/migration-guide-private-to-public.md`
-- [ ] Documented two distribution channels (GitHub-native vs npm)
-- [ ] Explained automatic upgrade path: `npx github:bradygaster/squad` → v0.6.0-preview after migration
+- [ ] Documented two distribution channels (~~GitHub-native~~ removed, npm only)
+- [ ] Documented migration path: `npx github:bradygaster/squad` → `npm install -g @bradygaster/squad-cli` or `npx @bradygaster/squad-cli`
 - [ ] Documented recommended migration path to npm for version management
 - [ ] Added .squad/ directory migration procedure (v0.5.4 → v0.6.0 format)
 - [ ] Documented shell script/CI updates needed (GitHub-native → npm)
 
 ---
 
-## Phase 5: Test npx github: Distribution
+## Phase 5: Test npm Distribution
 
-- [ ] After migration is complete, test GitHub-native distribution:
-  - [ ] Temporary directory: `mkdir $HOME\squad-test-github-native`
-  - [ ] Install via GitHub-native: `npx github:bradygaster/squad@latest --version`
-  - [ ] Expected output: v0.6.0-preview (or newer)
-  - [ ] Verify: `npx github:bradygaster/squad@latest doctor` passes
-  - [ ] Cleanup: `rm -Recurse -Force $HOME\squad-test-github-native`
-- [ ] Confirm that `npx github:bradygaster/squad` (no @) auto-gets latest commit after migration
+- [ ] After migration is complete, test npm distribution:
+  - [ ] Temporary directory: `mkdir $HOME\squad-test-npm`
+  - [ ] Install via npm: `npm install -g @bradygaster/squad-cli@latest`
+  - [ ] Expected output: `squad --version` → v0.6.0-preview (or newer)
+  - [ ] Verify: `squad doctor` passes
+  - [ ] Cleanup: `npm uninstall -g @bradygaster/squad-cli && rm -Recurse -Force $HOME\squad-test-npm`
+- [ ] Confirm that `npx @bradygaster/squad-cli` works without global install
 
 ---
 
@@ -213,14 +213,12 @@ If this is NOT checked, STOP. Do not proceed.
 ## Phase 14: Post-Release Validation
 
 - [ ] Created test directory: `mkdir $HOME\squad-test-v0.6.0`
-- [ ] Installed from release (GitHub-native): `npx github:bradygaster/squad@v0.6.0-preview`
-- [ ] Version shows: `npx github:bradygaster/squad@v0.6.0-preview --version` → 0.6.0-preview
-- [ ] Help works: `npx github:bradygaster/squad@v0.6.0-preview --help` (no errors)
-- [ ] Doctor passes: `npx github:bradygaster/squad@v0.6.0-preview doctor` (✅)
 - [ ] Installed from npm: `npm install -g @bradygaster/squad-cli@0.6.0-preview`
-- [ ] npm version shows: `squad --version` → 0.6.0-preview
-- [ ] npm works: `squad doctor` passes
-- [ ] Cleaned up: `rm -Recurse -Force $HOME\squad-test-v0.6.0`
+- [ ] Version shows: `squad --version` → 0.6.0-preview
+- [ ] Help works: `squad --help` (no errors)
+- [ ] Doctor passes: `squad doctor` (✅)
+- [ ] npx works: `npx @bradygaster/squad-cli --version` → 0.6.0-preview
+- [ ] Cleaned up: `npm uninstall -g @bradygaster/squad-cli && rm -Recurse -Force $HOME\squad-test-v0.6.0`
 
 ---
 

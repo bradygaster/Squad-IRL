@@ -58,10 +58,10 @@
 **Why:** The `workspace:*` protocol is pnpm/Yarn-specific. npm workspaces resolve workspace packages automatically.
 **Impact:** All inter-package dependencies in `packages/*/package.json` should use the actual version string, not `workspace:*`.
 
-### 2026-02-21: Distribution moves to npm (supersedes GitHub-native)
+### 2026-02-21: Distribution is npm-only (GitHub-native removed)
 **By:** Rabin (Distribution) + Fenster (Core Dev)
-**What:** Squad packages (`@bradygaster/squad-sdk` and `@bradygaster/squad-cli`) are distributed via npmjs.com. The GitHub-native `npx github:bradygaster/squad` path is deprecated.
-**Why:** npm is the standard distribution channel. Root `cli.js` prints deprecation warning when invoked via old path.
+**What:** Squad packages (`@bradygaster/squad-sdk` and `@bradygaster/squad-cli`) are distributed exclusively via npmjs.com. The GitHub-native `npx github:bradygaster/squad` path has been removed.
+**Why:** npm is the standard distribution channel. One distribution path reduces confusion and maintenance burden. Root `cli.js` prints deprecation warning if anyone still hits the old path.
 
 ### 2026-02-21: Coordinator prompt structure — three routing modes
 **By:** Verbal (Prompt Engineer)

@@ -30,22 +30,19 @@ No pull requests. No merges. No git operations. No version changes. ZERO executi
 
 ## Beta User Upgrade Path
 
-> **For users on v0.5.x beta (via `npx github:bradygaster/squad`)**
+> **For users on v0.5.x beta (previously via `npx github:bradygaster/squad`)**
 
-### Context: Two Distribution Channels
+### Context: Distribution Channel
 
-Squad has been distributed via two separate channels:
+Squad is distributed exclusively via npm:
 
 | Channel | Distribution | Version | Versioning | Installation |
 |---------|--------------|---------|------------|--------------|
-| **GitHub-native (Beta)** | `github.com/bradygaster/squad` public repo | v0.5.4 | No semantic versioning (always latest commit) | `npx github:bradygaster/squad` |
-| **npm (New)** | npm registry `@bradygaster/squad-cli` | v0.8.x → v0.6.0-preview (after migration) | Semantic versioning with stable & insider channels | `npm install -g @bradygaster/squad-cli` or `npx @bradygaster/squad-cli` |
+| **npm** | npm registry `@bradygaster/squad-cli` | v0.8.x → v0.6.0-preview (after migration) | Semantic versioning with stable & insider channels | `npm install -g @bradygaster/squad-cli` or `npx @bradygaster/squad-cli` |
 
-After this migration, the public GitHub repo will contain the v0.6.0-preview code. This means:
+> **Note:** GitHub-native distribution (`npx github:bradygaster/squad`) has been removed.
 
-- **`npx github:bradygaster/squad` will automatically get v0.6.0-preview** after the migration (since it always clones and runs the latest commit)
-- **But** there are important breaking changes between v0.5.4 and v0.6.0
-- **Recommended:** Migrate from GitHub-native to npm for proper version management and stability
+After this migration, users should install via npm:
 
 ### Step 1: Understand the Breaking Changes
 
@@ -109,25 +106,16 @@ If you need to preserve your v0.5.4 Squad configuration:
 
 ### Step 3: Update Installation & Distribution Method
 
-#### Current (v0.5.x via GitHub-native)
+#### Current (v0.5.x — upgrade to npm)
 ```bash
-npx github:bradygaster/squad --version
-# Output: v0.5.4 (from latest commit on public repo)
+squad --version
+# If you don't have squad installed:
+npm install -g @bradygaster/squad-cli
 ```
 
-#### After Migration: Two Options
+#### After Migration: Install via npm
 
-**Option 1: Stay on GitHub-native (automatic)**
-```bash
-npx github:bradygaster/squad --version
-# Output: v0.6.0-preview (automatically picks up latest commit after migration)
-
-# ⚠️ No version control — always bleeding edge
-# ⚠️ Slower installs (clones repo every time)
-# ✅ Great for testing pre-release features
-```
-
-**Option 2: Switch to npm (Recommended)**
+**Install globally (Recommended)**
 ```bash
 # Global install (recommended)
 npm install -g @bradygaster/squad-cli
@@ -164,7 +152,7 @@ squad --version
 squad doctor
 # Expected: ✅ All checks pass
 
-# If migrating to npm, update your CI/CD scripts
+# If migrating from old GitHub-native distribution, update your CI/CD scripts
 # Old: npx github:bradygaster/squad init
 # New: npx @bradygaster/squad-cli init
 ```
@@ -184,7 +172,7 @@ If your project references Squad in docs or CI/CD:
 
 **Update GitHub Actions workflows**:
 ```yaml
-# Old (GitHub-native)
+# Old (GitHub-native — removed)
 - run: npx github:bradygaster/squad doctor
 
 # New (npm)
@@ -194,7 +182,7 @@ If your project references Squad in docs or CI/CD:
 **Update shell scripts**:
 ```bash
 # Old
-alias squad='npx github:bradygaster/squad'
+alias squad='npx github:bradygaster/squad'  # REMOVED — do not use
 
 # New (after global install)
 alias squad='squad'  # (npm install -g @bradygaster/squad-cli)
@@ -207,9 +195,9 @@ alias squad='squad'  # (npm install -g @bradygaster/squad-cli)
 - Run `squad init` to create v0.6.0 structure
 - Manually migrate important decisions/roster if needed
 
-#### "Command not found after `npx github:bradygaster/squad`"
-- The GitHub-native distribution clones and runs the latest commit
-- This is expected behavior — no installation needed
+#### "Command not found after install"
+- If you installed globally, make sure `npm bin -g` is in your PATH
+- Try: `npx @bradygaster/squad-cli` as an alternative
 - For persistent installation, use npm: `npm install -g @bradygaster/squad-cli`
 
 #### "My project configuration was lost after upgrade"
@@ -1197,12 +1185,12 @@ $releaseNotes = @"
 
 ## 🚀 Installation
 
-### GitHub Native (Recommended for Beta Testing)
+### GitHub Native (No longer supported — use npm)
 \`\`\`bash
-npx github:bradygaster/squad
+npm install -g @bradygaster/squad-cli@0.6.0-preview
 \`\`\`
 
-### npm (When npm distribution is ready)
+### npm
 \`\`\`bash
 npm install -g @bradygaster/squad-cli@0.6.0-preview
 \`\`\`
@@ -1218,7 +1206,7 @@ If upgrading from the previous stable release:
 
 2. **Install new version**
    \`\`\`bash
-   npx github:bradygaster/squad init
+   npx @bradygaster/squad-cli init
    \`\`\`
 
 3. **Migrate config** (if needed)
@@ -1302,8 +1290,8 @@ Test installation from the tag (simulating public install):
 mkdir $HOME\squad-test-v0.6.0
 cd $HOME\squad-test-v0.6.0
 
-# Install via GitHub native (this is the public distribution method)
-npx github:bradygaster/squad@v0.6.0-preview
+# Install via npm (the only supported distribution method)
+npm install -g @bradygaster/squad-cli@0.6.0-preview
 
 # Expected: Installs and runs without errors
 ```
@@ -1311,10 +1299,10 @@ npx github:bradygaster/squad@v0.6.0-preview
 ### Verify Version Display
 
 ```powershell
-npx github:bradygaster/squad@v0.6.0-preview --version
+squad --version
 # Expected output: v0.6.0-preview
 
-npx github:bradygaster/squad@v0.6.0-preview --help 2>&1 | head -20
+squad --help 2>&1 | head -20
 # Expected: Help text, no errors
 ```
 
@@ -1322,7 +1310,7 @@ npx github:bradygaster/squad@v0.6.0-preview --help 2>&1 | head -20
 
 ```powershell
 # Quick functional test
-npx github:bradygaster/squad@v0.6.0-preview doctor
+squad doctor
 
 # Expected: Diagnostic output, no failures
 ```
@@ -1382,7 +1370,7 @@ Executed migration of squad-pr (private, v0.8.6.x) → squad (public, v0.6.0-pre
 ## Outcome
 ✅ Public Squad repo now at v0.6.0-preview
 ✅ GitHub release published and accessible
-✅ npx github:bradygaster/squad works
+✅ npx @bradygaster/squad-cli works
 ✅ Beta testing ready
 
 ## Post-Migration Decision
@@ -1625,7 +1613,7 @@ Print this checklist. Brady must explicitly say the word "banana" before executi
 
 ### Post-Release Checklist
 
-- [ ] Smoke test: Installation works (`npx github:bradygaster/squad@v0.6.0-preview`)
+- [ ] Smoke test: Installation works (`npm install -g @bradygaster/squad-cli@0.6.0-preview`)
 - [ ] CLI shows correct version in new install
 - [ ] Doctor command runs successfully
 - [ ] Release is visible on GitHub Releases page

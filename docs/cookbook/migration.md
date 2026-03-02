@@ -44,10 +44,12 @@ npm install -g @bradygaster/squad-cli@1.2.3
 
 ## Migrating from GitHub-Native to npm
 
-### Before (GitHub-native)
+### Before (GitHub-native — removed)
 
 ```bash
-npx github:bradygaster/squad
+# DEPRECATED — use npm instead:
+# npm install -g @bradygaster/squad-cli
+npx @bradygaster/squad-cli
 ```
 
 ### After (npm)
@@ -161,18 +163,11 @@ await loadConfig(); // Throws ConfigurationError if invalid
 
 ### `squad` appears to hang
 
-**Cause:** npm resolves `github:` specifiers via SSH. If no SSH agent is running, git prompts invisibly.
+**Cause:** If using the old `github:` specifier, npm resolves via SSH. If no SSH agent is running, git prompts invisibly.
 
-**Fix (pick one):**
+**Fix:** Switch to npm distribution:
 ```bash
-# Start SSH agent
-eval "$(ssh-agent -s)" && ssh-add
-
-# Or disable npm spinner
-npx --progress=false github:bradygaster/squad
-
-# Or use HTTPS
-git config --global url."https://github.com/".insteadOf git@github.com:
+npm install -g @bradygaster/squad-cli
 ```
 
 ### `squad: command not found`

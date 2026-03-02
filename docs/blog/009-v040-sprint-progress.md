@@ -81,11 +81,10 @@ Coordinator:
 
 ### 4. SSH Bug Documented and Closed (#30)
 
-Issue: `npx github:bradygaster/squad` appears to hang during install. npm resolves `github:` packages via git+ssh, and if no SSH agent is running, git prompts for a passphrase — but npm hides the prompt.
+Issue: `npx github:bradygaster/squad` previously appeared to hang during install. This is no longer relevant with npm-only distribution.
 
-**Fix documented:** 
-- Start SSH agent first: `ssh-add`
-- Or install with visible prompt: `npx --progress=false github:bradygaster/squad`
+**Current install method:**
+- Install globally: `npm install -g @bradygaster/squad-cli`
 
 **Status:** Issue closed, solution in README and troubleshooting docs.
 

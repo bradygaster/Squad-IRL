@@ -11,10 +11,11 @@ The Squad SDK has moved from GitHub-native distribution to npm packages. Benefit
 - Semantic versioning with insider/stable channels
 - Works with all npm-compatible package managers (npm, yarn, pnpm)
 
-## Before (GitHub-native)
+## Before (GitHub-native — no longer supported)
 
 ```bash
-npx github:bradygaster/squad
+# DEPRECATED — do not use
+# npx github:bradygaster/squad
 ```
 
 ## After (npm)
@@ -46,7 +47,7 @@ npm install @bradygaster/squad-sdk@insider
 
 | Aspect | GitHub-native | npm |
 |--------|--------------|-----|
-| Install | `npx github:bradygaster/squad` | `npm i -g @bradygaster/squad-cli` |
+| Install | ~~`npx github:bradygaster/squad`~~ (removed) | `npm i -g @bradygaster/squad-cli` |
 | SDK | bundled | `@bradygaster/squad-sdk` (separate) |
 | Updates | always latest commit | semver, explicit upgrade |
 | Channels | N/A | `latest`, `insider` |
@@ -58,4 +59,4 @@ npm install @bradygaster/squad-sdk@insider
 Run `npm install -g @bradygaster/squad-cli` to install globally.
 
 ### Using the old GitHub URL
-The GitHub-native distribution will be deprecated. Update your scripts and docs.
+The GitHub-native distribution has been removed. Update your scripts and docs to use `npm install -g @bradygaster/squad-cli` or `npx @bradygaster/squad-cli`.

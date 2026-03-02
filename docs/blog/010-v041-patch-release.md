@@ -38,7 +38,7 @@ We committed to responsive patches: user-reported issues → fix within 48 hours
 
 **Install v0.4.1:**
 ```
-npx github:bradygaster/squad@latest
+npm install -g @bradygaster/squad-cli@latest
 ```
 
 or upgrade if you have it:

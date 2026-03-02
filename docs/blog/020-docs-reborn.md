@@ -55,7 +55,7 @@ Credit to [@spboyer](https://github.com/spboyer) for the original beta site CSS 
 Every ported document got a tone pass:
 
 - **Removed "⚠️ INTERNAL ONLY" banners.** The v1 docs are public now.
-- **Updated CLI commands.** `npx github:bradygaster/squad` → `squad`. The npm distribution is the primary path.
+- **Updated CLI commands.** `npx github:bradygaster/squad` → `npx @bradygaster/squad-cli`. npm is the only distribution path.
 - **Updated repository URLs.** `bradygaster/squad` → `bradygaster/squad-pr` where appropriate.
 - **Preserved the beta voice.** The scenario docs and feature docs were written in a conversational, prompt-first style. We kept that. No corporate rewrite.
 

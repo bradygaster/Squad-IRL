@@ -401,7 +401,7 @@ describe('github-dist', () => {
       owner: 'bradygaster',
       repo: 'squad',
       binaryName: 'squad',
-      installCommandTemplate: 'npx github:{{owner}}/{{repo}}',
+      installCommandTemplate: 'npx @bradygaster/squad-cli',
     };
 
     it('validates a proper version', () => {
@@ -442,14 +442,14 @@ describe('github-dist', () => {
   });
 
   describe('getInstallCommand', () => {
-    it('returns npx github command with defaults', () => {
+    it('returns npx command with defaults', () => {
       const cmd = getInstallCommand();
-      expect(cmd).toBe('npx github:bradygaster/squad');
+      expect(cmd).toBe('npx @bradygaster/squad-cli');
     });
 
     it('substitutes custom owner/repo', () => {
       const cmd = getInstallCommand({ owner: 'acme', repo: 'tool' });
-      expect(cmd).toBe('npx github:acme/tool');
+      expect(cmd).toBe('npx @bradygaster/squad-cli');
     });
 
     it('uses custom template', () => {

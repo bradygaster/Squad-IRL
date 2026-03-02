@@ -24,7 +24,7 @@ hero: "v0.4.0 ships VS Code support, GitHub Projects integration, real-time agen
 - **Squad Pings You (Notifications)** — Agents can notify you on Teams, iMessage, Discord, or via webhook when they need input. Zero infrastructure in Squad core — bring your own MCP notification server. Teams is the primary path with copy-paste config. _(Built by @csharpfritz)_
 - **Plugin Marketplace** — When onboarding new team members, Squad browses configured plugin marketplaces (e.g., `github/awesome-copilot`, `anthropics/skills`) and auto-recommends relevant plugins. React frontend? It finds React patterns. Azure DevOps? It finds the Azure plugin. Full CLI: `squad plugin marketplace add/remove/list/browse`. _(Built by @GreenCee)_
 - **Context Window Optimization** — `decisions.md` pruned from 298KB (80K tokens) to 50KB. Spawn templates collapsed from 3 to 1. Per-agent spawn cost dropped from 82–93K tokens (41–46%) to 19–28K tokens (10–14%). _(Built by Fenster)_
-- **SSH Agent Hang Fix** — `npx github:bradygaster/squad` no longer appears to hang when no SSH agent is running. Root cause was npm spinner burying the passphrase prompt. Documented workaround: `--progress=false` or start SSH agent first. _(Built by @dnoriegagoodwin)_
+- **SSH Agent Hang Fix** — `npx github:bradygaster/squad` no longer appears to hang when no SSH agent is running. Root cause was npm spinner burying the passphrase prompt. This issue is now moot with npm-only distribution (`npm install -g @bradygaster/squad-cli`). _(Built by @dnoriegagoodwin)_
 
 ## The Story
 

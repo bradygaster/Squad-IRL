@@ -24,7 +24,7 @@ This guide covers what's different, what's the same, and when to use CLI vs VS C
 **Option A: Initialize with CLI (recommended)**
 
 ```bash
-npm i github:bradygaster/squad
+npm install -g @bradygaster/squad-cli
 ```
 
 Creates `.github/agents/squad.agent.md` and `.squad-templates/`. Then open VS Code and select **Squad** from the agent picker.
