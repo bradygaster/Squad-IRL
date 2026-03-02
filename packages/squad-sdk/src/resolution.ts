@@ -30,6 +30,8 @@ export interface SquadDirConfig {
   projectKey: string | null;
   /** True when in consult mode (personal squad consulting on external project) */
   consult?: boolean;
+  /** True when extraction is disabled for consult sessions (read-only consultation) */
+  extractionDisabled?: boolean;
 }
 
 /**

@@ -73,6 +73,8 @@ function showDeprecationWarning(): void {
 export interface RunInitOptions {
   /** Project description prompt — stored for REPL auto-casting. */
   prompt?: string;
+  /** If true, disable extraction from consult sessions (read-only consultations) */
+  extractionDisabled?: boolean;
 }
 
 /**
@@ -115,6 +117,7 @@ export async function runInit(dest: string, options: RunInitOptions = {}): Promi
     projectType: projectType as any,
     version,
     prompt: options.prompt,
+    extractionDisabled: options.extractionDisabled,
   };
 
   // Handle SIGINT to cleanup orphan .init-prompt

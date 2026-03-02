@@ -40,6 +40,21 @@ export class PersonalSquadNotFoundError extends Error {
   }
 }
 
+/**
+ * Error thrown when extraction is disabled for a consult session.
+ * Consumers can catch this specifically to suggest using --force.
+ */
+export class ExtractionDisabledError extends Error {
+  constructor() {
+    super(
+      'Extraction is disabled for this consult session.\n' +
+      'This was configured in your personal squad settings.\n' +
+      'Use --force to override.',
+    );
+    this.name = 'ExtractionDisabledError';
+  }
+}
+
 // ============================================================================
 // Consult Mode Agent File
 // ============================================================================
@@ -267,6 +282,8 @@ export interface SetupConsultModeOptions {
   dryRun?: boolean;
   /** Override project name (default: basename of projectRoot). Useful for worktrees. */
   projectName?: string;
+  /** If true, disable extraction back to personal squad (read-only consultation) */
+  extractionDisabled?: boolean;
 }
 
 /**
@@ -287,6 +304,8 @@ export interface SetupConsultModeResult {
   agentFile: string;
   /** List of created file paths (relative to squadDir) */
   createdFiles: string[];
+  /** Whether extraction is disabled for this consult session */
+  extractionDisabled: boolean;
 }
 
 /**
@@ -354,6 +373,22 @@ export async function setupConsultMode(
     throw new PersonalSquadNotFoundError();
   }
 
+  // Read source squad's config to inherit extractionDisabled setting
+  // Option takes precedence, then fall back to source config
+  let extractionDisabled = options.extractionDisabled ?? false;
+  const sourceConfigPath = path.join(personalSquadRoot, 'config.json');
+  if (fs.existsSync(sourceConfigPath)) {
+    try {
+      const sourceConfig = JSON.parse(fs.readFileSync(sourceConfigPath, 'utf-8'));
+      // Inherit from source unless explicitly overridden in options
+      if (options.extractionDisabled === undefined && sourceConfig.extractionDisabled) {
+        extractionDisabled = true;
+      }
+    } catch {
+      // Ignore malformed config
+    }
+  }
+
   // Check if project already has .squad/
   if (fs.existsSync(squadDir)) {
     throw new Error(
@@ -379,6 +414,7 @@ export async function setupConsultMode(
       sourceSquad: personalSquadRoot,
       projectName,
       createdAt: new Date().toISOString(),
+      extractionDisabled,
     };
     fs.writeFileSync(
       path.join(squadDir, 'config.json'),
@@ -437,6 +473,7 @@ export async function setupConsultMode(
     dryRun,
     agentFile,
     createdFiles,
+    extractionDisabled,
   };
 }
 
@@ -462,6 +499,8 @@ export interface ExtractLearningsOptions {
   selectLearnings?: (learnings: StagedLearning[]) => Promise<StagedLearning[]>;
   /** Override project name (default: basename of projectRoot). Useful for worktrees. */
   projectName?: string;
+  /** If true, override extractionDisabled setting in config */
+  force?: boolean;
 }
 
 /**
@@ -552,6 +591,7 @@ export async function extractLearnings(
   const dryRun = options.dryRun ?? false;
   const clean = options.clean ?? false;
   const acceptRisks = options.acceptRisks ?? false;
+  const force = options.force ?? false;
 
   const squadDir = path.resolve(projectRoot, '.squad');
   const projectName = options.projectName || path.basename(projectRoot);
@@ -571,6 +611,11 @@ export async function extractLearnings(
     throw new Error(
       'This project has a .squad/ but is not in consult mode. Use normal squad commands.',
     );
+  }
+
+  // Check if extraction is disabled for this consult session
+  if (config.extractionDisabled && !force) {
+    throw new ExtractionDisabledError();
   }
 
   // Detect license

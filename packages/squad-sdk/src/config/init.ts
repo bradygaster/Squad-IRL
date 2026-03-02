@@ -107,6 +107,8 @@ export interface InitOptions {
   version?: string;
   /** Project description prompt — stored for REPL auto-casting. */
   prompt?: string;
+  /** If true, disable extraction from consult sessions (read-only consultations) */
+  extractionDisabled?: boolean;
 }
 
 /**
@@ -528,6 +530,24 @@ export async function initSquad(options: InitOptions): Promise<InitResult> {
     if (!existsSync(dir)) {
       await mkdir(dir, { recursive: true });
     }
+  }
+  
+  // -------------------------------------------------------------------------
+  // Create .squad/config.json for squad settings
+  // -------------------------------------------------------------------------
+  
+  const squadConfigPath = join(squadDir, 'config.json');
+  if (!existsSync(squadConfigPath)) {
+    const squadConfig: Record<string, unknown> = {
+      version: 1,
+      teamRoot: teamRoot,
+    };
+    // Only include extractionDisabled if explicitly set
+    if (options.extractionDisabled) {
+      squadConfig.extractionDisabled = true;
+    }
+    await writeFile(squadConfigPath, JSON.stringify(squadConfig, null, 2), 'utf-8');
+    createdFiles.push(toRelativePath(squadConfigPath));
   }
   
   // -------------------------------------------------------------------------

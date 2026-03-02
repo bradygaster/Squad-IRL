@@ -38,6 +38,9 @@ export async function runConsult(cwd: string, args: string[]): Promise<void> {
           console.log('✅ Consult mode active');
           console.log(`   Team root: ${config.teamRoot ?? config.sourceSquad}`);
           console.log(`   Project: ${basename(cwd)}`);
+          if (config.extractionDisabled) {
+            console.log('   Extraction: disabled');
+          }
         } else {
           console.log('ℹ️  Project has .squad/ but not in consult mode');
         }
@@ -51,6 +54,7 @@ export async function runConsult(cwd: string, args: string[]): Promise<void> {
   }
 
   // Setup consult mode via SDK
+  // extractionDisabled is inherited from personal squad config
   try {
     const result = await setupConsultMode({
       projectRoot: cwd,
@@ -62,13 +66,21 @@ export async function runConsult(cwd: string, args: string[]): Promise<void> {
       console.log(`   1. Create ${result.squadDir}/config.json with consult: true`);
       console.log(`   2. Add .squad/ to ${result.gitExclude}`);
       console.log(`   3. Link to personal squad at ${result.personalSquadRoot}`);
+      if (result.extractionDisabled) {
+        console.log('   4. Extraction disabled (configured in personal squad)');
+      }
     } else {
       console.log('✅ Consult mode activated');
       console.log(`   Team: ${result.personalSquadRoot}`);
       console.log(`   Project: ${result.projectName}`);
+      if (result.extractionDisabled) {
+        console.log('   Extraction: disabled (configured in personal squad)');
+      }
       console.log('');
       console.log('   Your squad is now consulting on this project.');
-      console.log('   Run `squad extract` when done to bring learnings home.');
+      if (!result.extractionDisabled) {
+        console.log('   Run `squad extract` when done to bring learnings home.');
+      }
     }
   } catch (error) {
     if (error instanceof PersonalSquadNotFoundError) {

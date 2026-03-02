@@ -115,6 +115,7 @@ export async function runExtract(cwd: string, args: string[]): Promise<void> {
   const clean = args.includes('--clean');
   const yes = args.includes('--yes');
   const acceptRisks = args.includes('--accept-risks');
+  const force = args.includes('--force');
   const squadDir = resolve(cwd, '.squad');
   const configPath = resolve(squadDir, 'config.json');
 
@@ -138,6 +139,15 @@ export async function runExtract(cwd: string, args: string[]): Promise<void> {
       'Not in consult mode.\n' +
         '   This command only works after `squad consult`.\n' +
         '   If this is a project-owned squad, use `squad export` instead.',
+    );
+  }
+
+  // Check if extraction is disabled
+  if (config.extractionDisabled && !force) {
+    fatal(
+      'Extraction is disabled for this consult session.\n' +
+        '   This was configured in your personal squad settings.\n' +
+        '   Use --force to override.',
     );
   }
 

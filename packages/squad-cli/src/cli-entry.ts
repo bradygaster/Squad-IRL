@@ -771,12 +771,15 @@ async function main(): Promise<void> {
       initPrompt = readFileSync(filePath, 'utf-8').trim();
     } else {
       // Look for a positional string arg (not a flag, not 'init'/'hire')
-      const skipSet = new Set(['init', 'hire', '--global', '--mode', mode]);
+      const skipSet = new Set(['init', 'hire', '--global', '--mode', mode, '--no-extract']);
       const positional = args.find((a, i) => i > 0 && !a.startsWith('--') && !skipSet.has(a));
       if (positional) initPrompt = positional;
     }
 
-    await runInit(dest, { prompt: initPrompt });
+    // Check for --no-extract flag (disables extraction from consult sessions)
+    const extractionDisabled = args.includes('--no-extract');
+
+    await runInit(dest, { prompt: initPrompt, extractionDisabled });
     return;
   }
 
