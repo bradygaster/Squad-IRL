@@ -94,52 +94,48 @@ async function main(): Promise<void> {
 
   console.log('   ✓ Connected. Let the jokes begin!\n');
 
-  // Infinite joke loop
+  // Infinite joke loop — full 5-turn knock-knock exchange
   let jokeCount = 0;
 
   while (true) {
     const teller = agents[jokeCount % 2];
     const responder = agents[(jokeCount + 1) % 2];
+    const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-    // Teller starts the joke
+    // Turn 1: Teller opens with "Knock knock!"
     process.stdout.write(`🎭 ${teller.name}: `);
-    const tellerResponse = await sendAndCapture(
-      client,
-      pipeline,
-      teller,
-      'Tell me a knock-knock joke!',
-    );
+    const opener = await sendAndCapture(client, pipeline, teller, 'Start a new knock-knock joke. Just say "Knock knock!"');
     console.log();
+    await pause(800);
 
-    await new Promise((r) => setTimeout(r, 1000));
-
-    // Responder reacts to the joke
+    // Turn 2: Responder says "Who's there?"
     process.stdout.write(`🎭 ${responder.name}: `);
-    const responderReaction = await sendAndCapture(
-      client,
-      pipeline,
-      responder,
-      tellerResponse,
-    );
+    const whoseThere = await sendAndCapture(client, pipeline, responder, opener);
     console.log();
+    await pause(800);
 
-    await new Promise((r) => setTimeout(r, 1000));
-
-    // Teller acknowledges the reaction
+    // Turn 3: Teller gives the setup name
     process.stdout.write(`🎭 ${teller.name}: `);
-    await sendAndCapture(
-      client,
-      pipeline,
-      teller,
-      responderReaction,
-    );
+    const setup = await sendAndCapture(client, pipeline, teller, whoseThere);
+    console.log();
+    await pause(800);
+
+    // Turn 4: Responder says "[setup] who?"
+    process.stdout.write(`🎭 ${responder.name}: `);
+    const setupWho = await sendAndCapture(client, pipeline, responder, setup);
+    console.log();
+    await pause(800);
+
+    // Turn 5: Teller delivers the punchline
+    process.stdout.write(`🎭 ${teller.name}: `);
+    await sendAndCapture(client, pipeline, teller, setupWho);
     console.log('\n');
 
-    // Swap roles for next iteration
+    // Swap roles for next joke
     agents.reverse();
     jokeCount++;
 
-    await new Promise((r) => setTimeout(r, 3000));
+    await pause(3000);
   }
 }
 
@@ -184,10 +180,22 @@ async function sendAndCapture(
   session.on('message_delta', handler);
 
   try {
+    let fallback = '';
     if (session.sendAndWait) {
-      await session.sendAndWait({ prompt: message }, 30_000);
+      const result = await session.sendAndWait({ prompt: message }, 30_000);
+      // Extract content from sendAndWait result (same pattern as shell)
+      const data = (result as Record<string, unknown> | undefined)?.['data'] as Record<string, unknown> | undefined;
+      fallback = typeof data?.['content'] === 'string' ? (data['content'] as string) : '';
+      // If result itself is a string, use that
+      if (!fallback && typeof result === 'string') fallback = result;
     } else {
       await session.sendMessage({ prompt: message });
+    }
+
+    // Use streaming content if captured, otherwise fall back to sendAndWait result
+    if (!captured && fallback) {
+      captured = fallback;
+      process.stdout.write(captured);
     }
   } finally {
     session.off('message_delta', handler);
