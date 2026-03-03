@@ -1,17 +1,17 @@
 ---
-updated_at: 2026-02-27T23:18:00Z
-focus_area: Replatform Launch — Final Gate
-issues_open: ["#532", "#542"]
+updated_at: 2026-03-03T00:00:00Z
+focus_area: Migration to Public Repo + SDK Samples
+issues_open: []
 issues_closed_prd: 30
 tests_passing: 2944
 prd_location: .squad/identity/prd-next-waves.md
-current_phase: Replatform Launch Gate — Close #532, Merge #552, Ship Alpha
+current_phase: Migration v0.6.0 + SDK Samples
 process: All work through PRs with squad member review before merge
 ---
 
 # What We're Focused On
 
-**Status:** Replatform launch APPROVED by Keaton. One blocker remaining: #532 (dogfood REPL against real repos). 2944 tests passing. Build clean. On `dev` branch, repo cleaned up.
+**Status:** Migration planning complete. Target: public repo v0.6.0 (clean minor bump from v0.5.4). On `migration` branch. Two new SDK samples shipped (knock-knock, rock-paper-scissors). Banana gate still active for git operations.
 
 ## Public Readiness Assessment (2026-02-24)
 
