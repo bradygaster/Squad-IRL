@@ -1,0 +1,9 @@
+services:
+  rock-paper-scissors:
+    build:
+      context: ../..
+      dockerfile: samples/rock-paper-scissors/Dockerfile
+    container_name: squad-rps-arena
+    restart: unless-stopped
+    environment:
+      - GITHUB_TOKEN=${GITHUB_TOKEN}

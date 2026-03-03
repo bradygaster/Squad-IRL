@@ -32,3 +32,13 @@
 
 ### 2026-02-24T17-25-08Z : Team consensus on public readiness
 📌 Full team assessment complete. All 7 agents: 🟡 Ready with caveats. Consensus: ship after 3 must-fixes (LICENSE, CI workflow, debug console.logs). No blockers to public source release. See .squad/log/2026-02-24T17-25-08Z-public-readiness-assessment.md and .squad/decisions.md for details.
+
+### Rock-Paper-Scissors Sample — Prompt Architecture
+- Created `samples/rock-paper-scissors/prompts.ts` with 10 player strategies and scorekeeper prompt
+- **The Learner (Sherlock 🔍)** is the key demo agent — prompt instructs LLM to analyze opponent play history, detect patterns (frequency bias, sequences, cycles), predict next move, and counter strategically with reasoning
+- Two-line response format for The Learner: [analysis sentence] + [move]. Makes logs showcase actual LLM pattern recognition
+- Deterministic agents (Rocky, Edward, Papyrus) have absolute prompts: "ALWAYS throw X. Never deviate."
+- Cycler uses modulo arithmetic in prompt: "Round % 3 == 1 → rock" (teaches LLM stateful behavior)
+- Creative agents: Echo (copycat), Rebel (contrarian — intentionally loses), Poker (bluffer with fake tells)
+- Scorekeeper prompt: entertaining commentary + mental leaderboard tracking + personality-driven announcements
+- Design principle: prompts are code. Precision over prose. Each must be robust against LLM drift.

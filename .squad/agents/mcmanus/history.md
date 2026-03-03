@@ -28,6 +28,51 @@
 
 ## Learnings
 
+### 2026-03-01: Rock Paper Scissors sample documentation
+
+**Status:** Complete. Sample README and samples index updated.
+
+**Work completed:**
+1. **Created `samples/rock-paper-scissors/README.md`** — Comprehensive guide (9.3 KB) covering:
+   - One-liner: "Multiple LLM-backed agents with different strategies compete in endless 1-on-1 matches"
+   - What it demonstrates (8 key areas): multi-session pooling, strategy-via-prompt, agent learning, real-time streaming, tournament structure, SDK patterns
+   - Prerequisites: GitHub token with Copilot access, Docker/Compose optional
+   - Quick start (local and Docker paths, 60-second runnable)
+   - Sample console output with player roster, match announcements, scorekeeper commentary, leaderboard
+   - Player strategy table: 9 agents (Rocky, Edward, Papyrus, Metronome, Chaos, Pebble, Echo, Poker, Sherlock) with emojis, strategies, and notes
+   - Architecture section: Client, session pooling, match loop, scoring, scorekeeper, EventBus
+   - Deep dive on Sherlock (learning agent): pattern detection, prediction, counter logic, example reasoning
+   - Customization guide: Add players, adjust match settings, modify scorekeeper
+   - SDK types reference (SquadClientWithPool, SessionPool, StreamingPipeline, EventBus, types)
+   - Troubleshooting: 5 common issues with solutions
+
+2. **Updated `samples/README.md`** — Added rock-paper-scissors entry:
+   - Positioned as sample #3 (after knock-knock, before hook-governance)
+   - Marked as Intermediate difficulty
+   - Estimated ~200–250 LOC
+   - Key theme: "Strategy + learning"
+   - SDK APIs listed: SquadClientWithPool, SessionPool, StreamingPipeline, onDelta(), EventBus, system prompts
+   - Updated portfolio count: 6 → 7 → 8 samples
+   - Updated LOC total: ~1,080–1,370 → ~1,280–1,620
+
+**Tone compliance:**
+- No hype, no hand-waving: Every claim substantiated (player strategies derive from `prompts.ts`, Sherlock logic derived from system prompt)
+- Experimental banner: ⚠️ included at top
+- Structure mirrors knock-knock: Prerequisites, Quick Start, What You'll See, How It Works, Customizing, SDK reference, Troubleshooting
+- 60-second runnable: Quick Start section executable in under a minute
+
+**Style notes:**
+- Used table format for player roster (visual, scannable)
+- Example output shows real agent behaviors (Rocky + Sherlock pairing shows learning in action)
+- Sherlock callout (special section) highlights differentiator without overselling
+- "⚠️ Experimental alpha" banner consistent with tone ceiling decision #30
+
+**Context from source material:**
+- Player strategies and prompts from `samples/rock-paper-scissors/prompts.ts` (9 agents: Chaos, Rocky, Edward, Papyrus, Metronome, Pebble, Sherlock, Echo, Poker)
+- Scorekeeper role and tone from `SCOREKEEPER_PROMPT`
+- Tone and format adapted from `samples/knock-knock/README.md` (proven pattern)
+- SDK concepts sourced from known patterns in other samples
+
 ### 📌 Team update (2026-02-28T15:34:36Z): 10 doc gaps filed + brand compliance audit completed
 - **Status:** Completed — McManus conducted comprehensive docs audit, filed 10 GitHub issues spanning feature docs, terminology, brand compliance, clarity, and reference
 - **Issues filed:** #568–#575, #577–#578 (missing `squad run` docs, consult mode guide, Ralph triage docs, triage/watch/loop naming, experimental banner, response modes clarity, dual-root guide, VS Code stub, session examples, README command count)

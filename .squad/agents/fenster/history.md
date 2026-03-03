@@ -357,3 +357,54 @@
 - `sendAndWait()` may be optional on session interface — use conditional check with fallback to `sendMessage()`
 - Auth error UX: check `GITHUB_TOKEN` before connecting, provide actionable error with setup instructions
 - Captured response text enables inter-agent conversation — Teller's joke becomes Responder's input
+
+---
+
+## 2025-07: Rock-Paper-Scissors Multi-Agent Arena
+
+**Requested by:** Brady. Create `samples/rock-paper-scissors/index.ts` — multi-player RPS tournament with real Copilot sessions.
+
+**What was built:** `samples/rock-paper-scissors/index.ts` (~430 lines):
+- **Multi-session management:** Creates one session per player (7 players) + scorekeeper (8 total)
+- **Match pairing logic:** Cycles through all pairings (player[i] vs player[j]) to avoid immediate rematches
+- **Concurrent move collection:** `Promise.all([getPlayerMove(A), getPlayerMove(B)])` for parallel LLM calls
+- **Context-aware prompting:** The Learner receives opponent history (last 5 moves) in prompt
+- **Scorekeeper streaming:** Uses StreamingPipeline for token-by-token commentary on match results
+- **Leaderboard tracking:** Internal stats (W/L/D), sorted display every 10 matches, scorekeeper commentary
+- **Move parsing:** Extracts "rock"/"paper"/"scissors" from LLM response, takes last occurrence to handle reasoning + answer
+- **Graceful forfeits:** If move unparseable, treat as forfeit and log warning
+- **Console formatting:** Banner, player roster with emoji, match announcements, leaderboard display
+
+**Architecture patterns:**
+- `PlayerInfo` extends `PlayerStrategy` (imported from prompts.ts) with session state
+- `MatchHistory` tracks opponent move sequences per pairing (for The Learner's context)
+- `playMatch()` orchestrates single match: get moves → determine winner → update stats → announce result
+- `getPlayerMove()` handles context injection for The Learner vs. simple "What do you throw?" for others
+- `parseMove()` robust parsing: finds all rock/paper/scissors in response, returns last one
+- `announceResult()` and `printLeaderboard()` both use StreamingPipeline for scorekeeper commentary
+
+**SDK patterns used:**
+- SquadClientWithPool with GITHUB_TOKEN auth
+- CastingEngine.castTeam() for player names (universe: usual-suspects)
+- StreamingPipeline with onDelta() callback for stdout streaming
+- Session creation with systemPrompt per player
+- message_delta event handlers with conditional field access (deltaContent/delta/content)
+- sendAndWait() with fallback to sendMessage() for compatibility
+
+**Key design choices:**
+- All pairings pre-computed and cycled to ensure fair distribution
+- Parallel move collection reduces per-match latency
+- Move history stored per pairing (not global) — important for The Learner's opponent modeling
+- Scorekeeper commentary after every match + leaderboard keeps output engaging
+- Parse move from last occurrence in response — handles LLM reasoning patterns ("I think... so I'll throw rock")
+
+**Verification:** TypeScript compiles clean (tsc --noEmit expected to pass after prompts.ts exists).
+
+## Learnings
+
+- Multi-session management pattern: create all sessions upfront, store sessionIds in player state, resume per request
+- Context injection for adaptive agents: The Learner gets opponent history, others get static prompts
+- Parallel LLM calls via Promise.all() for concurrent player moves — reduces total latency
+- Robust move parsing: search all occurrences, take last one — handles reasoning-then-answer LLM patterns
+- Match pairing cycling: pre-compute all [i,j] pairs, cycle through them to avoid immediate rematches
+- Scorekeeper as streaming agent: commentary adds narrative to the arena, StreamingPipeline makes it feel live

@@ -70,3 +70,12 @@ All shell dispatch calls must use awaitStreamedResponse() to wait for full strea
 
 ### 2026-02-24T17-25-08Z : Team consensus on public readiness
 📌 Full team assessment complete. All 7 agents: 🟡 Ready with caveats. Consensus: ship after 3 must-fixes (LICENSE, CI workflow, debug console.logs). No blockers to public source release. See .squad/log/2026-02-24T17-25-08Z-public-readiness-assessment.md and .squad/decisions.md for details.
+
+### Rock-Paper-Scissors Docker Infrastructure (samples/rock-paper-scissors)
+- Multi-session sample (8+ concurrent Copilot sessions: 7 players + 1 scorekeeper) running in Docker
+- Pattern: Same Docker setup as knock-knock (multi-stage build, node:20-alpine, build context at monorepo root)
+- Dockerfile copies both `index.ts` and `prompts.ts` (this sample has more files than knock-knock's single file)
+- No special Docker memory limits needed (<200MB for 8 active sessions)
+- No special networking needed (outbound HTTPS to Copilot API works by default)
+- SDK Consideration: SquadClientWithPool defaults to `maxConcurrent: 5` — index.ts must override to handle 8+ sessions
+- SDK Limitation: Session creation is sequential (Copilot SDK constraint), but usage can be parallel after creation
