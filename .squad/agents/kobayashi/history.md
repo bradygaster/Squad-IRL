@@ -662,3 +662,28 @@ Added "Known Failure Modes" section documenting both failures as cautionary exam
 **Decision:** Phases 1-2.5 are verified complete. Awaiting Brady's signal for Phase 3 (beta push) after the "ONE more PR" mentioned arrives.
 
 **Checklist updated:** docs/migration-checklist.md — banana gate checked, all Phase 1 boxes checked, Phase 2 acknowledged, Phase 2.5 remains marked complete.
+
+### 2026-03-XX: Cherry-Pick Documentation — Remote Control Docs Synchronized to Main
+
+**Task:** Brady reported that docs/features/remote-control.md existed on migration branch but NOT on main, breaking GitHub Pages link.
+
+**Pre-flight Verification:**
+- Confirmed file absent from main: git show main:docs/features/remote-control.md → fatal error (not in main)
+- Confirmed file present on migration via commit 4ab4c9b
+
+**Action Taken:**
+1. Stashed unstaged changes on squad/nap-command-restore 
+2. Switched to main branch
+3. Attempted cherry-pick of commit 4ab4c9b — succeeded cleanly
+4. Post-flight check: verified file now present on main
+
+**Discovery During Push:**
+- Discovered origin/main was 3 commits ahead of local main
+- Found that commit 4ab4c9b was already merged to origin/main via PR #693 (merge commit 2e6e1e6)
+- My cherry-pick would have created a duplicate commit on top of existing history
+- Solution: Reset local main to origin/main state (already correct)
+
+**Outcome:** File docs/features/remote-control.md confirmed present on origin/main. GitHub Pages link should resolve correctly. Restored working branch and popped stash.
+
+**Learning:** Always check if commits are already on target branch before forcing cherry-picks — origin may already have the work merged via PR. The merge PR #693 had already brought 4ab4c9b to main.
+

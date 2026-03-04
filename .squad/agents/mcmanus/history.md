@@ -942,3 +942,17 @@ Multi-agent build of Rock-Paper-Scissors game with 10 AI strategies, Docker infr
 - Clear upgrade path for beta users
 - npm distribution as standard (no more GitHub-native)
 - Samples and docs as discovery tools
+
+### 2026-03-07: Full broken-link audit across all docs
+
+**Status:** Complete. 139 markdown files scanned, 102 internal links checked.
+
+**Findings:**
+1. **One broken link fixed:** `docs/features/remote-control.md:325` linked to `../get-started/quickstart.md` which doesn't exist. Corrected to `../get-started/installation.md` (the actual setup guide).
+2. **Three anchor links verified valid:** Links to `your-team.md#reviewer-protocol` from `memory-and-knowledge.md`, `parallel-work.md`, and `human-team-members.md` — all resolve correctly (heading exists at line 139 of `your-team.md`).
+3. **No `.html` links found in docs** — all internal links correctly use `.md` extension.
+4. **No broken links in root files** (README.md, CONTRIBUTING.md, CHANGELOG.md) or package READMEs.
+
+**Note:** Kobayashi separately fixing the link from `docs/reference/cli.md` → `docs/features/remote-control.md` (file wasn't on `main`).
+
+**Pattern observed:** The `quickstart.md` link was a stale reference — the getting-started guide was likely renamed to `installation.md` at some point without updating all cross-references. This is a recurring risk when files are renamed.

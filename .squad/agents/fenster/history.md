@@ -272,6 +272,7 @@
 - Root package.json has `"type": "module"` — bare `import` works in cli.js (no dynamic import needed)
 - `packages/squad-cli/dist/cli-entry.js` auto-executes `main().catch(...)` at module level — importing it is sufficient to run the CLI
 - `process.env.npm_execpath` is set when running via npm/npx but absent for direct `node` invocation — good signal for conditional deprecation notices
+- **2026-03-03:** Wired `squad nap` command into CLI entry point (cli-entry.ts lines 245-254). Full implementation existed in nap.ts (runNap, runNapSync, formatNapReport) and REPL already had `/nap` working. CLI was missing the routing — added flag parsing (--deep, --dry-run), squadRoot resolution via resolveSquad(), async runNap() call, formatNapReport() output. Help text and docs/reference/cli.md updated. TypeScript build verified clean.
 
 ### 2026-03-03: History Audit & Correction Pattern
 

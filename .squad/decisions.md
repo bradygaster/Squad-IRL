@@ -1916,3 +1916,19 @@ npm test — Not run yet (phase doesn't block on tests)
 The migration is 80% complete. All non-npm-dependent work is done. v0.8.18 is tagged on GitHub, the release is published, docs are updated, and code is built and ready. The final step is npm authentication and package publish, which is Brady's responsibility.
 
 **No code or process changes required from Kobayashi.** Awaiting npm credentials to proceed with Phase 8.
+
+
+
+### 2026-03-04: Guard against broken internal links in docs
+**By:** McManus  
+**Context:** Full broken-link audit found a stale quickstart.md reference that should have been installation.md. File was renamed without updating all cross-references.
+
+**Pattern Observed:**
+When docs files are renamed or moved, internal links from other files break silently. There's no CI check catching this before merge.
+
+**Recommendation:**
+1. Add a link-check step to CI — A simple Node.js script (or markdown-link-check) that resolves all relative [text](path.md) links and fails the build if any target is missing.
+2. Include in PR checklist — When renaming or moving any .md file, grep for the old filename across all docs and update references.
+3. Scope: docs/ directory + root markdown files (README.md, CONTRIBUTING.md, CHANGELOG.md).
+
+This is low-effort, high-value — a broken link on the GitHub Pages site erodes trust in the project.
