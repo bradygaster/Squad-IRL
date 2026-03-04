@@ -161,45 +161,42 @@ pm whoami\ returned 401 Unauthorized. Cannot execute Phase 8 publish without npm
 ---
 
 ## Phase 9: GitHub Release (Beta Repo)
-✅ **COMPLETE:** GitHub Release v0.8.18 created at https://github.com/bradygaster/squad/releases/tag/v0.8.18
-- [ ] Fetch latest beta/main: `git fetch beta && git log beta/main -1`
-- [ ] Tag beta at merge commit: `git tag v0.8.18 <merge-commit-sha>` (public repo release marker, matches npm version)
-- [ ] Push tag: `git push beta v0.8.18`
-- [ ] Create GitHub Release: `gh release create v0.8.18 --repo bradygaster/squad --title "v0.8.18 — Migration: GitHub-native → npm Distribution"`
-- [ ] Release body includes:
-  - [ ] **Breaking Changes:** GitHub-native → npm, `.ai-team/` → `.squad/`, monorepo structure
-  - [ ] **New Distribution:** `npm install -g @bradygaster/squad-cli` or `npx @bradygaster/squad-cli`
-  - [ ] **Upgrade Guide:** Link to migration docs
-  - [ ] **Version Jump:** v0.5.4 → v0.8.18 (intermediate versions skipped)
-- [ ] Mark as "Latest" release (not prerelease)
+- [x] Fetch latest beta/main: `git fetch beta && git log beta/main -1`
+- [x] Tag beta at merge commit: v0.8.18 tag created at ac9e156 (done in Phase 5)
+- [x] Push tag: `git push beta v0.8.18` (done in Phase 5)
+- [x] Create GitHub Release: https://github.com/bradygaster/squad/releases/tag/v0.8.18
+- [x] Release body includes:
+  - [x] **Breaking Changes:** GitHub-native → npm, `.ai-team/` → `.squad/`, monorepo structure
+  - [x] **New Distribution:** `npm install -g @bradygaster/squad-cli` or `npx @bradygaster/squad-cli`
+  - [x] **Upgrade Guide:** Link to migration docs
+  - [x] **Version Jump:** v0.5.4 → v0.8.18 (intermediate versions skipped)
+- [x] Mark as "Latest" release (not prerelease)
 
 ---
 
-## Phase 10: Deprecate Beta
-**⚠️ BLOCKED: npm auth required.** Cannot execute without \
-pm whoami\ credentials.'s Old Package (if applicable)
+## Phase 10: Deprecate Beta's Old Package (if applicable)
+**⚠️ BLOCKED:** npm auth required. `npm whoami` returned 401 Unauthorized.
 - [ ] If `@bradygaster/create-squad` was published to npm:
   - [ ] `npm deprecate @bradygaster/create-squad "Migrated to @bradygaster/squad-cli. Install with: npm install -g @bradygaster/squad-cli"`
 - [ ] Verify deprecation: `npm view @bradygaster/create-squad`
 
 ---
 
-## Phase 11: Post-Release Bump
-**⚠️ SKIPPED:** Phase 8 (npm publish) is blocked. Phase 11 only executes if Phase 8 succeeds. (Origin)
+## Phase 11: Post-Release Bump (Origin)
+**⚠️ BLOCKED:** Depends on Phase 8 (npm publish). Will execute after publish completes.
 **Per release versioning sequence:** After publishing v0.8.18, immediately bump to v0.8.19-preview.1 for continued development.
 
-- [x] Update root `package.json`: `"version": "0.8.18"` → `"version": "0.8.19-preview.1"`
-- [x] Update `packages/squad-cli/package.json`: `"version": "0.8.18"` → `"version": "0.8.19-preview.1"`
-- [x] Update `packages/squad-sdk/package.json`: `"version": "0.8.18"` → `"version": "0.8.19-preview.1"`
-- [x] Run npm install to update package-lock.json: `npm install`
+- [ ] Update root `package.json`: `"version": "0.8.18"` → `"version": "0.8.19-preview.1"`
+- [ ] Update `packages/squad-cli/package.json`: `"version": "0.8.18"` → `"version": "0.8.19-preview.1"`
+- [ ] Update `packages/squad-sdk/package.json`: `"version": "0.8.18"` → `"version": "0.8.19-preview.1"`
+- [ ] Run npm install to update package-lock.json: `npm install`
 - [ ] Commit: `git add package.json packages/*/package.json package-lock.json && git commit -m "chore: bump version to 0.8.19-preview.1 for continued development"`
 - [ ] Push to origin: `git push origin HEAD` (or appropriate branch)
 
 ---
 
 ## Phase 12: Update Migration Docs
-✅ **COMPLETE:** \docs/migration-github-to-npm.md\ superseded warning removed on both local and beta/main branches. CHANGELOG already updated with v0.8.18 details.
-- [ ] Update `docs/migration-github-to-npm.md` with v0.8.18 specifics
+- [x] Update `docs/migration-github-to-npm.md` — removed superseded warning
 - [ ] Update `docs/migration-guide-private-to-public.md` with actual version numbers
 - [ ] Link to this checklist from main migration guide
 - [ ] Commit: "docs: update migration guides for v0.8.18 execution"
@@ -207,26 +204,20 @@ pm whoami\ credentials.'s Old Package (if applicable)
 ---
 
 ## Phase 13: Verification
-✅ **COMPLETE:** \nVerification results:\n- \
-pm run lint\ ✅ Passed (no TypeScript errors)\n- \
-pm run build\ ✅ Passed (SDK and CLI built successfully)\n- Build 2: 0.8.18.1 → 0.8.18.2 (normal bumping from prepare script)\n\n⚠️ Cannot verify npm packages (Phase 8 blocked by auth):\n- \
-pm view @bradygaster/squad-cli@0.8.18\ — Skipped (requires npm auth + published package)\n- \
-pm view @bradygaster/squad-sdk@0.8.18\ — Skipped (requires npm auth + published package)
-- [ ] Origin packages on npm: `npm view @bradygaster/squad-cli@0.8.18` ✅
-- [ ] Origin packages on npm: `npm view @bradygaster/squad-sdk@0.8.18` ✅
-- [ ] Beta release on GitHub: `gh release view v0.8.18 --repo bradygaster/squad` ✅
-- [ ] Beta main branch HEAD includes migration: `git log beta/main --oneline -5` shows merge ✅
-- [ ] Test install: `npm install -g @bradygaster/squad-cli@0.8.18 && squad --version` → 0.8.18 ✅
+- [ ] Origin packages on npm: `npm view @bradygaster/squad-cli@0.8.18` ⚠️ blocked by Phase 8
+- [ ] Origin packages on npm: `npm view @bradygaster/squad-sdk@0.8.18` ⚠️ blocked by Phase 8
+- [x] Beta release on GitHub: `gh release view v0.8.18 --repo bradygaster/squad` ✅
+- [x] Beta main branch HEAD includes migration: `git log beta/main --oneline -5` shows merge ✅
+- [ ] Test install: `npm install -g @bradygaster/squad-cli@0.8.18 && squad --version` → 0.8.18 ⚠️ blocked by Phase 8
 
 ---
 
 ## Phase 14: Communication & Closure
-✅ **COMPLETE:** Beta repo README already has correct npm installation instructions. GitHub Release published with migration notes. Decision document to be written.
 - [ ] Announce migration completion in team channels (if any)
-- [ ] Update beta repo README with new installation instructions
+- [x] Update beta repo README with new installation instructions (already in migrated content)
 - [ ] Add migration notes to beta repo's CHANGELOG.md
-- [ ] Document decision: `.squad/decisions/inbox/kobayashi-migration-complete.md`
-- [ ] Update Kobayashi history: `.squad/agents/kobayashi/history.md`
+- [x] Document decision: `.squad/decisions/inbox/kobayashi-migration-phases6-14.md`
+- [x] Update Kobayashi history: `.squad/agents/kobayashi/history.md`
 
 ---
 
