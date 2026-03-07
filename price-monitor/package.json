@@ -1,0 +1,15 @@
+{
+  "name": "price-monitor",
+  "version": "1.0.0",
+  "description": "Squad sample: AI agents monitor prices, analyze trends, and recommend deals",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

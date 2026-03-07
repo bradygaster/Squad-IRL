@@ -1,0 +1,13 @@
+{
+  "name": "content-pipeline",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent content creation pipeline with Flesch-Kincaid readability scoring",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

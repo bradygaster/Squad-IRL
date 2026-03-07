@@ -1,0 +1,16 @@
+{
+  "name": "receipt-scanner",
+  "version": "1.0.0",
+  "description": "Squad sample: AI agents process receipt OCR data into expense reports",
+  "type": "module",
+  "scripts": {
+    "start": "tsx index.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0"
+  }
+}

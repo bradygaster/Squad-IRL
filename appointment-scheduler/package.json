@@ -1,0 +1,13 @@
+{
+  "name": "appointment-scheduler",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent appointment scheduler with timezone-aware calendar intersection",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

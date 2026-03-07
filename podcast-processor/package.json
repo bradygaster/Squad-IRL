@@ -1,0 +1,13 @@
+{
+  "name": "podcast-processor",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent podcast transcript processor with NLP-style text analysis",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

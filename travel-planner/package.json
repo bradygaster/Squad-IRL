@@ -1,0 +1,13 @@
+{
+  "name": "travel-planner",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent Tokyo trip planner with budget optimization and itinerary assembly",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

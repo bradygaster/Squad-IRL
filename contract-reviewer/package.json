@@ -1,0 +1,13 @@
+{
+  "name": "contract-reviewer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent SaaS contract review with risk scoring and negotiation advice",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

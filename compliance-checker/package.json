@@ -1,0 +1,13 @@
+{
+  "name": "compliance-checker",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent security compliance auditor across OWASP, GDPR, SOC2 with dependency scanning and scorecard",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

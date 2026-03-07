@@ -1,0 +1,13 @@
+{
+  "name": "ecommerce-optimizer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent e-commerce optimizer with pricing elasticity, bundle creation, RFM segmentation, and Monte Carlo forecasting",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

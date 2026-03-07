@@ -1,0 +1,13 @@
+{
+  "name": "bug-triage",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Multi-agent bug triage system with text similarity scoring and priority algorithms",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
