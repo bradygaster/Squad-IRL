@@ -6,8 +6,8 @@
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { SquadClient } from '@bradygaster/squad-sdk/client';
-import type { SquadSession, SquadSessionConfig } from '@bradygaster/squad-sdk/client';
-import type { SquadSessionEvent } from '@bradygaster/squad-sdk/adapter';
+import type { SquadSession, SquadSessionConfig } from '@bradygaster/squad-sdk/adapter';
+import type { SquadSessionEvent, SquadSessionEventHandler } from '@bradygaster/squad-sdk/adapter';
 import squadConfig from './squad.config.js';
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -33,6 +33,34 @@ function banner(): void {
   console.log(`${C.dim}  Five travel specialists ready to help you plan.${C.reset}`);
   console.log(`${C.dim}  Type your travel questions, or "quit" to exit.${C.reset}`);
   console.log();
+}
+
+/**
+ * Extract the human-readable content from a squad response.
+ * The response may be a string, or an event object with data.content.
+ */
+function extractContent(result: unknown): string | null {
+  if (typeof result === 'string') return result;
+  if (!result || typeof result !== 'object') return null;
+
+  const obj = result as Record<string, any>;
+
+  // Event shape: { data: { content: "..." } }
+  if (obj.data?.content && typeof obj.data.content === 'string') {
+    return obj.data.content;
+  }
+
+  // Direct content shape: { content: "..." }
+  if (obj.content && typeof obj.content === 'string') {
+    return obj.content;
+  }
+
+  // Message shape: { message: "..." }
+  if (obj.message && typeof obj.message === 'string') {
+    return obj.message;
+  }
+
+  return null;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -119,67 +147,69 @@ async function sendAndStream(
 ): Promise<void> {
   console.log();
   console.log(`${C.dim}  ─────────────────────────────────────────${C.reset}`);
-  process.stdout.write(`${C.white}`);
 
-  let responseText = '';
-  let receivedDelta = false;
+  // Try streaming first for real-time UX
+  let receivedContent = false;
 
-  const deltaHandler = (event: SquadSessionEvent) => {
-    if (event.type === 'message_delta') {
-      const content = (event as any).content ?? (event as any).data?.content ?? '';
-      if (content) {
-        receivedDelta = true;
-        responseText += content;
-        process.stdout.write(content);
-      }
+  const deltaHandler: SquadSessionEventHandler = (event: SquadSessionEvent) => {
+    const content = (event as any).content ?? (event as any).data?.content ?? '';
+    if (content) {
+      if (!receivedContent) process.stdout.write(`${C.white}`);
+      receivedContent = true;
+      process.stdout.write(content);
     }
   };
-
-  const idlePromise = new Promise<void>((resolve) => {
-    const idleHandler = (event: SquadSessionEvent) => {
-      if (event.type === 'idle' || event.type === 'turn_end') {
-        session.off('idle', idleHandler);
-        session.off('turn_end', idleHandler);
-        resolve();
-      }
-    };
-    session.on('idle', idleHandler);
-    session.on('turn_end', idleHandler);
-  });
 
   session.on('message_delta', deltaHandler);
 
   try {
-    await client.sendMessage(session, { prompt });
-    // Wait for the turn to finish (idle event)
-    await Promise.race([
-      idlePromise,
-      new Promise<void>((_, reject) =>
-        setTimeout(() => reject(new Error('Response timed out after 5 minutes')), 300_000)
-      ),
-    ]);
-  } finally {
-    session.off('message_delta', deltaHandler);
-  }
-
-  // If we didn't get streaming deltas, fall back to sendAndWait
-  if (!receivedDelta && session.sendAndWait) {
-    process.stdout.write(`${C.reset}`);
-    try {
+    // Use sendAndWait if available (returns final response)
+    if (session.sendAndWait) {
       const result = await session.sendAndWait({ prompt }, 300_000);
-      if (result && typeof result === 'object' && 'message' in (result as any)) {
-        console.log((result as any).message);
-      } else if (typeof result === 'string') {
-        console.log(result);
-      } else {
-        console.log(JSON.stringify(result, null, 2));
-      }
-    } catch {
-      console.log(`${C.yellow}  (No response received — the squad may still be thinking.)${C.reset}`);
-    }
-  }
+      session.off('message_delta', deltaHandler);
 
-  process.stdout.write(`${C.reset}\n`);
+      if (receivedContent) {
+        // Streaming worked — response already printed
+        process.stdout.write(`${C.reset}\n`);
+      } else if (result) {
+        // No streaming, but got a result — extract the content
+        const text = extractContent(result);
+        if (text) {
+          console.log(`${C.white}${text}${C.reset}`);
+        } else {
+          console.log(`${C.yellow}  (Received a response but couldn't parse it.)${C.reset}`);
+        }
+      } else {
+        console.log(`${C.yellow}  (No response — the squad may still be thinking.)${C.reset}`);
+      }
+    } else {
+      // Fallback: fire sendMessage and wait for idle
+      await client.sendMessage(session, { prompt });
+
+      // Give it time to stream
+      await new Promise<void>((resolve) => {
+        const check = () => {
+          session.off('idle', check);
+          session.off('turn_end', check);
+          resolve();
+        };
+        session.on('idle', check);
+        session.on('turn_end', check);
+        setTimeout(resolve, 300_000);
+      });
+
+      session.off('message_delta', deltaHandler);
+      if (receivedContent) {
+        process.stdout.write(`${C.reset}\n`);
+      } else {
+        console.log(`${C.yellow}  (No response received.)${C.reset}`);
+      }
+    }
+  } catch (err: any) {
+    session.off('message_delta', deltaHandler);
+    if (receivedContent) process.stdout.write(`${C.reset}\n`);
+    throw err;
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -199,6 +229,16 @@ async function main(): Promise<void> {
     return;
   }
 
+  // Suppress noisy CLI subprocess warnings (e.g., Node.js experimental SQLite)
+  const origStderrWrite = process.stderr.write.bind(process.stderr);
+  process.stderr.write = (chunk: any, ...args: any[]) => {
+    const str = typeof chunk === 'string' ? chunk : chunk.toString();
+    if (str.includes('[CLI subprocess]') || str.includes('ExperimentalWarning')) {
+      return true;
+    }
+    return origStderrWrite(chunk, ...args);
+  };
+
   console.log();
   console.log(`${C.magenta}  Connecting to your travel squad...${C.reset}`);
 
@@ -217,9 +257,10 @@ async function main(): Promise<void> {
       model: 'claude-sonnet-4.5',
       streaming: true,
       systemMessage: {
-        mode: 'append',
+        mode: 'append' as const,
         content: buildSystemPrompt(),
       },
+      onPermissionRequest: () => ({ kind: 'approved' as const }),
     };
 
     session = await client.createSession(sessionConfig);
