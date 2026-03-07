@@ -484,3 +484,23 @@ The CLI is functionally sound for basic operations. The 4 issues are all UX/mess
 - Test coverage and verdict sections — all outcomes recorded as final state
 
 **Count:** 4 corrections made. History is now clean for future agent spawn.
+
+### 📌 Sample Project Verification (2026-03-01): Second half of 20-way sample collection tested
+- **Status:** Complete — verified last 10 samples (alphabetically) after session crash
+- **Task:** Run `npx tsx index.ts` with 30s timeout for each sample, verify meaningful domain-specific output
+- **Samples tested:** job-application-tracker, medical-appointment-prep, meeting-recap-generator, podcast-processor, price-monitor, real-estate-analyzer, receipt-scanner, social-media-manager, support-ticket-router, travel-planner
+- **Results:** ✅ 10/10 PASS — all samples produce meaningful, domain-specific output
+  - job-application-tracker: Multi-offer comparison with weighted scoring (86.7 vs 75.7), pipeline status, 7 applications tracked
+  - medical-appointment-prep: 5-agent prep system, visit summary sheet, medication review, insurance quick-ref
+  - meeting-recap-generator: 5 decisions, 8 action items, speaker analysis, executive summary, follow-up email draft from 66-entry transcript
+  - podcast-processor: 49 transcript exchanges, quote ranking, topic distribution, chapter segmentation
+  - price-monitor: 5 products across 4 stores, deal scoring (95/100 flash deal), price trends, potential savings $206-$246
+  - real-estate-analyzer: 6 agents, 5 properties evaluated, cap rate/CoC/NPV analysis, risk scoring, ranked recommendations
+  - receipt-scanner: 4-agent pipeline, 10 receipts, OCR + dedup + GL classification + approval, $4,072.12 categorized
+  - social-media-manager: 27 content combinations scored, 10 posts scheduled, weekly calendar by platform/time/angle
+  - support-ticket-router: 12 tickets processed, 7 duplicates found, 10 auto-approved, KB articles + known issues linked
+  - travel-planner: ⚠️ SPECIAL ATTENTION (index.ts deleted + restored from git) — ✅ PASS: 5 agents, Tokyo itinerary, flight/hotel/activities optimized, $3,561/$4,000 budget, 18 activities, Haversine distance verification
+- **Output quality:** All samples show sophisticated multi-agent coordination, realistic data flows, domain-specific terminology, formatted output (tables, summaries, recommendations)
+- **Performance:** All complete within 30s timeout; largest outputs ~44KB (podcast-processor)
+- **Travel-planner note:** Despite index.ts corruption/restoration, produces complete working output with all 5 agents functioning correctly
+- **Takeaway:** Sample collection is production-ready. All 10 demonstrate unique use cases with meaningful Squad patterns (multi-agent coordination, data synthesis, decision making, report generation).

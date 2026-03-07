@@ -1005,3 +1005,40 @@ Multi-agent build of Rock-Paper-Scissors game with 10 AI strategies, Docker infr
 
 
 📌 Team update (2026-03-04T17:52:00Z): Migration docs file-safety guidance added — doctor command now live in CLI (fixes #188) — decided by Keaton, implemented by McManus
+
+### 2026-03-[Current]: Sample Project README Audit Complete
+
+**Status:** All 20 sample READMEs verified and confirmed complete.
+
+**Audit Results (20/20 pass):**
+- ✅ All files present (ab-test-analyzer through travel-planner)
+- ✅ All have clear titles and descriptions
+- ✅ All document install instructions (`npm install`)
+- ✅ All document run instructions (`npm start` or `npx tsx index.ts`)
+- ✅ All describe their agent team structure (4–6 agents each)
+- ✅ All describe expected output/terminal behavior
+- ✅ All have **unique, substantive content** (not templates)
+
+**Key Strengths Observed:**
+1. **Deep Algorithm Documentation:** Each README explains the actual math (z-tests, Haversine distance, TF-IDF, Monte Carlo, etc.) not just what the app does
+2. **Consistent Structure:** Every README opens with "What It Does" then agent table, then algorithms/formulas, then run instructions
+3. **Varied Agent Counts:** 3–6 agents per project showing different Squad orchestration patterns
+4. **Output Clarity:** Each describes what users will see in the terminal (colors, charts, tables, formatted output)
+5. **No Boilerplate:** All content is project-specific with real algorithms and domain logic
+
+**Root README Status:**
+- ✅ Accurately lists all 20 samples with descriptions
+- ✅ "What Makes These Different" section validates each one's unique algorithm
+- ✅ Contributing guidelines clearly defined
+
+**Note:** Session crash context — all READMEs were verified to be intact, present, and high-quality. No gaps found. No fixes needed.
+
+## Learnings
+
+1. **Sample Quality Consistency:** A well-structured README template (followed across all 20 projects) + unique algorithm documentation = discoverable samples that teach real concepts.
+
+2. **DevRel Angle:** These samples aren't "Hello World" — they're industry-grade algorithms (mortgage math, statistical testing, NLP clustering) presented as terminal programs. The README strategy makes each one a micro-tutorial in a specific domain.
+
+3. **Message Amplification:** The 20-sample collection tells a story: "Squad can orchestrate specialized agents across any domain." Each README is part of that story, not a standalone artifact.
+
+4. **Maintenance Pattern:** For future additions (sample #21+), the audit checklist should be enforced: presence, title, description, install, run, agents, output, and algorithm uniqueness. This ensures consistency without template bloat.

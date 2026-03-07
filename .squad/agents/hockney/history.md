@@ -796,3 +796,22 @@ All labeled squad:hockney for routing. Each issue includes: what's missing, why 
 - **Key finding:** The SDK dist was stale (still had old `.squad-templates` path). Source was already updated but `npm run build` hadn't been run. Rebuilt SDK to verify test passes.
 - **Pre-existing failure:** Line 94 gitattributes content mismatch (unrelated, not introduced by this change).
 - **Lesson:** On Windows, use `join(root, '.squad', 'templates')` not `join(root, '.squad/templates')` — forward-slash segments in `join` args work on Node but it's better practice to use separate args.
+
+### 100-Ways-to-Use-Squad Sample Verification — First 10 (2026-03-07)
+**Status:** Complete — all 10 samples ran successfully with domain-specific output.
+- **Samples tested:** ab-test-analyzer, appointment-scheduler, bug-triage, competitive-intel-monitor, compliance-checker, content-pipeline, contract-reviewer, ecommerce-optimizer, email-inbox-triage, inventory-manager
+- **Method:** Ran `npx tsx index.ts` in each sample directory with 30s timeout
+- **Results:** 10/10 PASS — all produced meaningful, unique output (no errors, no blank output, no generic boilerplate)
+- **Output verification:**
+  - **ab-test-analyzer:** Multi-agent A/B test analysis with statistical significance tests, power calculations, segmentation analysis, weighted scores, and final ship/don't-ship recommendations
+  - **appointment-scheduler:** 4-agent scheduling system analyzing participant timezones, availability windows, conflict detection, and optimal meeting time recommendations with local time conversions
+  - **bug-triage:** 5-agent bug triage system with priority scoring, duplicate detection, environment matching, auto-assignment routing, and time-savings metrics (96% reduction)
+  - **competitive-intel-monitor:** 6-agent competitive intelligence gathering with feature comparison matrices, pricing analysis, sentiment mining, social listening, market positioning maps, and executive briefing
+  - **compliance-checker:** 5-agent compliance audit across OWASP/GDPR/SOC2 frameworks with security scanning, privacy analysis, policy validation, and risk scoring
+  - **content-pipeline:** 5-agent editorial pipeline with fact-checking, plagiarism detection, SEO optimization, readability analysis, and editorial review scoring
+  - **contract-reviewer:** 5-agent contract risk analysis with clause extraction, risk scoring, benchmark comparison, negotiation suggestions, and overall contract grading
+  - **ecommerce-optimizer:** 6-agent revenue optimization with product catalog scoring, pricing recommendations, bundle creation, funnel analysis, customer segmentation, and Monte Carlo revenue forecasting
+  - **email-inbox-triage:** 3-agent email classification with category detection, summarization, priority scoring, action routing, and fallback domain-based routing
+  - **inventory-manager:** 6-agent inventory system with stock monitoring, reorder alerts, forecasting, pricing analysis, margin tracking, and category trend analysis
+- **Key insight:** All samples demonstrate sophisticated multi-agent coordination with domain-specific logic, realistic data scenarios, formatted terminal output (boxes, tables, sparklines), and actionable insights. Output ranges from 20-50KB per sample.
+- **Quality signal:** Zero runtime errors, zero template boilerplate detected. Each sample has unique domain vocabulary, metrics, and workflow patterns appropriate to its use case.

@@ -569,3 +569,45 @@ The CLI couldn't run because `packages/squad-sdk/src/index.ts` was missing re-ex
 
 
 📌 Team update (2026-03-04T17:52:00Z): Migration docs file-safety guidance added — doctor command now live in CLI (fixes #188) — decided by Keaton, implemented by McManus
+
+## 2026-03-05: TypeScript Compilation Verification of 20 Sample Projects
+
+**Requested by:** Brady. "Verify all 20 sample projects compile correctly after travel-planner/index.ts was restored from git following a session crash."
+
+**Task:** Run `npx tsc --noEmit` in all 20 sample directories to verify TypeScript compilation. Fix any issues found.
+
+**Sample Directories:**
+ab-test-analyzer, appointment-scheduler, bug-triage, competitive-intel-monitor, compliance-checker, content-pipeline, contract-reviewer, ecommerce-optimizer, email-inbox-triage, inventory-manager, job-application-tracker, medical-appointment-prep, meeting-recap-generator, podcast-processor, price-monitor, real-estate-analyzer, receipt-scanner, social-media-manager, support-ticket-router, travel-planner
+
+**Initial Results:**
+- ✅ 16/20 samples passed immediately
+- ❌ 4/20 samples failed with TS2580 error: "Cannot find name 'process'"
+  - appointment-scheduler (1 error at line 189)
+  - content-pipeline (3 errors at lines 70, 75, 1006)
+  - ecommerce-optimizer (2 errors at lines 723, 725)
+  - podcast-processor (5 errors at lines 71, 74, 79, 498, 811)
+
+**Root Cause:**
+All four failing samples use `process.stdout.write()` or `process.exit()` but lacked:
+1. `@types/node` in devDependencies
+2. `"types": ["node"]` in tsconfig.json compilerOptions
+
+**Fix Applied:**
+1. Added `"@types/node": "^22.13.9"` to package.json devDependencies in all 4 samples
+2. Added `"types": ["node"]` to tsconfig.json compilerOptions in all 4 samples
+3. Ran `npm install --save-dev @types/node` in each directory to install the types
+4. Verified all 4 samples now compile cleanly
+
+**Final Results:**
+✅ **20/20 samples now compile successfully**
+
+**Files Modified (8 files):**
+- appointment-scheduler/package.json, tsconfig.json
+- content-pipeline/package.json, tsconfig.json
+- ecommerce-optimizer/package.json, tsconfig.json
+- podcast-processor/package.json, tsconfig.json
+
+## Learnings
+- When samples use Node.js globals (`process`, `Buffer`, `__dirname`, etc.), they require both `@types/node` installed AND `"types": ["node"]` in tsconfig.json — just adding the package.json entry isn't sufficient
+- TypeScript's `types` compiler option must reference installed type definitions; the error "Cannot find type definition file for 'node'" means npm install hasn't run yet
+- travel-planner (the restored file) compiled successfully on first try — the git restore was clean
