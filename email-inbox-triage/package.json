@@ -1,15 +1,17 @@
 {
   "name": "email-inbox-triage",
   "version": "1.0.0",
-  "description": "Squad sample: AI agents collaboratively triage an email inbox",
+  "private": true,
+  "description": "A Squad-powered email triage team — paste your emails, get a prioritised action plan from a team of specialists.",
   "type": "module",
   "scripts": {
-    "start": "tsx index.ts",
-    "build": "tsc",
-    "typecheck": "tsc --noEmit"
+    "start": "npx tsx index.ts"
+  },
+  "dependencies": {
+    "@bradygaster/squad-sdk": "^0.8.0"
   },
   "devDependencies": {
-    "tsx": "^4.19.0",
-    "typescript": "^5.5.0"
+    "tsx": "^4.19.4",
+    "typescript": "^5.7.0"
   }
 }
