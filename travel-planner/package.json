@@ -2,11 +2,12 @@
   "name": "travel-planner",
   "version": "1.0.0",
   "type": "module",
-  "description": "Multi-agent Tokyo trip planner with budget optimization and itinerary assembly",
+  "description": "Interactive LLM-powered travel planner with multi-agent itinerary assembly",
   "scripts": {
     "start": "npx tsx index.ts"
   },
   "devDependencies": {
+    "@types/node": "^22.13.5",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }
