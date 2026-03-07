@@ -52,6 +52,32 @@
 
 **Tone & style preserved:** Kept existing README structure, descriptions, and tone ceiling (no hype, substantiated claims).
 
+### 2026-03-07: Travel Planner sample README — SDK migration
+
+**Status:** Complete. Rewrote `travel-planner/README.md` to showcase the new squad.config.ts approach.
+
+**Why this matters:**
+- Old README described a standalone 900-line TS app that called OpenAI directly — now obsolete
+- New approach: `squad.config.ts` file using `@bradygaster/squad-sdk` to define a specialized squad of 5 travel specialists
+- Brady's directive: samples should show "ways to use Squad to solve real human problems," not just technical capabilities
+
+**New README structure:**
+1. **Open with human problem** — Trip planning is fragmented, stressful, decision fatigue across 10+ sites
+2. **Show the team** — 5 specialists: Research, Flights, Lodging, Activities, Budget (one-liner each, clear domain ownership)
+3. **Quick start** — `npm install`, `npx squad build`, open in Copilot, ask a real question
+4. **What happens inside** — Not a pipeline, a *conversation*; agents collaborate and adjust
+5. **3 realistic examples** — "Warm & cheap for $2500", "Family trip with kids", "Budget meals + architecture"
+6. **What makes this Squad** — Explains routing, collaboration, context persistence, coordination (vs. chatbot with knowledge domains)
+7. **SDK foundation** — Mentions `@bradygaster/squad-sdk`, `defineSquad`, why no prompt engineering
+
+**Tone applied:** Clear, engaging, zero hype. Speaks to normal people (not just developers). "You describe a human problem. They solve it as a team."
+
+**Key decisions:**
+- Removed technical implementation details (Haversine scoring, ASCII bars, OpenAI endpoint overrides)
+- Added focus on *experience* (what the user sees and benefits from) over *architecture*
+- Squad differences highlighted: routing, collaboration, context—why it's not "chatbot + domains"
+- File length: ~120 lines markdown (concise, readable in 3 minutes)
+
 ### 2026-03-01: Rock Paper Scissors sample documentation
 
 **Status:** Complete. Sample README and samples index updated.

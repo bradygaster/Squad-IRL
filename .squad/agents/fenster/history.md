@@ -621,3 +621,33 @@ All four failing samples use `process.stdout.write()` or `process.exit()` but la
 - **Pattern:** User input → LLM agent composition → structured JSON parsing → agent optimization
 - **Commits:** 7d21940 (feat: rebuild as interactive LLM-driven planner)
 - **Alignment:** Brady's user directive ("no hardcoded fake data, real value to users") implemented. Fenster's interactive LLM pattern now reference for all future samples.
+
+
+### 📌 Travel-planner SDK rebuild — 2026-03-07
+
+**Context:** Brady was furious. The interactive travel-planner (900 lines, standalone TypeScript app with OpenAI fetch() calls) was built "around github copilot instead of using it." It missed the point entirely: samples should demonstrate the Squad SDK, not replace it.
+
+**Task:** Rebuild travel-planner as a Squad SDK configuration (squad.config.ts). Delete the standalone app.
+
+**Execution:**
+1. Deleted: index.ts (900 lines), package-lock.json, 
+ode_modules/
+2. Created: squad.config.ts (402 lines) — complete Squad SDK config with:
+   - 5 specialized travel agents (research, flights, lodging, activities, budget)
+   - Rich inline charters (~80 lines each) with genuine domain expertise
+   - Intelligent routing rules (destination→research, flights→flights, broad queries→all agents)
+   - Team definition with projectContext explaining collaborative travel planning
+   - Defaults and optional ceremony for complex multi-destination trips
+3. Updated: package.json (Squad SDK dependency), 	sconfig.json (ESNext/bundler mode)
+4. Result: Clean, SDK-first config that uses GitHub Copilot as the interface. The SDK *is* the app.
+
+**Learnings:**
+- Squad samples are SDK demonstrations, not standalone apps — the distinction matters
+- Rich agent charters (with bullet lists, response patterns, style guides, domain expertise) make agents genuinely useful
+- Inline charters work well for samples — they keep everything in one readable file
+- Routing patterns should be intuitive: specific queries → specialists, broad queries → full team collaboration
+- TypeScript compilation errors for missing SDK exports are expected during SDK development — the config structure is what matters
+- "Makes it work then makes it right" means: delete the wrong thing completely, rebuild from SDK primitives, verify the approach
+- The measure of a good sample: "Can a normal person understand what they get from this squad in 30 seconds?"
+
+**Commit:** [will be made by Brady or McManus]

@@ -1,14 +1,13 @@
 {
   "name": "travel-planner",
   "version": "1.0.0",
+  "private": true,
+  "description": "A Squad-powered travel planning team — tell it where you're going, get a personalized itinerary from a team of travel specialists.",
   "type": "module",
-  "description": "Interactive LLM-powered travel planner with multi-agent itinerary assembly",
-  "scripts": {
-    "start": "npx tsx index.ts"
+  "dependencies": {
+    "@bradygaster/squad-sdk": "^0.8.0"
   },
   "devDependencies": {
-    "@types/node": "^22.13.5",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "typescript": "^5.7.0"
   }
 }
