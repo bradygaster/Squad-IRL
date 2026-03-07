@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, RefillTracker improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> MedOrganizer listed Bob Jameson's 7 medications with "Daily" frequency and recommended a smartphone app — but Bob uses a flip phone and was just hospitalized after confusing his morning and evening blood pressure pills (BP dropped to 78/42). Scored 38/100. The revised system uses color-coded time-of-day scheduling (🟡 morning, 🔵 evening, 🟣 bedtime), arthritis-friendly pill organizers, flip phone alarms, a printable wallet card for emergencies, and daughter Karen's remote weekly check-in protocol.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

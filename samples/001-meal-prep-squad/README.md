@@ -22,6 +22,12 @@
 3. **Update** — If score < 90%, Shopper improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Sarah's feeding a family of 5 on $150/week with a diabetic husband and a 7-year-old who refuses anything green. The agents produced a complete meal plan with recipes, a $149.50 grocery list, and a 2-hour Sunday prep schedule that makes weeknight dinners take under 30 minutes.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

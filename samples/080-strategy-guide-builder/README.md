@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, GuideWriter improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Most game guides are either a wall of text nobody reads or a bare-bones wiki stub. This squad produces a structured strategy guide with beginner-friendly fundamentals, advanced tactics for each phase of play, matchup-specific tips, and common mistake callouts — organized so you can find exactly what you need mid-session. Think less "generic tips list" and more "the guide your favorite streamer would write."
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

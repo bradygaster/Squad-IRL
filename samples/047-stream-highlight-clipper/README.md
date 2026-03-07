@@ -21,6 +21,14 @@
 3. **Update** — If score < 90%, TitleWriter improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Jake's 4-hour Apex stream:
+
+> **Top Clip**: 1v3 clutch with 1 HP (1:23:42-1:24:18, 36 sec). Viral potential: 🔥🔥🔥🔥🔥. **Title**: "1v3 CLUTCH WITH 1 HP IN DIAMOND (I SCREAMED)". **7 clips identified**, ranked by viral potential, with exact timestamps, platform optimization, thumbnail frames, and hashtag strategies. Estimated editing time: 2-3 hours for all clips.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

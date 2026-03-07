@@ -21,6 +21,15 @@
 3. **Update** — If score < 90%, SolutionFocuser improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Mr. Chen addressing homework concerns:
+
+> **Subject:** Checking In - Maya's Been a Star in Class Discussions!  
+> "Maya has been absolutely stellar in our science unit... I'm reaching out because I've noticed a pattern over the past three weeks that I wanted to loop you in on. Maya's been turning in homework less frequently than usual... Because Maya is so capable in class, I'm wondering if something has shifted at home..."
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

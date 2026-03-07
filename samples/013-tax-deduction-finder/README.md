@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, Maximizer improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Jordan (freelance designer, $87K income) was taking the standard deduction and missing business write-offs. The agents found $9,847 in Schedule C deductions including home office ($1,500), mileage ($831), and software ($660). Result: $1,379 in self-employment tax savings + identified $312 overpayment refund. Total savings: $1,691.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

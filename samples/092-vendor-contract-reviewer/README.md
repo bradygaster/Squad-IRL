@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, NegotiationAdvisor improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> Lawyer's initial review used legal jargon, found only 3 of 9 red flags, and missed the most dangerous clause — an asymmetric cancellation policy forfeiting Priya's entire $2,400 deposit with zero penalty if the photographer cancels. The revised analysis caught all 9 issues with 🔴🟡🟢 severity ratings, provided specific alternative contract language for each, and included a ready-to-send negotiation email to the photographer.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

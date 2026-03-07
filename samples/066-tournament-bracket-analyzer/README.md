@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, OddsCalculator improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+A basic bracket predictor just picks higher seeds. This squad dissects head-to-head histories, analyzes play-style matchups, and assigns calibrated confidence levels — turning a 16-team tournament into a round-by-round breakdown with upset alerts and Cinderella storylines you'd actually bet on.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, PaceCalculator improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Cookie-cutter marathon plans ignore your injury history, current fitness, and schedule constraints. This squad builds a week-by-week training program with pace targets calibrated to your goal time, rest days that account for your life, and injury-prevention cues based on your weak points. The difference between a generic "run 5 miles Tuesday" and a plan that actually gets you to the finish line healthy.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

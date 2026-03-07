@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, MemoryExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Ava's Bio 201 exam in 5 days: 4 chapters, disorganized notes, missed 2 lectures, panicking. First draft was 30 pages of textbook summaries. The agents created concept maps, comparison tables, 40 practice questions, mnemonic devices ("ATP = TRI-phosphate = 3 phosphates"), and a 5-day study plan. Ava scored 91% (up from her usual 78-82%). The concept maps alone were worth it.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

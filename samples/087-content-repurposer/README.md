@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, ContentSlicerBot improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> Transforms a 2,000-word sustainable fashion blog into a coordinated multi-platform campaign: Twitter thread with viral data drops ("700K microplastic fibers per wash"), LinkedIn thought-leadership post (1,000 characters with personal POV), Instagram 10-slide carousel with infographics, and TikTok 60-second video using trending audio. Includes platform-specific hashtags, 5-day posting schedule, and engagement strategies.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

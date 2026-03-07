@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, ImpactCalculator improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Watch vague eco-advice become a phased action plan with quantified impact: eliminate 312 plastic bottles/year, save $4,340 over 5 years, reduce household trash by 68%—all with Austin-specific shopping locations, DIY options, and realistic difficulty ratings for apartment living.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

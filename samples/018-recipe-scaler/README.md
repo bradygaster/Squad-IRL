@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, TimingExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Nina's grandma's lasagna serves 8, but she's hosting 24 for Thanksgiving (needs to triple it). First version just tripled ingredients but ignored logistics. The agents figured out: 3 pans fit in her oven (2 top, 1 bottom, rotate halfway), baking time increases to 55-60 min, brown 3 lbs meat in batches (don't overcrowd), assemble morning of. Result: Perfect lasagna for 24, everyone asked for the recipe.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

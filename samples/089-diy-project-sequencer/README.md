@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, SafetyOfficer improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> First draft suggested hanging drywall before running electrical, missed Portland's mandatory permits for garage-to-living-space conversion, and estimated "2 hours" for 240 sq ft of drywall. The revised plan for Rachel Kowalski's $3,500 garage-to-office project sequences 6 weekends with correct dependencies, itemized materials ($3,187 at Home Depot), safety protocols, and clear guidance on when to call a licensed electrician vs. DIY.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

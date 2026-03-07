@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, CommunicationHub improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Every group project has the same problem: vague roles, uneven workloads, and that one person who vanishes until the night before. This squad breaks the project into concrete tasks matched to each member's strengths, sets milestone deadlines with buffer time, and generates accountability check-in templates. Transform "we should probably start soon" into a plan where everyone knows exactly what they own and when it's due.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

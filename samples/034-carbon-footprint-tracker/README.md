@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, ActionPlanner improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+David's 18.2-ton carbon footprint breaks down to 29% air travel and 22.7% driving. The agents built a 6-action plan that exceeds his 30% reduction goal, saves $2,026/year, and hits the target by Month 2 — with one phone call to enroll in renewable energy and a 4°F thermostat adjustment.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

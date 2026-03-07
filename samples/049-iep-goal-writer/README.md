@@ -21,6 +21,14 @@
 3. **Update** — If score < 90%, GoalCrafter improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Jayden's 4th grade IEP (dyslexia + ADHD):
+
+> **Goal 1**: Decode 20 multisyllabic words (3-4 syllables) with 80% accuracy across 4/5 trials by March 2025. **Baseline**: 45% accuracy. **Method**: Bi-weekly CORE Phonics assessments. **Supports**: Wilson Reading, syllable division strategies. Includes short-term objectives, progress monitoring schedule, and accommodations. ✅ SMART, compliant, measurable.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

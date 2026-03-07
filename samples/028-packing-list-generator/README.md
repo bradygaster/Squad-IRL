@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, MinimalistCoach improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+**Emma is going to Tokyo for 10 days (3 work, 7 sightseeing) and is a chronic over-packer.** The agents created a carry-on-only packing list with weather-specific details (November Tokyo: 50-60°F, needs layers), outfit matrix showing 8 items = 12+ outfits, and Tokyo-specific essentials (compact umbrella, yen cash, Suica card). **The result: complete packing strategy with exactly what to pack, what to skip, and how to do laundry mid-trip.**
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

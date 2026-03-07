@@ -21,6 +21,14 @@
 3. **Update** — If score < 90%, BudgetAdvisor improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Maria's salmon dinner party:
+
+> **Primary pairing**: Chablis (unoaked Chardonnay) - $28. High acidity cuts through fatty salmon and butter sauce while citrus notes echo the lemon. **Why it works**: Complement + contrast principles. Alternatives at $14 (Albariño) and $50 (Premier Cru). Includes wine shop script so you don't feel intimidated: "Hi! I'm making pan-seared salmon..."
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

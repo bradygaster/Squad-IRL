@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, GratitudeExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Priya and Dev faced 47 thank-you notes and a blank notecard. Generic "thank you for the gift" became personalized stories: Aunt Maya's handmade quilt became "our favorite — we've used it for three movie nights and think of you every time," Uncle James's $200 check became "going toward our Tuscany cooking class — we'll toast to you with Chianti." Finished all 47 in 2 evenings.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

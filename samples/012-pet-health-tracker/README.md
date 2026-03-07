@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, QuestionGenerator improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Bella (7-year-old golden retriever) had recurring ear infections but the pattern wasn't clear. The agents analyzed her history and found: 4 infections in 18 months, all in summer (seasonal allergies), 11 lb weight gain, and overdue dental cleaning. Generated 8 specific vet questions. Result: Vet confirmed allergies, prescribed new diet. Bella's back to healthy weight.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, CallToActionWriter improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+A rambling complaint letter gets filed in the trash. This squad turns your community concern into a persuasive, well-structured petition — with a clear problem statement, supporting evidence, specific asks, and a call to action that makes signing feel urgent. The difference between "someone should do something" and a document that actually lands on a council member's desk with 500 signatures.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

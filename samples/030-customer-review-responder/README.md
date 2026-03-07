@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, ProblemSolver improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+A family restaurant gets a brutal 1-star review: cold food, 45-minute wait, a dismissive manager. The agents craft a response where the owner admits *he* was that manager, addresses every complaint by name, explains what he's changed, and offers a complimentary dinner — turning the review into a trust-building moment for future customers.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

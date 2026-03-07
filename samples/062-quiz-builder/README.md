@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, AnswerKeyMaker improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+See a photosynthesis quiz evolve from basic recall questions to a 15-question assessment spanning all Bloom's Taxonomy levels—complete with scenario-based problems, graph analysis, detailed answer key with explanations, and perfect alignment to learning objectives.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

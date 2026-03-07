@@ -21,6 +21,14 @@
 3. **Update** — If score < 90%, BudgetBoss improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Lily's 7th birthday unicorn party:
+
+> **3-hour timeline** (2-5pm): Unicorn treasure hunt (30 min), craft station (30 min), freeze dance + pin-the-horn (25 min), pizza/cake (30 min), free play (35 min). **Complete shopping list**: $387 total (under $400 budget). **Day-before & day-of checklists**. Includes "what could go wrong" troubleshooting. Result: Zero stress, maximum fun.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

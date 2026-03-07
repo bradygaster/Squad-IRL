@@ -22,6 +22,12 @@
 3. **Update** — If score < 90%, FactChecker improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+**Dorothy, 78, marched in Selma in 1965 but struggled to capture what it really felt like.** The agents transformed 6 hours of rambling voice memos into a powerful memoir chapter. Her story came alive: the church shoes that left bloody blisters, hiding in a church basement while troopers circled above, praying the Rosary with a Muslim woman named Aisha, receiving boots from a stranger. **The result: "The Church Shoes" — a deeply personal 15-page chapter that her grandchildren will treasure forever.**
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

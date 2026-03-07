@@ -22,6 +22,12 @@
 3. **Update** — If score < 90%, LocalExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Mia and Jake's original Tokyo itinerary started at 8am (they hate mornings), zigzagged across the city wasting 4 hours on Day 2, and ignored Mia's shellfish allergy. The agents rebuilt it with 10-11am start times, geographically clustered activities, shellfish-safe restaurants, indoor backup for the rainy day, and 2-3 hour daily buffer time — all for $610 of their $2,000 budget.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

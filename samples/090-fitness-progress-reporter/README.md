@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, ProgramAdjuster improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> Round 1 just listed Dani Okafor's Week 14 numbers without analysis — missed her squat plateau (same 3 reps for 2 weeks), ignored lower back tightness after deadlifts, and offered generic "good job, keep going" motivation. Round 2 identified the stall pattern with a specific deload recommendation, flagged the back tightness as an injury risk, projected her meet total at 20 weeks out, and adjusted next week's training maxes with real 5/3/1 percentages.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

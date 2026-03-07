@@ -21,6 +21,14 @@
 3. **Update** — If score < 90%, DecisionAdvisor improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Marcus's checkout flow redesign test:
+
+> **Results**: Treatment lifted conversion +2.48% (p=0.031, statistically significant). **Red flag**: Desktop users showed -0.8pp decrease. **Revenue impact**: $4.59M annually for mobile. **Recommendation**: 🚀 Ship to mobile only. Run separate desktop test. **Why**: Mobile drives the win (+7.1% lift), desktop needs modified treatment.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, Wordsmith improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+David's a restaurant manager trying to pivot into tech PM. His original resume screamed "food service" with phrases like "front-of-house operations." The agents rewrote it with tech keywords (Agile, stakeholder management, cross-functional), quantified achievements (reduced costs 18%, improved retention 40%), and produced an ATS-friendly format that scored 92% keyword match with the job posting.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

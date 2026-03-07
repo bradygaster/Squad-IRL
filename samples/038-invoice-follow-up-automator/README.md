@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, EscalationExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Sarah's $4,750 invoice is 60 days overdue with no response. The agents built a 4-step escalation sequence — from a warm "Happy New Year" email to a certified final demand letter — with a phone call script, three payment options at every step, and a decision tree for when to file in small claims court.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

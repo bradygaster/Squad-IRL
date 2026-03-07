@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, ValueCommunicator improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Transform "$800 for character illustration" into a professional quote breaking down 44 hours of creative work, commercial use rights, rush fees, material costs—with clear payment terms and value communication that turns a $800 guess into a confident $4,158 proposal.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

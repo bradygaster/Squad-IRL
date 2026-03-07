@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, CTAExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Marcus's coffee roastery newsletter read like corporate press releases ("We are pleased to announce..."). Open rate: 18%. The agents injected personality: "That Ethiopian coffee I've been obsessing over for 3 months? It's FINALLY here and it's the best thing we've ever roasted." Open rate jumped to 42%, 89 people used the discount code, 4 replied "best newsletter ever."
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

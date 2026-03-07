@@ -21,6 +21,12 @@ Everyone
 3. **Update** — If score < 90%, NumbersCruncher improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Keisha wants to walk dogs in Charlotte's Myers Park neighborhood with $500 to start. The agents found a gap in the market (no evening/weekend walker), built month-by-month P&L projections showing $1,474/month profit by Month 6, and calculated her effective hourly rate at $25.67 — 27% more than her day job.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

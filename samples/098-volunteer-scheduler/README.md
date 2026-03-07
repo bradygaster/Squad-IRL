@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, CommunicationBot improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> Round 1 randomly assigned the professional photographer to parking duty, put a volunteer with a bad knee on bounce house monitoring, separated a couple who requested to work together, and left teens unsupervised. The revised schedule for Pastor David's 28-volunteer Harvest Festival skill-matches every role (EMT → First Aid, photographer → Photography, sound tech → Music/Sound), pairs all 5 teens with adult buddies, and includes confirmation emails and day-of logistics.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

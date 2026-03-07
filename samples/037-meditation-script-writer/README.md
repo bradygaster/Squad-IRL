@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, IntentionSetter improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Rachel has never meditated and finds "clearing her mind" intimidating. The agents wrote a full 15-minute script with 4-7-8 breathing, a progressive body scan from feet to head, and a lake visualization — complete with [pause] timing markers and voice pacing notes. No crystals required.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

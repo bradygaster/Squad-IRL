@@ -21,6 +21,14 @@
 3. **Update** — If score < 90%, EngagementExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Mia's beach sunset post:
+
+> **Caption hook**: "What would you do if you had zero obligations for 24 hours?" Vulnerable story about not being able to turn off productivity brain. Clear CTA: "Tell me in the comments—I need ideas for day 2." **25 strategic hashtags**: 3 mega, 7 mid-tier, 10 niche, 5 community. Expected engagement: 800-1,200 likes, 50-80 comments, 3K-5K new reach.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

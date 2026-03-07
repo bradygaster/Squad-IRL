@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, AppealWriter improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> From "My doctor prescribed this because I need it" to a comprehensive 5-page appeal with specific policy citations (HF-2847392, Section 5.3), clinical data (AHI 38, 90-day CPAP failure), Medicare LCD guidelines, Oregon insurance law, and an 8-exhibit documentation checklist ready to submit.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

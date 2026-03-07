@@ -21,6 +21,14 @@
 3. **Update** — If score < 90%, StressReducer improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Here's what the agent team produced for Rachel and Tom's Austin→Portland move:
+
+> **DO THESE TODAY:** Get 3 moving quotes (peak season books 6-8 weeks out), check lease break terms, request Emma's school records. **Week-by-week timeline** for decluttering, packing, utilities, and kid/pet prep. **Moving Day Essentials Box** checklist. **Total cost**: $17,500-20,000. **127 tasks** organized, nothing forgotten.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

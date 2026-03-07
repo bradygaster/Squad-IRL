@@ -22,6 +22,12 @@
 3. **Update** — If score < 90%, Cheerleader improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Carlos (3.7 GPA, first-gen, wants engineering) was applying to 8 reach schools with no financial safeties. The agents rebuilt his strategy: 2 reach, 3 target, 3 safety schools with strong first-gen support. Essay plan leveraged his soccer leadership + translating for non-English parents. Result: 5 acceptances with $127K in scholarships. He's at Georgia Tech on a full ride.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

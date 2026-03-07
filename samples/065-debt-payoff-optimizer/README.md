@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, MotivationTracker improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+See $31,300 in debt transform from "pay highest interest first" generic advice into a 44-month hybrid strategy with emergency fund phase, month-by-month payment schedules, milestone celebrations, what-if scenarios, and psychological tactics to stay motivated through years of payoff.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

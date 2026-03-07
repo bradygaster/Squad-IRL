@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, DocumentTracker improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Estate planning feels overwhelming because nobody tells you what to do *first*. This squad generates a prioritized, timeline-aware checklist — from immediate essentials (will, power of attorney, beneficiary updates) to longer-term tasks (trust setup, digital asset inventory) — with plain-English explanations of why each item matters. Turn a paralyzing "I should really get to that" into a clear 90-day action plan.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

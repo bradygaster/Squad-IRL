@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, SuccessCoach improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Lisa and Tom are first-time gardeners with a 10×16 raised bed in Raleigh. The agents designed a full layout with 11 varieties proven for Zone 7b, a week-by-week planting calendar from March through harvest, and a $268 shopping list that yields $350–$500 of produce — including the warning that "your rosemary will outlive your mortgage."
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

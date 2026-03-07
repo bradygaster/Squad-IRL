@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, TaxOptimizer improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Lisa's portfolio drifted to 72% stocks after the bull market (target: 60%). The first rebalance plan would've triggered $4,200 in unnecessary capital gains taxes. The agents rebuilt it to harvest $12,000 in tax losses (saving $3,000 in taxes), avoid wash sale violations, and hit her targets: 60.2% stocks / 29.8% bonds / 10.0% cash.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

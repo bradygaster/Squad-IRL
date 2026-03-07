@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, AgeAppropriateFilter improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Emma (age 6) loves unicorns and needed a bravery story. The first draft was 2,100 words with vocabulary like "trepidation" (too advanced). The agents created "Emma and the Lost Unicorn" — a 987-word, 10-minute adventure where Emma helps a baby unicorn named Shimmer, learns that bravery means helping others even when scared, and becomes a Protector of Sparkle Forest. Emma asked for it 4 nights in a row.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, Planner improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Tom and Rachel's first home maintenance plan scheduled roof inspection in 115°F July heat and missed critical Arizona tasks like monsoon prep. The agents rebuilt it with Phoenix-specific scheduling (HVAC filters every 30 days for dust, AC tune-up before summer, monsoon prep in March), DIY vs. professional guidance, and a $2,847 annual budget that protects their $380K investment for $237/month.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, RelationshipBuilder improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Generic outreach emails get ignored — influencers can smell a template from a mile away. This squad researches each creator's content style, audience demographics, and past brand deals to craft pitches that feel like a genuine collaboration proposal, not a cold email blast. The result: personalized messages with specific content ideas, fair compensation framing, and a value proposition that actually resonates.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, EngagementExpert improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+Ms. Torres needs a 5-day unit on the Constitution for 28 students including 4 with IEPs. The agents delivered daily 50-minute lesson plans with bell ringers, a Chromebook scavenger hunt, a checks-and-balances simulation, a mock trial, and two summative assessment options — all aligned to Virginia SOL CE.2 and CE.6.
+
+> 📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash

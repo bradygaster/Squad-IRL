@@ -21,6 +21,12 @@
 3. **Update** — If score < 90%, TimezoneCalculator improves the output
 4. **Repeat** — Loop continues until quality threshold is met
 
+## See It In Action
+
+> From generic "try to sleep on the plane" advice to a precision 8-day circadian protocol for Marcus Rivera's SFO → Tokyo trip: 4-day pre-departure sleep shifting with exact bedtimes (moving 1.5 hours earlier each night), calculated light exposure windows for eastward phase advance, hour-by-hour in-flight sleep/wake plan in dual timezones, and a presentation-morning routine ensuring peak alertness at 9:00 AM JST — all grounded in circadian science.
+
+📄 **[See the full example output →](examples/sample-output.md)**
+
 ## Running This Sample
 
 ```bash
