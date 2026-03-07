@@ -8,9 +8,6 @@
     "start": "npx tsx index.ts",
     "dev": "npx tsx watch index.ts"
   },
-  "dependencies": {
-    "@bradygaster/squad-sdk": "latest"
-  },
   "devDependencies": {
     "tsx": "^4.0.0",
     "typescript": "^5.7.0"

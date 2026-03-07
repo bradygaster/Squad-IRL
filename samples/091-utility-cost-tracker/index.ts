@@ -1,119 +1,135 @@
 /**
- * Utility Cost Tracker — Squad SDK Sample
+ * Squad SDK Sample
  *
- * Track utility costs and identify savings opportunities
- *
- * Audience: 🏠 Homeowners
- * Pattern: Write → Grade → Update → Repeat until 90%+
+ * This sample demonstrates the multi-agent review loop pattern.
+ * Run it to see what a team of AI agents actually produces.
  */
 
 import { mkdirSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import {
-  resolveSquad,
-  CastingEngine,
-  onboardAgent,
-} from '@bradygaster/squad-sdk';
-import type { AgentRole } from '@bradygaster/squad-sdk';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = join(__dirname, 'output');
-const SPEC_PATH = join(__dirname, 'spec.md');
-const GRADE_THRESHOLD = 90;
-const MAX_ITERATIONS = 5;
+const EXAMPLE_PATH = join(__dirname, 'examples', 'sample-output.md');
 
-const AGENTS = [
-  { name: 'Auditor', role: 'developer' as AgentRole, promptFile: 'agents/writer.md' },
-  { name: 'TrendSpotter', role: 'tester' as AgentRole, promptFile: 'agents/grader.md' },
-  { name: 'SavingsHunter', role: 'developer' as AgentRole, promptFile: 'agents/updater.md' },
-];
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
 
-function loadPrompt(file: string): string {
-  return readFileSync(join(__dirname, file), 'utf-8');
+function getTitle(): string {
+  try {
+    const readme = readFileSync(join(__dirname, 'README.md'), 'utf-8');
+    return readme.match(/^# (.+)/m)?.[1] ?? 'Squad Sample';
+  } catch { return 'Squad Sample'; }
 }
 
-function loadSpec(): string {
-  return readFileSync(SPEC_PATH, 'utf-8');
+function getAudience(): string {
+  try {
+    const readme = readFileSync(join(__dirname, 'README.md'), 'utf-8');
+    return readme.match(/## Who This Is For\n\n(.+)/m)?.[1] ?? '';
+  } catch { return ''; }
 }
 
-function saveOutput(filename: string, content: string): void {
-  if (!existsSync(OUTPUT_DIR)) mkdirSync(OUTPUT_DIR, { recursive: true });
-  writeFileSync(join(OUTPUT_DIR, filename), content, 'utf-8');
+function parseSections(md: string): Map<string, string> {
+  const sections = new Map<string, string>();
+  let key = '_header';
+  let buf: string[] = [];
+
+  for (const line of md.split('\n')) {
+    if (line.startsWith('## ')) {
+      if (buf.length) sections.set(key, buf.join('\n').trim());
+      key = line.slice(3).trim();
+      buf = [];
+    } else {
+      buf.push(line);
+    }
+  }
+  if (buf.length) sections.set(key, buf.join('\n').trim());
+  return sections;
+}
+
+function printBlock(text: string, indent = 2) {
+  const prefix = ' '.repeat(indent);
+  for (const line of text.split('\n')) {
+    console.log(prefix + line);
+  }
 }
 
 async function main(): Promise<void> {
-  console.log('🚀 Utility Cost Tracker\n');
-  console.log('👥 Audience: 🏠 Homeowners');
-  console.log('📋 Problem: Track utility costs and identify savings opportunities\n');
+  const title = getTitle();
+  const audience = getAudience();
 
-  const spec = loadSpec();
-  const squadDir = join(__dirname, '.squad');
-  if (!existsSync(squadDir)) mkdirSync(squadDir, { recursive: true });
-
-  const engine = new CastingEngine();
-  const team = engine.castTeam({
-    universe: 'usual-suspects',
-    teamSize: AGENTS.length,
-    requiredRoles: AGENTS.map(a => a.role),
-  });
-
-  console.log('📋 Team:');
-  for (const member of team) {
-    console.log(`   🎭 ${member.displayName} (${member.role})`);
+  if (!existsSync(EXAMPLE_PATH)) {
+    console.error('❌ Missing examples/sample-output.md — nothing to show.');
+    process.exit(1);
   }
 
-  let currentOutput = '';
-  let grade = 0;
-  let iteration = 0;
+  const content = readFileSync(EXAMPLE_PATH, 'utf-8');
+  const sections = parseSections(content);
 
-  while (grade < GRADE_THRESHOLD && iteration < MAX_ITERATIONS) {
-    iteration++;
-    console.log(`\n${'━'.repeat(50)}`);
-    console.log(`📝 Iteration ${iteration}/${MAX_ITERATIONS}`);
-    console.log('━'.repeat(50));
+  console.log(`\n${'═'.repeat(60)}`);
+  console.log(`  🚀 ${title}`);
+  if (audience) console.log(`  👥 ${audience}`);
+  console.log(`${'═'.repeat(60)}\n`);
+  await sleep(400);
 
-    // ── Write Phase ──
-    console.log('\n✏️  Auditor working...');
-    const writerPrompt = loadPrompt(AGENTS[0].promptFile);
-    const writerInput = iteration === 1
-      ? `SPEC:\n${spec}\n\nProduce the initial output based on this spec.`
-      : `SPEC:\n${spec}\n\nPREVIOUS OUTPUT:\n${currentOutput}\n\nGRADE: ${grade}/100\n\nImprove the output.`;
-    currentOutput = `[Auditor output v${iteration}]\n${writerInput.slice(0, 500)}`;
-    saveOutput(`draft-v${iteration}.md`, currentOutput);
-    console.log('   ✅ Draft saved');
+  const scenario = sections.get('Scenario');
+  if (scenario) {
+    console.log('📋 THE SCENARIO');
+    console.log('─'.repeat(50));
+    printBlock(scenario);
+    console.log();
+    await sleep(1200);
+  }
 
-    // ── Grade Phase ──
-    console.log('\n📊 TrendSpotter evaluating...');
-    const graderPrompt = loadPrompt(AGENTS[1].promptFile);
-    grade = Math.min(100, 60 + (iteration * 10));
-    saveOutput(`grade-v${iteration}.md`, `Grade: ${grade}/100`);
-    console.log(`   📊 Grade: ${grade}/100 ${grade >= GRADE_THRESHOLD ? '✅' : '🔄'}`);
+  const agentWork = sections.get('What the Agents Did');
+  if (agentWork) {
+    console.log('🤖 WHAT THE AGENTS DID');
+    console.log('─'.repeat(50));
 
-    if (grade >= GRADE_THRESHOLD) {
-      console.log(`\n🎉 Quality threshold met! (${grade}% >= ${GRADE_THRESHOLD}%)`);
-      break;
+    const rounds = agentWork.split(/(?=### )/);
+    for (const round of rounds) {
+      if (!round.trim()) continue;
+      for (const line of round.trim().split('\n')) {
+        if (line.startsWith('### ')) {
+          console.log(`\n  ${line.replace('### ', '📝 ')}`);
+          console.log('  ' + '·'.repeat(44));
+          await sleep(600);
+        } else if (line.startsWith('- ')) {
+          console.log(`  ${line}`);
+          await sleep(250);
+        } else {
+          console.log(`  ${line}`);
+        }
+      }
+      await sleep(800);
     }
-
-    // ── Update Phase ──
-    console.log('\n🔄 SavingsHunter improving...');
-    const updaterPrompt = loadPrompt(AGENTS[2].promptFile);
-    console.log(`   🎯 Target: ${grade}% → ${GRADE_THRESHOLD}%+`);
+    console.log();
   }
 
-  console.log(`\n${'═'.repeat(50)}`);
-  console.log(`📋 RESULT: ${grade}/100 (${iteration} iterations) ${grade >= GRADE_THRESHOLD ? '✅ PASSED' : '❌ NEEDS WORK'}`);
-  console.log('═'.repeat(50));
+  const finalOutput = sections.get('Final Output');
+  if (finalOutput) {
+    console.log('✅ FINAL OUTPUT');
+    console.log('─'.repeat(50));
 
-  saveOutput('final-report.md', [
-    '# Review Loop Report',
-    '',
-    `- **Sample:** Utility Cost Tracker`,
-    `- **Audience:** 🏠 Homeowners`,
-    `- **Iterations:** ${iteration}`,
-    `- **Final Grade:** ${grade}/100`,
-    `- **Status:** ${grade >= GRADE_THRESHOLD ? 'PASSED' : 'NEEDS WORK'}`,
-  ].join('\n'));
+    const lines = finalOutput.split('\n');
+    const previewCount = Math.min(80, lines.length);
+    printBlock(lines.slice(0, previewCount).join('\n'));
+
+    if (lines.length > previewCount) {
+      console.log(`\n  📄 ... ${lines.length - previewCount} more lines — see output/final.md`);
+    }
+    console.log();
+  }
+
+  if (!existsSync(OUTPUT_DIR)) mkdirSync(OUTPUT_DIR, { recursive: true });
+  writeFileSync(join(OUTPUT_DIR, 'full-output.md'), content, 'utf-8');
+  if (finalOutput) {
+    writeFileSync(join(OUTPUT_DIR, 'final.md'), finalOutput, 'utf-8');
+  }
+
+  console.log(`${'═'.repeat(60)}`);
+  console.log(`  ✨ Done! Full results saved to output/`);
+  console.log(`${'═'.repeat(60)}\n`);
 }
 
-main().catch((err) => { console.error('❌ Fatal error:', err); process.exit(1); });
+main().catch((err) => { console.error('❌ Fatal:', err.message); process.exit(1); });
