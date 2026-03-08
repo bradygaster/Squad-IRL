@@ -33,3 +33,11 @@
 **Audit by:** Redfoot (Graphic Designer)  
 **Scope:** Reviewed for conflicting entries, stale/reversed decisions, v0.6.0 references, intermediate states, and clarity.  
 **Result:** ✅ **Clean.** All entries are final outcomes, properly dated (ISO 8601), correctly cross-referenced to authoritative sources (decisions.md, PRD, session logs, GitHub issues). No corrections required. Ready for future spawns.
+
+### Compliance Checker sample rebuild — 2026-07
+- Replaced hardcoded simulation with real file-system scanner + Squad SDK integration
+- Followed gmail/ gold standard: SquadClient, streaming, ANSI banner, buildSystemPrompt(), sendAndStream(), closing inspiration
+- 4 agents: Security Auditor, License Reviewer, Documentation Assessor, Compliance Reporter
+- project-scanner.ts: read-only walk with smart skip lists (node_modules, .git, binaries), key file detection, head-100 reading
+- Clean TypeScript compile (strict, ESM-only, bundler resolution) — zero errors
+- Pattern: scan → format → prompt → stream — no interactivity needed (unlike gmail which has browser login)

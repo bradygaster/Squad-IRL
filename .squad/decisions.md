@@ -1566,6 +1566,91 @@ This pattern preserves both the learning trajectory AND the correct final state.
 **Date:** 2026-03  
 **Status:** Recommendation (pending Brady's call)
 
+---
+
+### 2026-03-08: Multi-page scrape loop pattern for shopping samples
+
+**By:** Fenster (Core Dev)  
+**Date:** 2026-03-08  
+**What:** The price-monitor sample introduces a multi-page scrape loop: user can scrape multiple shopping pages before sending to squad, accumulating products across pages. Previous samples (gmail, linkedin-monitor) do single-page scrape.  
+**Why:** Shopping workflows naturally span multiple pages (wishlist, deals page, specific products). The loop pattern (`while(true) { Enter to scrape, "done" to finish }`) is reusable for any sample that benefits from multi-page accumulation.  
+**Impact:** Future shopping/browsing samples can adopt this pattern. The single-page pattern remains correct for gmail/linkedin.
+
+---
+
+### 2026-03-08: bug-triage uses `gh` CLI, not GitHub API tokens
+
+**By:** Kujan (SDK Expert)  
+**Date:** 2026-03-08  
+**What:** The bug-triage sample uses `gh issue list` via `child_process.execSync` for GitHub data access. No API tokens, no OAuth, no Playwright — just the authenticated `gh` CLI.  
+**Why:** Every Squad sample should minimise prerequisite complexity. The `gh` CLI is already installed by most GitHub-active developers, handles authentication natively, and returns clean JSON. This sets a pattern for other samples that need GitHub data: use `gh`, not `@octokit/rest` or raw fetch.  
+**Pattern:** `execSync('gh issue list --repo X --json ... --limit N')` → parse JSON → format for prompt. Validate with `gh --version` and `gh auth status` before proceeding.  
+**Impact:** Future samples needing GitHub data (PR review, release notes, etc.) should follow this pattern.
+
+---
+
+### 2026-03-08: Receipt Scanner — Security Pattern: File-based Samples
+
+**By:** Baer (Security)  
+**Date:** 2026-03-08  
+**What:** File-based Squad samples that read user data must: (1) validate folder path existence before reading, (2) operate read-only on user files, (3) include a privacy note about data sent to AI models, (4) use masked/fictional data in sample files (no real PII).  
+**Why:** Receipt and financial data is sensitive. Users need clear expectations about what happens to their data. Sample files must not contain patterns that could be mistaken for real credentials.  
+**Impact:** All future file-reading Squad samples should follow this pattern.
+
+---
+
+### 2026-03-08: Real Estate Analyzer — Playwright Sample Pattern
+
+**By:** Keaton (Lead)  
+**Date:** 2026-03-08  
+**What:** The `real-estate-analyzer/` sample has been rebuilt from a hardcoded data demo into a real Playwright-based Squad sample following the `gmail/` gold standard pattern. This establishes that all browser-based samples in this repo should follow the same architecture.  
+**Pattern Established:**  
+1. **Scraper module** (separate file) — handles browser launch, navigation, scraping, and cleanup  
+2. **Squad config** (squad.config.ts) — agents with deep charters, routing rules, ceremonies  
+3. **Orchestration** (index.ts) — banner, browser flow, sendAndStream with delta handler, closing inspiration  
+4. **Persistent browser session** — stored in a dot-directory (e.g., `.realestate-session/`)  
+5. **Three-tier scraping fallback** — primary selectors, secondary selectors, generic fallback  
+6. **Read-only by default** — samples scrape/read but never take action unless explicitly extended  
+**Why:** Consistency across samples makes it easier for users to understand the pattern and adapt it. The gmail/ sample proved the architecture works; real-estate-analyzer now validates it generalizes to other domains.  
+**Impact:** Future Playwright-based samples (e.g., LinkedIn scraper, job board analyzer) should follow this same structure. Team members creating new browser-based samples can use either gmail/ or real-estate-analyzer/ as their template.
+
+---
+
+### 2026-03-08: Appointment Scheduler — conversational input over browser automation
+
+**By:** McManus (DevRel)  
+**Date:** 2026-03-08  
+**What:** The appointment-scheduler sample uses text-based conversational input (readline prompt), not Playwright or external APIs. Users describe their scheduling need in plain text; the squad analyzes constraints and produces suggestions.  
+**Why:** Keeps the sample self-contained with zero external dependencies beyond the Squad SDK. Demonstrates the "AI scheduling assistant that replaces the 10-email back-and-forth" use case without requiring API credentials or browser automation.  
+**Impact:** Consistent with gmail/ pattern (real integration → squad analysis → streamed output) but simpler to run. Extension points documented for Google Calendar and Outlook API integration.
+
+---
+
+### 2026-03-08: job-application-tracker uses gmail/ gold standard pattern
+
+**By:** Kobayashi (Git/Release)  
+**Date:** 2026-03-08  
+**What:** The rebuilt `job-application-tracker/` follows the exact same architecture as `gmail/` — Playwright persistent browser, multi-strategy DOM scraping, SquadClient streaming, ANSI output. Four agents instead of five (Job Matcher, Company Researcher, Application Advisor, Action Planner).  
+**Why:** Consistency across samples reduces onboarding friction. The gmail/ pattern is proven and well-structured. New samples should follow it unless there's a compelling reason to diverge.
+
+---
+
+### 2026-03-08: Compliance Checker sample pattern
+
+**By:** Redfoot (Designer)  
+**Date:** 2026-03-08  
+**What:** The compliance-checker sample follows the gmail/ gold standard pattern exactly:  
+- `squad.config.ts` with defineSquad/defineAgent/defineTeam/defineRouting  
+- `index.ts` with SquadClient, buildSystemPrompt(), sendAndStream(), ANSI banner, closing inspiration  
+- Domain-specific module (`project-scanner.ts`) for the real-world integration (file system scanning)  
+**Key Choices:**  
+1. **Read-only scanning** — scanner never modifies the target project. Safety-first for a compliance tool.  
+2. **Smart skip lists** — node_modules, .git, dist, binaries, etc. are excluded to keep scan data focused and prompt-sized.  
+3. **Head-100 strategy** — only first 100 lines of key files are read. Keeps token usage reasonable while capturing the important config/docs content.  
+4. **4 agents instead of 5** — collapsed OWASP/GDPR/SOC2 specialists into practical domains (Security, License, Docs, Privacy-via-Reporter). More useful for general projects.  
+5. **No interactivity** — unlike gmail (which needs browser login), compliance scanning is fully automated. Run and get results.  
+**Impact:** Sets the pattern for other "scan and analyse" samples in the 100-ways collection.
+
 ## Question
 
 Can we support `npx github:bradygaster/squad` alongside the existing npm channel (`npx @bradygaster/squad-cli`)?

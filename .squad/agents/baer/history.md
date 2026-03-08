@@ -85,3 +85,17 @@
 - **Recommendation:** Option A (now): Keep read-only, document for future. Option B (if requested): Implement with all 5 mitigations. Consider separate gmail-actions-demo for production-hardened version.
 - **Pattern:** Read-only mode is safe default; actions require explicit opt-in and user approval per operation.
 - **Status:** Awaiting product decision on action scope.
+
+### Receipt Scanner Sample — File-Based Squad Conversion (2026-03-08)
+📌 **Requested by:** Brady
+- Replaced hardcoded demo with real file-based Squad sample following gmail/ gold standard pattern
+- **Security considerations applied:**
+  - Folder path validation before reading (existence check + directory check)
+  - Read-only file access — receipt files are never modified
+  - Privacy note in closing output and README: receipt data sent to AI model but not stored
+  - Sample receipts use example data only — card numbers are masked (****), email uses example.com domain
+  - No PII committed: sample receipts contain only fictional business data
+- **Architecture:** receipt-reader.ts (file scanner) + squad.config.ts (4 agents) + index.ts (orchestration) — mirrors gmail/ pattern
+- **Agents:** Receipt Parser, Expense Categorizer, Anomaly Detector, Report Builder
+- **Pattern reuse:** Same SquadClient, streaming, ANSI output, banner/closing flow as gmail/
+- TypeScript strict mode, ESM-only, zero errors on `npx tsc --noEmit`

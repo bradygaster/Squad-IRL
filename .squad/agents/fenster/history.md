@@ -800,3 +800,21 @@ pm start works.
 
 📌 Team update (2026-03-08T13:21:18Z): LinkedIn Monitor sample completed — full TypeScript implementation, four-agent squad.config.ts, URL-first action design pattern — decided by Fenster and Verbal
 
+
+### Price Monitor Transformation (2026-03-08)
+
+**Requested by:** Brady. Transform price-monitor/ from hardcoded demo into real Playwright-based Squad sample.
+
+**What was done:**
+- Replaced 726-line self-contained hardcoded demo (fake data, no SDK, no browser) with real Playwright + Squad SDK implementation following gmail/linkedin-monitor gold standard pattern
+- Created: price-scraper.ts (5 scraping strategies: Amazon cards, Amazon wishlist, Best Buy, generic e-commerce, last-resort price-pattern scan), squad.config.ts (4 agents: Price Analyst, Deal Scorer, Purchase Advisor, Summary Reporter), index.ts (full orchestration with multi-page scrape loop)
+- Updated: package.json (added squad-sdk + playwright deps), tsconfig.json (bundler resolution matching gmail), README.md (new docs for browser-based flow)
+- Added: .gitignore for .price-session/
+- Novel feature vs gmail/linkedin: multi-page scrape loop — user can scrape multiple shopping pages before sending to squad, building up a product list across pages
+
+**Files:** price-monitor/index.ts, price-scraper.ts, squad.config.ts, package.json, tsconfig.json, README.md, .gitignore
+
+## Learnings
+- The price-monitor domain requires multi-strategy DOM scraping more than gmail or linkedin — shopping sites have wildly different structures, so 5 fallback strategies are needed (Amazon-specific, Best Buy, generic product cards, raw price-pattern scan)
+- Multi-page scraping loop is a natural pattern for shopping (user visits wishlist, then deals page, then a specific product) — the gmail/linkedin samples do single-page but this domain benefits from accumulation
+- The gold standard pattern (banner → Playwright → scrape → Squad SDK → stream → closing) is fully stable and repeatable — third sample built from it with zero friction

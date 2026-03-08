@@ -105,3 +105,12 @@ Sample ready for use.
 
 **Total corrections: 5** (1 date fix, 4 clarity/hygiene fixes)
 
+### Bug Triage Sample — Rebuilt as Real GitHub Issues Integration
+- Replaced hardcoded 794-line demo (fake data, TF-IDF, Jaccard) with a real Squad SDK sample following the gmail/ gold standard
+- Pattern: `gh` CLI for data fetching via `child_process.execSync` — no Playwright, no API tokens needed beyond `gh auth`
+- 4 agents in squad.config.ts: Issue Classifier, Duplicate Detector, Triage Advisor, Summary Reporter
+- Follows gmail/ structure exactly: SquadClient, streaming via sendAndWait + message_delta, ANSI banner, extractContent helper, stderr suppression
+- New file: `issue-fetcher.ts` — gh CLI validation, git remote detection, issue fetching, prompt formatting
+- Read-only sample — analyses issues but never modifies them
+- Build verified: `npm install && npx tsc --noEmit` passes clean
+

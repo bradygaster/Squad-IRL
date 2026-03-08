@@ -815,3 +815,11 @@ All labeled squad:hockney for routing. Each issue includes: what's missing, why 
   - **inventory-manager:** 6-agent inventory system with stock monitoring, reorder alerts, forecasting, pricing analysis, margin tracking, and category trend analysis
 - **Key insight:** All samples demonstrate sophisticated multi-agent coordination with domain-specific logic, realistic data scenarios, formatted terminal output (boxes, tables, sparklines), and actionable insights. Output ranges from 20-50KB per sample.
 - **Quality signal:** Zero runtime errors, zero template boilerplate detected. Each sample has unique domain vocabulary, metrics, and workflow patterns appropriate to its use case.
+
+### Support-ticket-router transformation (2026-03-08)
+**Status:** Complete — hardcoded demo replaced with real file-based Squad sample following gmail/ gold standard.
+- **What changed:** Gutted the old 42KB deterministic pipeline (5 agents, keyword scoring, Jaccard similarity, TF-IDF) and replaced with a proper SquadClient-based sample using 4 agents (Ticket Classifier, Knowledge Matcher, Response Drafter, Queue Manager).
+- **Files created/replaced:** package.json, tsconfig.json, squad.config.ts, index.ts, ticket-reader.ts, .gitignore, README.md, plus 5 sample tickets in sample-tickets/.
+- **Pattern followed:** gmail/ gold standard — SquadClient from squad-sdk/client, streaming with ANSI output, banner, sendAndWait with delta handler, closing inspiration section, buildSystemPrompt from squad config.
+- **Verification:** `npm install` clean (0 vulnerabilities), `npx tsc --noEmit` passes with zero errors.
+- **Key difference from gmail:** File-based integration (reads .txt/.md from folder) instead of Playwright browser automation. No interactive readline — reads tickets and triages in one shot.

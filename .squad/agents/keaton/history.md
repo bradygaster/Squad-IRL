@@ -724,3 +724,12 @@ This history accurately documents Keaton's work and decisions. Future spawns can
 - **Scope guidance:** Keep tight — no send/reply in a demo.
 - **Pattern:** Use defineTool() integration for Gmail API actions with explicit user confirmation.
 - **Next:** Awaiting Fenster's code review and Baer's security assessment.
+
+### 2026-03-08T07:23: Real Estate Analyzer — Transformed from Hardcoded Demo to Playwright Sample
+- **Task:** Brady requested transformation of real-estate-analyzer/ from a hardcoded data demo into a real Playwright-based Squad sample following the gmail/ gold standard pattern.
+- **Approach:** Read gmail/ pattern (index.ts, gmail-scraper.ts, squad.config.ts, package.json) as the template. Replaced all 6 files in real-estate-analyzer/ to match the architecture exactly: persistent browser session, Playwright scraping, 4-agent squad config, streaming responses, ANSI terminal output, banner + closing inspiration.
+- **Files created:** package.json (squad-sdk + playwright deps), tsconfig.json (ESNext/bundler), .gitignore (.realestate-session/), listing-scraper.ts (Redfin/Zillow/generic fallback scraping), squad.config.ts (4 agents with deep charters), index.ts (full orchestration), README.md.
+- **Scraping strategy:** Three-tier fallback: (1) Redfin selectors (HomeCardContainer, HomeStatsV2), (2) Zillow selectors (property-card), (3) Generic fallback for any listing-like elements. Regex extraction for beds/baths/sqft from varied DOM structures.
+- **Squad agents:** Property Evaluator (price/sqft, condition, deal rating), Investment Analyst (mortgage calc, cap rate, cash flow), Neighborhood Scorer (schools, transit, walkability, growth), Summary Reporter (ranked opportunity list).
+- **Verification:** npm install clean, npx tsc --noEmit passes with zero errors.
+- **Pattern learned:** The gmail/ pattern is a solid template for any Playwright-based Squad sample. Key structural elements: persistent browser context for session reuse, scraper module separate from orchestration, buildSystemPrompt() that composes squad config into system message, sendAndStream() with delta handler for streaming, closing inspiration section.

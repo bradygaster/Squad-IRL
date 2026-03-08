@@ -854,3 +854,25 @@ pm publish --access public --ignore-scripts\ — @bradygaster/squad-cli@0.8.20 p
 **Outcome:** Release v0.8.20 completed successfully. All stakeholders can now install latest via \
 pm install -g @bradygaster/squad-cli\. Development continues at 0.8.21-preview.1.
 
+### 2026-03-08: Rebuilt job-application-tracker as Real Playwright Sample (COMPLETE)
+**Status:** COMPLETE. Hardcoded demo replaced with real browser-based job scraping sample following gmail/ gold standard.
+
+#### Context
+Brady requested transforming `job-application-tracker/` from a hardcoded demo (fake data, no real integrations) into a real Playwright-based Squad sample that scrapes actual job listings from any job board.
+
+#### What Changed
+1. **package.json** — Added squad-sdk and playwright dependencies, matched gmail/ structure
+2. **tsconfig.json** — Switched to `module: "ESNext"` / `moduleResolution: "bundler"` (gmail/ pattern)
+3. **job-scraper.ts** — NEW: Playwright scraping with multi-strategy selectors (Indeed, LinkedIn Jobs, generic fallback)
+4. **squad.config.ts** — NEW: 4 agents (Job Matcher, Company Researcher, Application Advisor, Action Planner) using defineSquad/defineAgent/defineRouting
+5. **index.ts** — REPLACED: Full orchestration matching gmail/ pattern (banner, readline, browser launch, scrape, SquadClient connect, streaming, cleanup)
+6. **README.md** — Rewritten for the new sample
+7. **.gitignore** — NEW: Excludes .jobs-session/, node_modules/, dist/
+
+#### Key Learning
+When converting hardcoded demos to real Playwright samples:
+- Follow the gmail/ gold standard precisely — same import patterns, same ANSI helpers, same streaming approach
+- Multi-strategy scraping (site-specific selectors → generic heuristics → raw fallback) handles diverse job board DOMs
+- Persistent browser sessions (`.jobs-session/`) avoid re-auth across runs
+- Ask for user preferences BEFORE scraping — gives agents context for scoring and matching
+

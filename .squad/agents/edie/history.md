@@ -175,3 +175,13 @@ All four agents shipped Phase 2 in parallel: Fortier wired TTFT/duration/through
 - No intermediate states recorded as final (except the above version ref).
 - All decisions match .squad/decisions.md consensus.
 - Confidence: High. History now reflects ground truth for future spawns.
+
+### inventory-manager sample transformation (2026-03-XX)
+- Replaced hardcoded 1000+ line demo with real file-based Squad sample following gmail/ gold standard pattern
+- 8 files: package.json, tsconfig.json, index.ts, squad.config.ts, inventory-reader.ts, sample-inventory.csv, README.md, .gitignore
+- CSV reader module (inventory-reader.ts) with typed parsing, header validation, and formatted prompt output
+- 4 agents in squad.config.ts: Stock Analyst, Demand Predictor, Reorder Optimizer, Action Reporter — each with detailed supply-chain charters
+- index.ts follows gmail pattern exactly: ANSI banner, buildSystemPrompt from config, SquadClient connect, sendAndWait streaming, closing inspiration
+- sample-inventory.csv has 25 products with varied scenarios: critically low (Arduino Nano at 0), healthy, overstocked (Rubber Gaskets at 14000), dead stock (Welding Rod and Bubble Wrap with 0 daily_usage)
+- Used SDK typed APIs directly (no `as any` or `Record<string, unknown>` casts on agent/routing types) — clean `tsc --noEmit`
+- Read-only: never modifies inventory files. Usage: `npm start` or `npm start -- /path/to/file.csv`

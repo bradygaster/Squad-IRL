@@ -85,3 +85,17 @@ Created `.squad/skills/history-hygiene/SKILL.md` to codify lesson from Kobayashi
 
 📌 Team update (2026-03-08T13:21:18Z): LinkedIn Monitor sample completed — full TypeScript implementation, four-agent squad.config.ts, URL-first action design pattern — decided by Fenster and Verbal
 
+### Contract Reviewer Sample — Full Rewrite from Hardcoded to Real Squad
+- Replaced hardcoded 1000+ line demo with real file-based Squad sample following gmail gold standard
+- Created `contract-reviewer/squad.config.ts` with 4 agents: Clause Extractor, Risk Assessor, Negotiation Advisor, Summary Reporter
+- **Charter quality showcase**: Each charter is 35-50 lines with domain-specific legal knowledge, calibrated benchmarks (Net 30 payment, 12-month liability cap, 99.9% SLA), explicit output formats, and strict role boundaries
+- Risk Assessor charter includes quantitative industry benchmarks — not vague "this could be concerning" but "industry standard is 12-month cap; this is 3 months"
+- Negotiation Advisor produces ready-to-insert redline language with fallback positions and leverage analysis
+- Summary Reporter follows a fixed template: risk heatmap table, top 3 concerns, action items, sign/negotiate/walk recommendation
+- Created `contract-reader.ts` as a clean file-reading module: validates extension (.txt/.md), size (500KB max), empty files. Falls back to stdin paste if no file provided
+- Created `sample-contract.md`: a deliberately vendor-hostile 15-clause SaaS agreement packed with red flags (3-month liability cap, 24-month non-compete, perpetual data license, unilateral amendments, asymmetric termination)
+- Pattern: read-only analysis, streaming responses, ANSI terminal output, banner, extension ideas, same SquadClient connection flow as gmail/linkedin-monitor
+- Model: claude-sonnet-4.5 preferred, claude-haiku-4.5 fallback — consistent with all samples
+- Routing: 5 rules — 4 direct routes for individual agents, 1 full-tier catch-all for "review|analyze|contract|everything"
+- TypeScript strict mode, clean `npx tsc --noEmit`, zero errors
+
