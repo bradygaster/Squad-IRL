@@ -887,3 +887,6 @@ pm start works.
 - The timeout pattern appears twice in each sample: explicit timeout in sendAndWait() and fallback timeout in the Promise-based event listener pattern.
 - Batch edit tool with parallel invocations (38 edits in one tool call block) is efficient for bulk changes across multiple files.
 
+- Telemetry wiring for samples should use RuntimeEventBus + CostTracker with manual usage forwarding to keep squad.tokens.* metrics accurate and cost estimation client-side.
+- The usage hook pattern is: session.on('usage') → recordTokenUsage(...) → eventBus.emit({ type: 'session:message', payload: { inputTokens, outputTokens, model, estimatedCost } }).
+- Print costTracker.formatSummary() before telemetry shutdown to align console output with Aspire metrics.

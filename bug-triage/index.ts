@@ -15,10 +15,26 @@ import {
   fetchIssues,
   formatIssuesForPrompt,
 } from './issue-fetcher.js';
-import { initSquadTelemetry } from '@bradygaster/squad-sdk';
+import { initSquadTelemetry, RuntimeEventBus as EventBus, CostTracker, recordTokenUsage } from '@bradygaster/squad-sdk';
 
-// Initialize OpenTelemetry (sends traces/metrics to Aspire when OTEL_EXPORTER_OTLP_ENDPOINT is set)
-const telemetry = initSquadTelemetry();
+// Model pricing (USD per 1M tokens) — used instead of SDK-reported cost
+const MODEL_PRICING: Record<string, { input: number; output: number }> = {
+  'claude-sonnet-4.5': { input: 3, output: 15 },
+  'claude-haiku-4.5': { input: 0.80, output: 4 },
+  'claude-opus-4.5': { input: 15, output: 75 },
+  'gpt-4o': { input: 2.50, output: 10 },
+};
+
+function estimateCost(model: string, inputTokens: number, outputTokens: number): number {
+  const pricing = MODEL_PRICING[model] ?? MODEL_PRICING['claude-sonnet-4.5'];
+  return (inputTokens * pricing.input + outputTokens * pricing.output) / 1_000_000;
+}
+
+// Initialize telemetry pipeline: EventBus → OTel spans + metrics + CostTracker
+const eventBus = new EventBus();
+const telemetry = initSquadTelemetry({ eventBus });
+const costTracker = new CostTracker();
+costTracker.wireToEventBus(eventBus);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ANSI helpers
@@ -294,6 +310,33 @@ async function main(): Promise<void> {
     };
 
     session = await client.createSession(sessionConfig);
+
+    // Forward session usage events to the EventBus for cost tracking + OTel spans
+    session.on('usage', ((event: any) => {
+      const inputTokens = typeof event.inputTokens === 'number' ? event.inputTokens : 0;
+      const outputTokens = typeof event.outputTokens === 'number' ? event.outputTokens : 0;
+      const model = event.model ?? 'unknown';
+      const cost = estimateCost(model, inputTokens, outputTokens);
+
+      // Fire OTel metric counters (squad.tokens.input, .output, .cost)
+      recordTokenUsage({
+        type: 'usage',
+        sessionId: session.sessionId,
+        model,
+        inputTokens,
+        outputTokens,
+        estimatedCost: cost,
+        timestamp: new Date(),
+      });
+
+      // Forward to EventBus → CostTracker + OTel spans
+      eventBus.emit({
+        type: 'session:message',
+        sessionId: session.sessionId,
+        payload: { inputTokens, outputTokens, model, estimatedCost: cost },
+        timestamp: new Date(),
+      });
+    }) as SquadSessionEventHandler);
     console.log(`${C.green}  ✓ Connected! Your triage squad is ready.${C.reset}`);
   } catch (err: any) {
     const msg = err?.message ?? String(err);
@@ -345,6 +388,15 @@ async function main(): Promise<void> {
     await client.disconnect();
   } catch { /* best effort */ }
 
+  // Cost summary
+  const summary = costTracker.getSummary();
+  if (summary.totalInputTokens > 0 || summary.totalOutputTokens > 0) {
+    console.log(`${C.cyan}${C.bold}  📊 Token & Cost Summary${C.reset}`);
+    console.log(`${C.dim}  ─────────────────────────────────────────────${C.reset}`);
+    console.log(`${C.white}  ${costTracker.formatSummary().split('\n').join(`\n  `)}${C.reset}`);
+    console.log();
+  }
+
   await telemetry.shutdown();
 
   rl.close();
@@ -354,3 +406,4 @@ main().catch((err) => {
   console.error(`${C.red}  Fatal error: ${err?.message ?? err}${C.reset}`);
   process.exit(1);
 });
+
