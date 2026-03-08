@@ -901,3 +901,11 @@ pm start works.
 - Non-Playwright samples: All 13 passed dep install, tsc, timeout config, OTel wiring, startup checks
 - Commit: 6d087c0
 - Context: Full quality assurance sweep of 100-ways-to-use-squad samples completed
+
+### 📌 Team update (2026-03-08T13:24:26Z): CMA file output added to realtor-sales-package — decided by Fenster
+- `sendAndStream` now returns accumulated content buffer alongside streaming to stdout
+- After streaming completes, CMA output saved to `files/{area}_CMA_Package.md` using sanitized target area
+- `files/` directory auto-created with `mkdirSync({ recursive: true })`
+- Filename sanitization: `replace(/[^a-zA-Z0-9]+/g, '_')` strips spaces and special characters
+- Key pattern: accumulate streamed content in parallel with `process.stdout.write()` — reusable for any sample that needs to persist streamed output
+- File path: `realtor-sales-package/index.ts` (lines 143-213 sendAndStream, lines 398-415 file save)

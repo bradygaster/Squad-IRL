@@ -5,6 +5,8 @@
 
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
+import { writeFileSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { SquadClient } from '@bradygaster/squad-sdk/client';
 import type { SquadSession, SquadSessionConfig } from '@bradygaster/squad-sdk/adapter';
 import type { SquadSessionEvent, SquadSessionEventHandler } from '@bradygaster/squad-sdk/adapter';
@@ -143,17 +145,19 @@ async function sendAndStream(
   client: SquadClient,
   session: SquadSession,
   prompt: string,
-): Promise<void> {
+): Promise<string> {
   console.log();
   console.log(`${C.dim}  ─────────────────────────────────────────${C.reset}`);
 
   let receivedContent = false;
+  let contentBuffer = '';
 
   const deltaHandler: SquadSessionEventHandler = (event: SquadSessionEvent) => {
     const content = (event as any).content ?? (event as any).data?.content ?? '';
     if (content) {
       if (!receivedContent) process.stdout.write(`${C.white}`);
       receivedContent = true;
+      contentBuffer += content;
       process.stdout.write(content);
     }
   };
@@ -170,6 +174,7 @@ async function sendAndStream(
       } else if (result) {
         const text = extractContent(result);
         if (text) {
+          contentBuffer = text;
           console.log(`${C.white}${text}${C.reset}`);
         } else {
           console.log(`${C.yellow}  (Received a response but couldn't parse it.)${C.reset}`);
@@ -203,6 +208,8 @@ async function sendAndStream(
     if (receivedContent) process.stdout.write(`${C.reset}\n`);
     throw err;
   }
+
+  return contentBuffer;
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -392,7 +399,19 @@ async function main(): Promise<void> {
   try {
     console.log();
     console.log(`${C.dim}  Sending ${totalListings} listing(s) from Redfin & Zillow to the squad...${C.reset}`);
-    await sendAndStream(client, session, initialPrompt);
+    const cmaContent = await sendAndStream(client, session, initialPrompt);
+
+    // Save CMA output to a markdown file
+    if (cmaContent) {
+      const sanitized = targetArea.trim().replace(/[^a-zA-Z0-9]+/g, '_').replace(/_+$/, '');
+      const fileName = `${sanitized}_CMA_Package.md`;
+      const filesDir = join(import.meta.dirname ?? process.cwd(), 'files');
+      mkdirSync(filesDir, { recursive: true });
+      const filePath = join(filesDir, fileName);
+      writeFileSync(filePath, cmaContent, 'utf-8');
+      console.log();
+      console.log(`${C.green}  📄 Saved: files/${fileName}${C.reset}`);
+    }
   } catch (err: any) {
     console.error(`${C.red}  Error: ${err?.message ?? err}${C.reset}`);
   }
