@@ -72,27 +72,16 @@ export async function navigateToEDHRECTheme(page: Page, theme: string): Promise<
  */
 export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> {
   // Scroll down to trigger lazy-loaded sections
-  await page.evaluate(() => {
-    window.scrollBy(0, 2000);
-  });
+  await page.evaluate('window.scrollBy(0, 2000)');
   await page.waitForTimeout(2000);
-  await page.evaluate(() => {
-    window.scrollBy(0, 2000);
-  });
+  await page.evaluate('window.scrollBy(0, 2000)');
   await page.waitForTimeout(2000);
 
-  const cards = await page.evaluate(() => {
-    const results: {
-      name: string;
-      category: string;
-      inclusionRate: number;
-      price?: string;
-    }[] = [];
+  const cards = await page.evaluate(`(() => {
+    const results = [];
+    const seenNames = new Set();
 
-    const seenNames = new Set<string>();
-
-    // Category mapping from section headers
-    const categoryKeywords: Record<string, string> = {
+    const categoryKeywords = {
       creature: 'creature',
       instant: 'instant',
       sorcery: 'sorcery',
@@ -103,20 +92,20 @@ export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> 
       mana: 'land',
     };
 
-    const inferCategory = (sectionText: string): string => {
+    const inferCategory = (sectionText) => {
       const lower = sectionText.toLowerCase();
       for (const [keyword, cat] of Object.entries(categoryKeywords)) {
         if (lower.includes(keyword)) return cat;
       }
       return 'other';
-    }
+    };
 
-    const parseInclusionRate = (text: string): number => {
-      const match = text.match(/(\d+)%/);
-      return match ? parseInt(match[1]!, 10) : 0;
-    }
+    const parseInclusionRate = (text) => {
+      const match = text.match(/(\\d+)%/);
+      return match ? parseInt(match[1], 10) : 0;
+    };
 
-    // ── Strategy 1: Card containers with data attributes ──
+    // Strategy 1: Card containers with data attributes
     const cardContainers = document.querySelectorAll(
       '[class*="Card_container"], [class*="card-container"], .cardlist-card, .card-wrapper'
     );
@@ -124,11 +113,10 @@ export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> 
     if (cardContainers.length > 0) {
       let currentCategory = 'other';
       for (const card of cardContainers) {
-        // Walk up to find section header
         const section = card.closest('section, [class*="Section"], [class*="panel"]');
         if (section) {
           const header = section.querySelector('h2, h3, h4, [class*="header"], [class*="title"]');
-          if (header?.textContent) {
+          if (header && header.textContent) {
             currentCategory = inferCategory(header.textContent);
           }
         }
@@ -137,9 +125,9 @@ export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> 
           '[class*="Card_name"], [class*="card-name"], .card-name, a[data-name], img[alt]'
         );
         const name =
-          nameEl?.getAttribute('data-name') ??
-          nameEl?.getAttribute('alt') ??
-          nameEl?.textContent?.trim() ??
+          (nameEl && nameEl.getAttribute('data-name')) ||
+          (nameEl && nameEl.getAttribute('alt')) ||
+          (nameEl && nameEl.textContent && nameEl.textContent.trim()) ||
           '';
 
         if (!name || seenNames.has(name.toLowerCase())) continue;
@@ -148,16 +136,16 @@ export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> 
         const rateEl = card.querySelector(
           '[class*="inclusion"], [class*="synergy"], [class*="percent"]'
         );
-        const inclusionRate = rateEl ? parseInclusionRate(rateEl.textContent ?? '') : 0;
+        const inclusionRate = rateEl ? parseInclusionRate((rateEl.textContent || '')) : 0;
 
         const priceEl = card.querySelector('[class*="price"], [class*="tcg"]');
-        const price = priceEl?.textContent?.trim() || undefined;
+        const price = (priceEl && priceEl.textContent && priceEl.textContent.trim()) || undefined;
 
-        results.push({ name, category: currentCategory, inclusionRate, price });
+        results.push({ name: name, category: currentCategory, inclusionRate: inclusionRate, price: price });
       }
     }
 
-    // ── Strategy 2: Links with card image tooltips ──
+    // Strategy 2: Links with card image tooltips
     if (results.length === 0) {
       const cardLinks = document.querySelectorAll(
         'a[class*="card"], a[data-entry], .cardlink, a[href*="/cards/"]'
@@ -168,35 +156,34 @@ export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> 
         const section = link.closest('div[class*="section"], section, .panel');
         if (section) {
           const header = section.querySelector('h2, h3, h4');
-          if (header?.textContent) {
+          if (header && header.textContent) {
             currentCategory = inferCategory(header.textContent);
           }
         }
 
         const name =
-          link.getAttribute('data-entry') ??
-          link.getAttribute('data-name') ??
-          (link as HTMLImageElement).alt ??
-          link.textContent?.trim() ??
+          link.getAttribute('data-entry') ||
+          link.getAttribute('data-name') ||
+          link.alt ||
+          (link.textContent && link.textContent.trim()) ||
           '';
 
         if (!name || name.length < 2 || seenNames.has(name.toLowerCase())) continue;
         seenNames.add(name.toLowerCase());
 
         const parent = link.parentElement;
-        const rateText = parent?.textContent ?? '';
+        const rateText = (parent && parent.textContent) || '';
         const inclusionRate = parseInclusionRate(rateText);
 
-        results.push({ name, category: currentCategory, inclusionRate });
+        results.push({ name: name, category: currentCategory, inclusionRate: inclusionRate });
       }
     }
 
-    // ── Strategy 3: Fallback — grab any image alt text that looks like a card ──
+    // Strategy 3: Fallback — grab any image alt text that looks like a card
     if (results.length === 0) {
       const images = document.querySelectorAll('img[alt]');
       for (const img of images) {
-        const alt = img.getAttribute('alt') ?? '';
-        // Filter to names that look like MTG cards (capitalized, multi-word, no URLs)
+        const alt = img.getAttribute('alt') || '';
         if (
           alt.length > 3 &&
           alt.length < 60 &&
@@ -212,7 +199,7 @@ export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> 
     }
 
     return results;
-  });
+  })()`) as EDHRECCard[];
 
   return cards;
 }
@@ -221,8 +208,8 @@ export async function scrapeRecommendedCards(page: Page): Promise<EDHRECCard[]> 
  * Attempt to scrape pricing data from the current EDHREC page.
  */
 export async function scrapePricing(page: Page): Promise<Map<string, string>> {
-  const pricing = await page.evaluate(() => {
-    const priceMap: Record<string, string> = {};
+  const pricing = await page.evaluate(`(() => {
+    const priceMap = {};
     const priceEls = document.querySelectorAll(
       '[class*="price"], [class*="tcg"], [class*="dollar"]'
     );
@@ -233,15 +220,15 @@ export async function scrapePricing(page: Page): Promise<Map<string, string>> {
         '[class*="name"], a[data-name], img[alt]'
       );
       const name =
-        nameEl?.getAttribute('data-name') ??
-        nameEl?.getAttribute('alt') ??
-        nameEl?.textContent?.trim() ??
+        (nameEl && nameEl.getAttribute('data-name')) ||
+        (nameEl && nameEl.getAttribute('alt')) ||
+        (nameEl && nameEl.textContent && nameEl.textContent.trim()) ||
         '';
-      const price = el.textContent?.trim() ?? '';
+      const price = (el.textContent && el.textContent.trim()) || '';
       if (name && price) priceMap[name] = price;
     }
     return priceMap;
-  });
+  })()`) as Record<string, string>;
 
   return new Map(Object.entries(pricing));
 }
