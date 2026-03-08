@@ -232,7 +232,7 @@ async function main(): Promise<void> {
 
   // 3. Fetch open issues
   console.log();
-  console.log(`${C.magenta}  🔍 Fetching open issues from ${repo}...${C.reset}`);
+  console.log(`${C.magenta}  🔍 Fetching the 5 most recent open issues from ${repo}...${C.reset}`);
 
   let issues: ReturnType<typeof fetchIssues>;
   try {

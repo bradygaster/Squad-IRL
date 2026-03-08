@@ -53,7 +53,7 @@ export function detectRepoFromGit(): string | null {
 /**
  * Fetch open issues from a GitHub repository using the `gh` CLI.
  */
-export function fetchIssues(repo: string, limit = 30): GitHubIssue[] {
+export function fetchIssues(repo: string, limit = 5): GitHubIssue[] {
   const cmd = `gh issue list --repo ${repo} --state open --json number,title,body,labels,assignees,createdAt --limit ${limit}`;
 
   const raw = execSync(cmd, { encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] });

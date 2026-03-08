@@ -173,14 +173,15 @@ const team = defineTeam({
   name: 'Bug Triage Squad',
   description: 'A team of specialists that turns a GitHub issue backlog into a prioritised, deduplicated action plan.',
   projectContext: `
-This squad helps maintainers triage their GitHub issue backlog by coordinating four specialists:
+This squad helps maintainers triage their GitHub issue backlog by coordinating four specialists.
+It processes up to 5 of the most recent open issues per run to keep responses fast and focused.
 
 **Issue Classifier** categorises each issue (Bug, Feature Request, Question, Enhancement, Documentation, Chore) and assigns severity.
 **Duplicate Detector** compares issues against each other and flags likely duplicates with evidence.
 **Triage Advisor** recommends concrete actions — Fix Now, Schedule, Needs Info, Won't Fix — and suggests team routing.
 **Summary Reporter** produces an executive triage dashboard with severity counts, duplicate pairs, top-5 priority list, and trend analysis.
 
-When someone provides a batch of GitHub issues, all agents collaborate to deliver a complete triage.
+When someone provides a batch of issues (up to 5 per run), all agents collaborate to deliver a complete triage.
 For specific follow-ups ("which are duplicates?" or "what should we fix first?"), the relevant specialist responds.
 
 The squad is read-only — it analyses issues but never modifies them.

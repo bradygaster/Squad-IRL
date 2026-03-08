@@ -34,7 +34,7 @@ npm start        # runs: npx tsx index.ts
 The app will:
 1. Check that `gh` is installed and authenticated
 2. Ask which repo to triage (auto-detects from git remote)
-3. Fetch up to 30 open issues using `gh issue list`
+3. Fetch the 5 most recent open issues using `gh issue list`
 4. Send them to the four-agent triage squad
 5. Stream back a complete triage with classification, duplicates, action plan, and dashboard
 
