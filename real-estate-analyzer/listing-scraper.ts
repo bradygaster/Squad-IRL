@@ -69,8 +69,9 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
     }[] = [];
 
     // ── Helper: extract text or empty string ──
-    const text = (el: Element | null | undefined): string =>
-      el?.textContent?.trim() ?? '';
+    // Wrapped in object to avoid esbuild __name injection in browser context
+    const h = { text: (el: Element | null | undefined): string =>
+      el?.textContent?.trim() ?? '' };
 
     // ════════════════════════════════════════════════════════════════════════
     // Strategy 1: Redfin listing cards
@@ -81,22 +82,22 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
 
     for (const card of redfinCards) {
       const address =
-        text(card.querySelector('.homeAddressV2, .link-and-anchor, [data-rf-test-id="abp-homeinfo-homeAddress"]')) ||
-        text(card.querySelector('.homecardV2 .homeAddressV2')) ||
-        text(card.querySelector('a[href*="/home/"]'));
+        h.text(card.querySelector('.homeAddressV2, .link-and-anchor, [data-rf-test-id="abp-homeinfo-homeAddress"]')) ||
+        h.text(card.querySelector('.homecardV2 .homeAddressV2')) ||
+        h.text(card.querySelector('a[href*="/home/"]'));
 
       const price =
-        text(card.querySelector('.homecardV2 .homecardV2Price, .bp-Homecard__Price--value, .priceEstimate, span[data-rf-test-id="abp-price"]')) ||
-        text(card.querySelector('.price'));
+        h.text(card.querySelector('.homecardV2 .homecardV2Price, .bp-Homecard__Price--value, .priceEstimate, span[data-rf-test-id="abp-price"]')) ||
+        h.text(card.querySelector('.price'));
 
       // Stats: beds, baths, sqft — often in a stats row
       const statsEls = card.querySelectorAll('.HomeStatsV2 .stats, .bp-Homecard__Stats--item, .HomeStatsV2 span');
       const statsTexts: string[] = [];
       for (const s of statsEls) {
-        const t = text(s);
+        const t = h.text(s);
         if (t) statsTexts.push(t);
       }
-      const statsLine = statsTexts.join(' ') || text(card.querySelector('.HomeStatsV2'));
+      const statsLine = statsTexts.join(' ') || h.text(card.querySelector('.HomeStatsV2'));
 
       let beds = '';
       let baths = '';
@@ -113,9 +114,9 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
       // Collect remaining details
       const detailParts: string[] = [];
       const typeEl = card.querySelector('.HomeStatsV2 .propertyType, .property-type');
-      if (typeEl) detailParts.push(text(typeEl));
+      if (typeEl) detailParts.push(h.text(typeEl));
       const brokerEl = card.querySelector('.broker, .branding');
-      if (brokerEl) detailParts.push(text(brokerEl));
+      if (brokerEl) detailParts.push(h.text(brokerEl));
 
       if (address || price) {
         results.push({
@@ -139,17 +140,17 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
 
       for (const card of zillowCards) {
         const address =
-          text(card.querySelector('[data-test="property-card-addr"], address, .list-card-addr')) ||
-          text(card.querySelector('a[data-test="property-card-link"]'));
+          h.text(card.querySelector('[data-test="property-card-addr"], address, .list-card-addr')) ||
+          h.text(card.querySelector('a[data-test="property-card-link"]'));
 
         const price =
-          text(card.querySelector('[data-test="property-card-price"], .list-card-price')) ||
-          text(card.querySelector('span[data-test="property-card-price"]'));
+          h.text(card.querySelector('[data-test="property-card-price"], .list-card-price')) ||
+          h.text(card.querySelector('span[data-test="property-card-price"]'));
 
         const detailsEl = card.querySelector(
           '[data-test="property-card-details"], .list-card-details, .StyledPropertyCardDataArea-anchor'
         );
-        const detailText = text(detailsEl);
+        const detailText = h.text(detailsEl);
 
         let beds = '';
         let baths = '';
