@@ -846,3 +846,5 @@ pm start works.
 - `tsc --noEmit` passes cleanly even when squad.config.ts hasn't been created yet — the tsconfig `include` list doesn't error on missing files, and the `.js` import in index.ts skips resolution when source is absent.
 
 📌 Team update (2026-03-08T16:10:04Z): Conversation loop pattern established for samples with persistent artifacts (deck files, reports, documents). Supports iterative user modification. — decided by Fenster
+
+📌 Team update (2026-03-08T16:26:05Z): Arrow functions required inside page.evaluate() contexts. Named functions cause `__name is not defined` errors in ESM/strict mode. Fix applied to mtg-commander-deck-builder/card-scraper.ts. — Fenster
