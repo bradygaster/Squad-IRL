@@ -75,42 +75,6 @@ export async function scrapeProducts(page: Page): Promise<ScrapedProduct[]> {
 
     const seen = new Set<string>();
 
-    // Helper object avoids esbuild __name injection for arrow functions
-    // inside page.evaluate (browser context has no __name global).
-    const h = { add(
-      name: string,
-      price: string,
-      url: string,
-      onSale: boolean,
-      originalPrice: string,
-    ): void {
-      const trimName = name.trim().slice(0, 300);
-      const trimPrice = price.trim();
-      if (!trimName || trimName.length < 3) return;
-      if (!trimPrice) return;
-
-      const key = `${trimName}::${trimPrice}`;
-      if (seen.has(key)) return;
-      seen.add(key);
-
-      let resolvedUrl = url.trim();
-      if (resolvedUrl && !resolvedUrl.startsWith('http')) {
-        try {
-          resolvedUrl = new URL(resolvedUrl, pageUrl).href;
-        } catch {
-          resolvedUrl = '';
-        }
-      }
-
-      results.push({
-        name: trimName,
-        price: trimPrice,
-        url: resolvedUrl,
-        onSale,
-        originalPrice: originalPrice.trim(),
-      });
-    } };
-
     // ── Strategy 1: Amazon product cards ──
     const amazonCards = document.querySelectorAll(
       '[data-component-type="s-search-result"], .s-result-item[data-asin], .a-carousel-card'
@@ -150,7 +114,21 @@ export async function scrapeProducts(page: Page): Promise<ScrapedProduct[]> {
       const originalPrice = origEl?.textContent?.trim() ?? '';
       const onSale = !!originalPrice;
 
-      h.add(name, price, url, onSale, originalPrice);
+      {
+        const trimName = name.trim().slice(0, 300);
+        const trimPrice = price.trim();
+        if (trimName && trimName.length >= 3 && trimPrice) {
+          const key = `${trimName}::${trimPrice}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            let resolvedUrl = url.trim();
+            if (resolvedUrl && !resolvedUrl.startsWith('http')) {
+              try { resolvedUrl = new URL(resolvedUrl, pageUrl).href; } catch { resolvedUrl = ''; }
+            }
+            results.push({ name: trimName, price: trimPrice, url: resolvedUrl, onSale, originalPrice: originalPrice.trim() });
+          }
+        }
+      }
     }
 
     // ── Strategy 2: Amazon wishlist items ──
@@ -167,7 +145,21 @@ export async function scrapeProducts(page: Page): Promise<ScrapedProduct[]> {
           el.querySelector('.a-color-price');
         const price = priceEl?.textContent?.trim() ?? '';
         const url = nameEl?.getAttribute('href') ?? '';
-        h.add(name, price, url, false, '');
+        {
+          const trimName = name.trim().slice(0, 300);
+          const trimPrice = price.trim();
+          if (trimName && trimName.length >= 3 && trimPrice) {
+            const key = `${trimName}::${trimPrice}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              let resolvedUrl = url.trim();
+              if (resolvedUrl && !resolvedUrl.startsWith('http')) {
+                try { resolvedUrl = new URL(resolvedUrl, pageUrl).href; } catch { resolvedUrl = ''; }
+              }
+              results.push({ name: trimName, price: trimPrice, url: resolvedUrl, onSale: false, originalPrice: '' });
+            }
+          }
+        }
       }
     }
 
@@ -183,7 +175,21 @@ export async function scrapeProducts(page: Page): Promise<ScrapedProduct[]> {
         const url = nameEl?.getAttribute('href') ?? '';
         const origEl = el.querySelector('.pricing-price__regular-price, [class*="was-price"]');
         const originalPrice = origEl?.textContent?.trim() ?? '';
-        h.add(name, price, url, !!originalPrice, originalPrice);
+        {
+          const trimName = name.trim().slice(0, 300);
+          const trimPrice = price.trim();
+          if (trimName && trimName.length >= 3 && trimPrice) {
+            const key = `${trimName}::${trimPrice}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              let resolvedUrl = url.trim();
+              if (resolvedUrl && !resolvedUrl.startsWith('http')) {
+                try { resolvedUrl = new URL(resolvedUrl, pageUrl).href; } catch { resolvedUrl = ''; }
+              }
+              results.push({ name: trimName, price: trimPrice, url: resolvedUrl, onSale: !!originalPrice, originalPrice: originalPrice.trim() });
+            }
+          }
+        }
       }
     }
 
@@ -208,7 +214,21 @@ export async function scrapeProducts(page: Page): Promise<ScrapedProduct[]> {
         const linkEl = el.querySelector('a[href]');
         const url = linkEl?.getAttribute('href') ?? '';
 
-        h.add(name, price, url, false, '');
+        {
+          const trimName = name.trim().slice(0, 300);
+          const trimPrice = price.trim();
+          if (trimName && trimName.length >= 3 && trimPrice) {
+            const key = `${trimName}::${trimPrice}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              let resolvedUrl = url.trim();
+              if (resolvedUrl && !resolvedUrl.startsWith('http')) {
+                try { resolvedUrl = new URL(resolvedUrl, pageUrl).href; } catch { resolvedUrl = ''; }
+              }
+              results.push({ name: trimName, price: trimPrice, url: resolvedUrl, onSale: false, originalPrice: '' });
+            }
+          }
+        }
       }
     }
 
@@ -234,7 +254,21 @@ export async function scrapeProducts(page: Page): Promise<ScrapedProduct[]> {
         const linkEl = parent.querySelector('a[href]');
         const url = linkEl?.getAttribute('href') ?? '';
 
-        h.add(name, match[0], url, false, '');
+        {
+          const trimName = name.trim().slice(0, 300);
+          const trimPrice = match[0].trim();
+          if (trimName && trimName.length >= 3 && trimPrice) {
+            const key = `${trimName}::${trimPrice}`;
+            if (!seen.has(key)) {
+              seen.add(key);
+              let resolvedUrl = url.trim();
+              if (resolvedUrl && !resolvedUrl.startsWith('http')) {
+                try { resolvedUrl = new URL(resolvedUrl, pageUrl).href; } catch { resolvedUrl = ''; }
+              }
+              results.push({ name: trimName, price: trimPrice, url: resolvedUrl, onSale: false, originalPrice: '' });
+            }
+          }
+        }
       }
     }
 

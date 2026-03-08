@@ -68,11 +68,6 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
       details: string;
     }[] = [];
 
-    // ── Helper: extract text or empty string ──
-    // Wrapped in object to avoid esbuild __name injection in browser context
-    const h = { text: (el: Element | null | undefined): string =>
-      el?.textContent?.trim() ?? '' };
-
     // ════════════════════════════════════════════════════════════════════════
     // Strategy 1: Redfin listing cards
     // ════════════════════════════════════════════════════════════════════════
@@ -82,22 +77,22 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
 
     for (const card of redfinCards) {
       const address =
-        h.text(card.querySelector('.homeAddressV2, .link-and-anchor, [data-rf-test-id="abp-homeinfo-homeAddress"]')) ||
-        h.text(card.querySelector('.homecardV2 .homeAddressV2')) ||
-        h.text(card.querySelector('a[href*="/home/"]'));
+        (card.querySelector('.homeAddressV2, .link-and-anchor, [data-rf-test-id="abp-homeinfo-homeAddress"]')?.textContent?.trim() ?? '') ||
+        (card.querySelector('.homecardV2 .homeAddressV2')?.textContent?.trim() ?? '') ||
+        (card.querySelector('a[href*="/home/"]')?.textContent?.trim() ?? '');
 
       const price =
-        h.text(card.querySelector('.homecardV2 .homecardV2Price, .bp-Homecard__Price--value, .priceEstimate, span[data-rf-test-id="abp-price"]')) ||
-        h.text(card.querySelector('.price'));
+        (card.querySelector('.homecardV2 .homecardV2Price, .bp-Homecard__Price--value, .priceEstimate, span[data-rf-test-id="abp-price"]')?.textContent?.trim() ?? '') ||
+        (card.querySelector('.price')?.textContent?.trim() ?? '');
 
       // Stats: beds, baths, sqft — often in a stats row
       const statsEls = card.querySelectorAll('.HomeStatsV2 .stats, .bp-Homecard__Stats--item, .HomeStatsV2 span');
       const statsTexts: string[] = [];
       for (const s of statsEls) {
-        const t = h.text(s);
+        const t = (s?.textContent?.trim() ?? '');
         if (t) statsTexts.push(t);
       }
-      const statsLine = statsTexts.join(' ') || h.text(card.querySelector('.HomeStatsV2'));
+      const statsLine = statsTexts.join(' ') || (card.querySelector('.HomeStatsV2')?.textContent?.trim() ?? '');
 
       let beds = '';
       let baths = '';
@@ -114,9 +109,9 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
       // Collect remaining details
       const detailParts: string[] = [];
       const typeEl = card.querySelector('.HomeStatsV2 .propertyType, .property-type');
-      if (typeEl) detailParts.push(h.text(typeEl));
+      if (typeEl) detailParts.push(typeEl?.textContent?.trim() ?? '');
       const brokerEl = card.querySelector('.broker, .branding');
-      if (brokerEl) detailParts.push(h.text(brokerEl));
+      if (brokerEl) detailParts.push(brokerEl?.textContent?.trim() ?? '');
 
       if (address || price) {
         results.push({
@@ -140,17 +135,17 @@ export async function scrapeListings(page: Page): Promise<PropertyListing[]> {
 
       for (const card of zillowCards) {
         const address =
-          h.text(card.querySelector('[data-test="property-card-addr"], address, .list-card-addr')) ||
-          h.text(card.querySelector('a[data-test="property-card-link"]'));
+          (card.querySelector('[data-test="property-card-addr"], address, .list-card-addr')?.textContent?.trim() ?? '') ||
+          (card.querySelector('a[data-test="property-card-link"]')?.textContent?.trim() ?? '');
 
         const price =
-          h.text(card.querySelector('[data-test="property-card-price"], .list-card-price')) ||
-          h.text(card.querySelector('span[data-test="property-card-price"]'));
+          (card.querySelector('[data-test="property-card-price"], .list-card-price')?.textContent?.trim() ?? '') ||
+          (card.querySelector('span[data-test="property-card-price"]')?.textContent?.trim() ?? '');
 
         const detailsEl = card.querySelector(
           '[data-test="property-card-details"], .list-card-details, .StyledPropertyCardDataArea-anchor'
         );
-        const detailText = h.text(detailsEl);
+        const detailText = (detailsEl?.textContent?.trim() ?? '');
 
         let beds = '';
         let baths = '';
