@@ -1021,3 +1021,9 @@ pm start works.
 - Reused existing launch semantics: resolve saved links to canonical IDs and launch with `watch_videos?video_ids=...`, keeping the 8-song cap.
 - Added explicit diagnostics for unresolved legacy rows and unresolved search-query links before launch.
 - Validation: `npm test` (28 passing) and `npm run typecheck` succeeded in `mood-playlist-builder`.
+
+### 📌 Team update (2026-03-09T): mood-playlist session-level launch support — decided by Fenster
+- Added session-level open flow in mood-playlist-builder/index.ts so users can open either an entire saved playlist file or one grouped session.
+- Added deterministic session grouping in mood-playlist-builder/mood-logic.ts via groupSavedPlaylistSessions() using contiguous rows that share the same Mood value, surfaced as CLI labels with row range and link counts.
+- Preserved existing launch behavior contracts: 8-song cap, ID dedupe, search-resolution + skip diagnostics.
+- Added regression coverage for mood-session grouping and updated README usage docs.

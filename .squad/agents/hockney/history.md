@@ -32,6 +32,12 @@
 
 ## Learnings
 
+### Mood playlist session-level launch regressions (2026-03-09)
+**Status:** Complete — added deterministic regression coverage in `mood-playlist-builder/tests/mood-logic.test.ts`; all tests + typecheck pass.
+- Added parser/grouping regression that reads a realistic daily markdown playlist, then verifies `readSavedPlaylistEntries` + `groupSavedPlaylistSessions` recover contiguous sessions deterministically.
+- Added session-scope launch regression that selects one grouped session and routes its links through `resolveLaunchVideoIdsFromLinks`, asserting dedupe behavior, 8-song cap, and stable skip reasons (`duplicate-video-id`, `unresolved-search-query`, `max-videos-reached`).
+- Preserved/extended edge-case coverage for malformed rows and empty-session-adjacent headers so malformed cells remain diagnosable and deterministic during session grouping.
+
 ### A/B Test Orchestrator sample (2026-03-08)
 **Status:** Built — all 7 files + 2 sample briefs created. TypeScript compiles clean (zero errors).
 - **Files:** squad.config.ts (4 agents), index.ts (file/text input orchestrator), experiment-reader.ts (file reader module), package.json, tsconfig.json, README.md

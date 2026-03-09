@@ -3741,3 +3741,68 @@ For "open previous playlists", enforce behavior with unit-level tests in mood-pl
    - dedupe enforcement
    - max cap of 8
    - deterministic skip reasons (duplicate-video-id, max-videos-reached, etc.) from launch resolution.
+
+
+---
+
+
+# Decision: Support session-level launch for mood playlist history
+
+**Date:** 2026-03-09  
+**Decider:** Fenster (Core Dev)  
+**Requested by:** Jeremy Sinclair
+
+## Context
+
+Saved daily playlist markdown files can contain multiple mood runs over time. Users needed to open either the full file or only one logical run without changing the persisted file format.
+
+## Decision
+
+Implement session-level launch in mood-playlist-builder while preserving existing file compatibility:
+
+1. Keep current daily markdown table format unchanged.
+2. Derive sessions deterministically from existing data as **contiguous rows with the same Mood value**.
+3. In CLI previous-playlist flow, prompt users to open either:
+   - whole file, or
+   - a specific derived session (shown as mood + row range + song/link counts).
+4. Preserve existing launch semantics: 8-song cap, dedupe, and skip diagnostics.
+
+## Why
+
+The file format has no explicit session marker, so contiguous mood-grouping gives a deterministic, user-readable rule without migration risk. It also keeps historical files launchable exactly as before.
+
+## Impact
+
+- Users can target one mood run from a busy daily playlist.
+- No schema migration needed.
+- Existing full-file open behavior remains available.
+
+---
+
+# Decision: Session-level launch regression coverage for saved daily playlists
+
+- **Date:** 2026-03-09
+- **By:** Hockney (Tester)
+- **Scope:** \mood-playlist-builder\ saved-playlist parsing/grouping and launch resolution
+
+## What we decided
+
+Add deterministic regression tests that validate session-level launch behavior end-to-end through existing resolver semantics, rather than introducing a parallel launch path.
+
+## Why
+
+Daily playlist markdown files can contain multiple contiguous mood sessions plus malformed legacy rows. Launching a selected session must preserve deterministic outcomes: only selected-session links are launched, duplicates are skipped, launch list is capped at 8, and skip reasons remain stable for diagnostics.
+
+## Test coverage added
+
+1. Parse + group recovery test from a daily playlist markdown fixture using \eadSavedPlaylistEntries\ and \groupSavedPlaylistSessions\.
+2. Selected-session launch test that routes grouped session links through \esolveLaunchVideoIdsFromLinks\ and asserts:
+   - selected session only,
+   - dedupe,
+   - max-8 cap,
+   - deterministic skip reasons.
+3. Edge-case validation retained for malformed rows and empty-session-adjacent headers.
+
+## Impact
+
+Future changes to playlist parsing, grouping, or launch resolution will fail fast if session selection accidentally broadens launch scope or destabilizes skip diagnostics.
