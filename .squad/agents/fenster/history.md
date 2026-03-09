@@ -909,3 +909,33 @@ pm start works.
 - Filename sanitization: `replace(/[^a-zA-Z0-9]+/g, '_')` strips spaces and special characters
 - Key pattern: accumulate streamed content in parallel with `process.stdout.write()` — reusable for any sample that needs to persist streamed output
 - File path: `realtor-sales-package/index.ts` (lines 143-213 sendAndStream, lines 398-415 file save)
+
+### Mood Playlist Builder Sample (2026-03-09)
+
+**Requested by:** Jeremy Sinclair. Build a mood-driven playlist sample with interactive curation, markdown persistence, archive recall, and YouTube launch.
+
+**What was built:**
+- New sample folder: `mood-playlist-builder/` with TypeScript CLI (`index.ts`) and deterministic logic module (`mood-logic.ts`)
+- Flow implemented: raw mood input → 1–3 word mood phrase summary → up to 15 suggestions → edit loop (`add/remove/reset/done`) → YouTube lookup for each song
+- Persistence implemented: daily playlist tables in `mood-playlists/playlist-YYYY-MM-DD.md` with `Mood | Genre | Artist | Song | YouTube Link`
+- Archive implemented: append-only `mood-archive.md` with `DateTime | Raw Mood | Mood Phrase`, plus startup surfacing of recent and frequent moods
+- Playback implemented: extract `v` query IDs and open browser with `https://www.youtube.com/watch_videos?video_ids=...`
+- Tests added: summarization mapping, markdown append behavior, YouTube ID extraction + playlist URL builder
+
+**Files:** `mood-playlist-builder/index.ts`, `mood-playlist-builder/mood-logic.ts`, `mood-playlist-builder/tests/mood-logic.test.ts`, `mood-playlist-builder/README.md`, plus root README/sample index updates.
+
+## Learnings
+
+- Deterministic mood summarization (keyword map + 3-word fallback) gives stable outputs that are testable and still flexible for free-form mood text.
+- Generic markdown-table append helpers (`appendMarkdownRow`) make daily log files and archives reliable without rewriting headers or clobbering prior runs.
+- YouTube search result parsing can degrade gracefully by storing search URLs when direct video IDs are unavailable, while still building playlist URLs from valid `v` IDs.
+
+### 📌 Team context (2026-03-08T20:25:22Z): Mood Playlist Builder sample completed — decided by Fenster
+- New sample folder: mood-playlist-builder/ with TypeScript CLI and deterministic logic module
+- Flow: raw mood → keyword-based phrase summary (with 3-word fallback) → up to 15 song suggestions → user edit loop → YouTube multi-video launch
+- Persistence: daily playlist markdown tables + append-only archive with mood history
+- Playback: validates YouTube v IDs and builds playlist URL; graceful fallback to search links
+- Tests: unit tests for summarization, markdown append, URL extraction + builder
+- Decision captured: fenster-mood-playlist-deterministic-flow.md (deterministic core, user confirmation loop, append-only logs)
+- Files: index.ts (CLI), mood-logic.ts (logic module), tests/mood-logic.test.ts (unit tests), README.md
+- Quality: all tests passing, deterministic behavior verified, markdown persistence tested, sample runs end-to-end

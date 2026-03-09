@@ -3401,3 +3401,13 @@ Each file has two timeout occurrences that were updated:
 - No breaking changes — this is a pure timeout increase
 - All samples continue to work exactly as before, just with more patience
 
+
+### 2026-03-09: Deterministic Mood Playlist Flow for User-Curated Outputs
+**By:** Fenster
+**What:** Mood playlist sample uses keyword-based summarization + curated song libraries + mandatory user edit loop + append-only markdown + graceful YouTube fallback.
+**Why:** Deterministic core enables testing. User confirmation loop ensures intent. Append-only logs are merge-safe. Graceful fallback keeps sample robust.
+**Impact:** Users get testable, reproducible mood playlist behavior with persistent archive and decision-support history recall.
+### 2026-03-08: CMA output persisted to file alongside streaming
+**By:** Fenster
+**What:** sendAndStream accumulates streamed content in a buffer and returns it. Caller writes buffer to iles/{sanitized_area}_CMA_Package.md after streaming completes.
+**Why:** Post-stream write is atomic, avoids filesystem thrashing, consistent with error handling. Pattern is reusable for any streamed output persistence.
