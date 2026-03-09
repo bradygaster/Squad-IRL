@@ -4,7 +4,7 @@
 
 ## What Is This?
 
-Tired of automation being hard? Squad makes it simple. This repo contains 19 working samples showing how Squad agent teams solve everyday problems — no coding required.
+Tired of automation being hard? Squad makes it simple. This repo contains 20 working samples showing how Squad agent teams solve everyday problems — no coding required.
 
 Each sample is a **self-contained TypeScript project** with a team of AI agents. All you do is describe your problem in plain English, and Squad builds the code. No API keys. No boilerplate. Real algorithms, real patterns, real problems solved.
 
@@ -17,7 +17,7 @@ npm install
 npm start
 ```
 
-## The 19 Samples
+## The 20 Samples
 
 ### 💬 Text & Conversation Input
 
@@ -58,6 +58,14 @@ These parse documents, receipts, CSVs, or structured data to extract insights.
 | [inventory-manager](inventory-manager/) | Analyzes inventory data to identify stockout risks, predict demand, optimize reorder quantities, and generate action plans |
 | [receipt-scanner](receipt-scanner/) | Extracts receipt data, categorizes expenses, detects anomalies, and generates financial summaries with tax deduction flags |
 | [support-ticket-router](support-ticket-router/) | Triages support tickets with classification, known-issue matching, empathetic response drafting, and prioritized action queuing |
+
+### 🎵 Interactive & Personalization
+
+These learn user preferences and adapt behavior based on mood, history, or ongoing interactions.
+
+| Sample | What It Does |
+|--------|-------------|
+| [mood-playlist-builder](mood-playlist-builder/) | Creates custom playlists by mood, saves daily sessions, and launches curated songs to YouTube. Open previous playlists by date or individual mood sessions. Respects an 8-song launch cap and reports skip diagnostics for unresolved links.
 
 ## Why These Matter
 

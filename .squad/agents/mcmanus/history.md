@@ -1205,3 +1205,34 @@ px tsc --noEmit pass clean with no errors.
 **Cross-team note:** Keaton (Lead) wrote proposal for Squad restructure — bench 13 SDK-focused agents, keep 8 for samples, position McManus as "Community Guide" (front door for all contributor intake). Proposal pending Brady's review in decisions.md.
 
 **Next:** Monitor CONTRIBUTING.md feedback. Refinement may be needed based on contributor questions.
+
+---
+
+## 📌 Documentation Update (2026-03-08T23-14-45Z): Mood Playlist Builder README + Root README
+
+**From:** McManus (DevRel)
+**Requested by:** Jeremy Sinclair
+
+**What was done:**
+
+1. **Updated mood-playlist-builder/README.md** — restructured for clarity:
+   - Created subsections: "Creating a New Playlist", "Opening a Saved Playlist", "Launching to YouTube"
+   - Made the 8-song cap explicit and explained skip diagnostics with specific reasons (unresolved-search-query, invalid-link, non-youtube-link, missing-video-id, duplicate-video-id, max-videos-reached)
+   - Clarified interactive commands (done, remove, add, reset) with examples
+   - Reorganized Usage section to explain both entry points (create new vs. open previous) with clear sub-steps
+
+2. **Updated root README.md** — fixed sample count and documentation structure:
+   - Discovered mood-playlist-builder was missing from root README despite being one of 20 samples (README said 19)
+   - Created new category "🎵 Interactive & Personalization" to house mood-playlist-builder
+   - Updated sample count from 19 → 20
+   - Wrote concise one-liner for mood-playlist-builder that highlights key features: mood-based creation, date-based playlist access, individual session launch, 8-song cap, skip diagnostics
+
+**Why this matters:**
+
+- **Discoverability:** Root README now lists all 20 samples; mood-playlist-builder was effectively invisible
+- **Sensible documentation structure:** Created a new category that makes semantic sense for interactive/preference-learning tools (not trying to force it into "Text Input" or "Browser Automation")
+- **Clarity on launch & skip behavior:** Documentation now explicitly names and explains each skip reason, reducing confusion when users encounter them
+- **Consistency:** Sample one-liner in root README matches details in sample README without duplication
+
+**Decisions recorded:** See mcmanus-readme-update.md in decisions/inbox/
+

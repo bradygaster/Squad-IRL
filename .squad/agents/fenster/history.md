@@ -29,6 +29,27 @@
 - Session timeout bumped from 300_000ms (5min) to 600_000ms (10min) to accommodate OTel overhead
 - Context: Brady reported content-creation sample timing out at 5 minutes; increased headroom for telemetry + network latency
 
+### 📌 Team update (2026-03-09T01:36:29Z): Mood playlist launch truncation fix completed — YouTube ID hardening + regression tests — decided by Fenster & Hockney
+- Fenster: Hardened YouTube ID extraction, `resolveLaunchVideoIds` for search-result normalization, preserved 15-video dedup contract, explicit skip-reason reporting
+- Hockney: 16 deterministic regression tests, all passing, covers mixed-link resolution and launch payload verification
+- Decision merged: "Add deterministic YouTube launch-resolution regression tests" (2026-03-09)
+
+### 📌 Team update (2026-03-09T22:04:35Z): Mood playlist cap reduction from 15 to 8 songs — decided by Fenster
+- Reduced dynamic playlist cap from 15 to 8 across all runtime paths: model output constraints, interactive edit limits, launch payload caps
+- Updated mood-playlist-builder system prompt to enforce 1–8 song generation (prior: 1–15)
+- Interactive edit commands now validate 1–8 song limit
+- YouTube launch payload cap reduced from 15 to 8 video IDs in watch_videos query
+- Tests added for 8-song constraint validation; all 16+ existing regression tests remain green
+- README updated to reflect 8-song limit; orchestration docs updated
+- Decision merged: "mood-playlist-builder cap at 8 songs" (2026-03-09)
+- Context: Launch reliability degraded at 15-song ceiling; 8-cap improves resolution/payload margins
+
+### 📌 Team update (2026-03-10T): Mood playlist subprocess warning suppression hardening — decided by Fenster
+- Hardened `mood-playlist-builder/index.ts` warning suppression for Squad startup by setting both `NODE_NO_WARNINGS=1` and `NODE_OPTIONS=--no-warnings` before `SquadClient` connect.
+- Implemented scoped restore logic so previous env values are restored in `finally`, avoiding persistent process-wide mutation after playlist generation completes.
+- Added regression coverage in `tests/subprocess-warning-suppression.test.ts` to lock ordering (suppression before `new SquadClient`) and cleanup behavior (restore after disconnect).
+- Result: removes `[CLI subprocess] ExperimentalWarning: SQLite is an experimental feature...` noise while preserving existing stage progress/fallback status output.
+
 **Phase 3 Blocking (2026-02-22 onwards):**
 - Ralph start(): EventBus subscription + health checks (14 TODOs)
 - Coordinator initialize()/route(): CopilotClient wiring + agent manager (13 TODOs)
@@ -44,6 +65,11 @@
 **Task:** Complete git archaeology — all commits, PRs, issues, branches, deprecation markers, blog posts.
 
 **Findings:**
+
+### 📌 Team update (2026-03-09T): Mood playlist search URL resolution hardening — decided by Fenster
+- Hardened `mood-playlist-builder` YouTube resolver to prioritize top `ytInitialData` search results, including escaped `JSON.parse(...)` payloads and unicode-escaped watch patterns.
+- Added fallback extraction for escaped `videoRenderer.videoId` payloads so apostrophe/special-character queries (for example `Who's Making Love`, `Ridin'`) resolve consistently to launchable watch IDs.
+- Added explicit unresolved-search diagnostics in CLI output to surface failed queries non-silently while preserving existing 15-video cap and `watch_videos?video_ids=` launch contract.
 
 **Timeline:**
 - **2026-02-22 (~c1d5c7c→992763e):** Feature introduced. PR #265 added `squad aspire` command (Issue #265) as the CLI entry point to launch .NET Aspire dashboard for Squad observability. Core file: `packages/squad-cli/src/cli/commands/aspire.ts` (175 lines).
@@ -909,3 +935,115 @@ pm start works.
 - Filename sanitization: `replace(/[^a-zA-Z0-9]+/g, '_')` strips spaces and special characters
 - Key pattern: accumulate streamed content in parallel with `process.stdout.write()` — reusable for any sample that needs to persist streamed output
 - File path: `realtor-sales-package/index.ts` (lines 143-213 sendAndStream, lines 398-415 file save)
+
+### Mood Playlist Builder Sample (2026-03-09)
+
+**Requested by:** Jeremy Sinclair. Build a mood-driven playlist sample with interactive curation, markdown persistence, archive recall, and YouTube launch.
+
+**What was built:**
+- New sample folder: `mood-playlist-builder/` with TypeScript CLI (`index.ts`) and deterministic logic module (`mood-logic.ts`)
+- Flow implemented: raw mood input → 1–3 word mood phrase summary → up to 15 suggestions → edit loop (`add/remove/reset/done`) → YouTube lookup for each song
+- Persistence implemented: daily playlist tables in `mood-playlists/playlist-YYYY-MM-DD.md` with `Mood | Genre | Artist | Song | YouTube Link`
+- Archive implemented: append-only `mood-archive.md` with `DateTime | Raw Mood | Mood Phrase`, plus startup surfacing of recent and frequent moods
+- Playback implemented: extract `v` query IDs and open browser with `https://www.youtube.com/watch_videos?video_ids=...`
+- Tests added: summarization mapping, markdown append behavior, YouTube ID extraction + playlist URL builder
+
+**Files:** `mood-playlist-builder/index.ts`, `mood-playlist-builder/mood-logic.ts`, `mood-playlist-builder/tests/mood-logic.test.ts`, `mood-playlist-builder/README.md`, plus root README/sample index updates.
+
+## Learnings
+
+- Deterministic mood summarization (keyword map + 3-word fallback) gives stable outputs that are testable and still flexible for free-form mood text.
+- Generic markdown-table append helpers (`appendMarkdownRow`) make daily log files and archives reliable without rewriting headers or clobbering prior runs.
+- YouTube search result parsing can degrade gracefully by storing search URLs when direct video IDs are unavailable, while still building playlist URLs from valid `v` IDs.
+
+### 📌 Team context (2026-03-08T20:25:22Z): Mood Playlist Builder sample completed — decided by Fenster
+- New sample folder: mood-playlist-builder/ with TypeScript CLI and deterministic logic module
+- Flow: raw mood → keyword-based phrase summary (with 3-word fallback) → up to 15 song suggestions → user edit loop → YouTube multi-video launch
+- Persistence: daily playlist markdown tables + append-only archive with mood history
+- Playback: validates YouTube v IDs and builds playlist URL; graceful fallback to search links
+- Tests: unit tests for summarization, markdown append, URL extraction + builder
+- Decision captured: fenster-mood-playlist-deterministic-flow.md (deterministic core, user confirmation loop, append-only logs)
+- Files: index.ts (CLI), mood-logic.ts (logic module), tests/mood-logic.test.ts (unit tests), README.md
+- Quality: all tests passing, deterministic behavior verified, markdown persistence tested, sample runs end-to-end
+
+## 2026-03-09: Mood Playlist Builder Dynamic SDK Flow
+
+- Upgraded mood-playlist-builder from static-only generation to Squad SDK-driven mood planning with strict JSON schema constraints.
+- Added deterministic fallback path when model output is missing/invalid/unavailable; fallback now emits explicit warning text (no silent failure path).
+- Reused `mood-archive.md` as planning context (recent/popular/adjacent suggestions) and surfaced adjacent moods in UX while preserving append-only markdown contracts.
+- Preserved existing playlist editing loop (done/remove/add/reset), YouTube URL resolution, and daily archive/playlist append format.
+
+
+### 📌 Team update (2026-03-09T01:13:18Z): Dynamic Mood Playlist Guardrails + all-sample timeout increase (5min→10min) — decided by Fenster
+- Mood playlist sample now uses Squad SDK for dynamic mood/song generation with strict JSON validation
+- Deterministic fallback on validation failure or model unavailability
+- All 19 sample index.ts files updated with 600_000ms timeout
+- Playlist/archive persistence and YouTube launch contract preserved
+
+## 2026-03-09: Explicit mood Squad config as orchestration source
+
+- Centered mood pipeline orchestration in `mood-playlist-builder/squad.config.ts` with explicit stage ownership:
+  - `mood-interpreter` (mood interpretation/summarization)
+  - `song-curator` (song matching/curation)
+  - `mood-logic-guardian` (history-aware mood logic + fallback policy)
+- Added `moodPipeline` and `REQUIRED_MOOD_AGENT_NAMES` to make stage routing and required roles deterministic from config.
+- Updated runtime orchestration to execute staged prompts from `moodPipeline` via `squad-orchestration.ts` (`buildStagePrompt` + `mergeMoodPipelineOutputs`) instead of implicit single-pass routing.
+- Preserved existing contracts: daily playlist markdown path format, `mood-archive.md` append behavior, YouTube `watch_videos` launch flow, and explicit no-silent-failure fallback warnings.
+- Updated README to document where orchestration is configured and how to modify it.
+- Verified with `npm run typecheck` and `npm test` in `mood-playlist-builder` (all passing).
+
+### 📌 Team update (2026-03-09T01:22:06Z): mood-playlist-builder orchestration hardened via squad.config.ts — decided by Fenster, Hockney
+- Explicit role-based orchestration in mood-playlist-builder/squad.config.ts via moodPipeline
+- Runtime bound to config through squad-orchestration.ts helpers
+- Enforcement tests prevent silent bypasses; all 12 tests passing
+- Persistence and YouTube playback contracts preserved
+
+
+### 📌 Team update (2026-03-09): Mood playlist YouTube launch resolution hardening
+- **Requested by:** Jeremy Sinclair
+- **Issue:** Playlist launch opened ~8 tracks even when 15 curated songs were saved because several links were `youtube.com/results?search_query=...` and the resolver only matched `watch?v=` in HTML.
+- **Fix:** Hardened YouTube ID extraction in `mood-playlist-builder/mood-logic.ts` to support `www/m` host variants, shorts/embed/live path IDs, and richer search HTML patterns (`"videoId"` / `videoRenderer` / `watch?v=`) for follow-up search resolution.
+- **Behavioral impact:** Launch path keeps existing contracts (dedupe + max 15 + markdown format), still preserves fallback links, and continues emitting explicit skip reasons when a link cannot be resolved.
+- **Verification:** `npm run typecheck` and `npm test` both pass in `mood-playlist-builder` (16/16 tests).
+
+### 📌 Team update (2026-03-09T02:35:00Z): Top-result YouTube search resolution hardened for mood-playlist launch payloads — decided by Fenster
+- Updated search-result parsing to prefer the first `videoRenderer.videoId` from `ytInitialData`, then fallback to renderer/watch URL regexes.
+- `results?search_query=...` entries now resolve to canonical `watch?v={id}` IDs before launch payload assembly, preserving the 15-video cap + dedupe behavior.
+- Added regression coverage for noisy HTML where non-top `watch?v=` links appear before `ytInitialData` and verified deterministic skip reasons remain unchanged.
+
+📌 Team update (2026-03-09T01:40:18Z): Top-result YouTube watch URL resolution merged to decisions.md — implemented by Fenster, validated by Hockney
+
+
+### 📌 Team update (2026-03-09T): Mood playlist reliability cap reduced from 15 to 8 — decided by Fenster
+- Reduced mood-playlist-builder runtime cap from 15 to 8 across suggestion generation, model validation bounds, interactive edit loop limits, and YouTube launch ID limits.
+- Updated squad orchestration/model contracts (squad.config.ts, squad-orchestration.ts, and runtime constraint payloads) to require 1-8 songs.
+- Preserved markdown/archive append behavior exactly; playlists now naturally persist up to 8 rows per run.
+- Updated regression tests and docs to match the 8-song cap; validated with `npm test` and `npm run typecheck` in `mood-playlist-builder`.
+
+### 📌 Team update (2026-03-10): mood-playlist-builder can now open prior saved playlists — decided by Fenster
+- Added startup action selection in `mood-playlist-builder/index.ts`: create new playlist (existing flow) or open a previous daily playlist.
+- Implemented numbered prior-playlist selection from `mood-playlists/playlist-YYYY-MM-DD.md` files, newest-first.
+- Added robust markdown row parsing in `mood-logic.ts` for `Mood | Genre | Artist | Song | YouTube Link`, including escaped pipes and markdown/bare YouTube link extraction.
+- Reused existing launch semantics: resolve saved links to canonical IDs and launch with `watch_videos?video_ids=...`, keeping the 8-song cap.
+- Added explicit diagnostics for unresolved legacy rows and unresolved search-query links before launch.
+- Validation: `npm test` (28 passing) and `npm run typecheck` succeeded in `mood-playlist-builder`.
+
+### 📌 Team update (2026-03-09T): mood-playlist session-level launch support — decided by Fenster
+- Added session-level open flow in mood-playlist-builder/index.ts so users can open either an entire saved playlist file or one grouped session.
+- Added deterministic session grouping in mood-playlist-builder/mood-logic.ts via groupSavedPlaylistSessions() using contiguous rows that share the same Mood value, surfaced as CLI labels with row range and link counts.
+- Preserved existing launch behavior contracts: 8-song cap, ID dedupe, search-resolution + skip diagnostics.
+- Added regression coverage for mood-session grouping and updated README usage docs.
+
+### 📌 Team update (2026-03-09): mood-playlist-builder now shows stage-by-stage Squad progress while generating playlists — decided by Fenster
+- Added explicit runtime progress messaging for the three configured pipeline stages: interpret mood, curate songs, and apply mood logic.
+- Users now see start/completion status for each stage while waiting on dynamic generation, plus clear pipeline-complete and deterministic-fallback signals.
+- Preserved all existing behavior contracts: 8-song cap, archive/playlist append flows, and previous-playlist open/launch paths.
+- Updated sample README to document the new wait-time progress indicators and fallback visibility.
+- Validation: `npm test && npm run typecheck` passed in `mood-playlist-builder`.
+
+### 📌 Team update (2026-03-10): mood-playlist dynamic pipeline now parallelizes independent stages — decided by Fenster
+- Added dependency-aware stage batching via `buildMoodPipelineExecutionBatches()` in `mood-playlist-builder/squad-orchestration.ts`, driven directly by `moodPipeline` config.
+- Extended `moodPipeline` in `mood-playlist-builder/squad.config.ts` with `dependsOn` metadata so `interpret-mood` and `curate-songs` can run concurrently while `apply-mood-logic` waits for both.
+- Updated runtime orchestration in `mood-playlist-builder/index.ts` to execute each independent batch with `Promise.all`, while keeping stage progress logs and completion messaging deterministic and coherent.
+- Preserved deterministic fallback behavior and final output contracts by continuing to normalize/validate via `resolvePlaylistFromModel()` after merged stage outputs.
+- Validation: `npm test && npm run typecheck` passed in `mood-playlist-builder` (35 tests passing).

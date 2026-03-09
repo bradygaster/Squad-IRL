@@ -1,0 +1,20 @@
+{
+  "name": "mood-playlist-builder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build mood-based music playlists, save daily markdown tables, and launch YouTube playlists.",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx index.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test tests/**/*.test.ts"
+  },
+  "dependencies": {
+    "@bradygaster/squad-sdk": "^0.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "tsx": "^4.19.4",
+    "typescript": "^5.7.0"
+  }
+}

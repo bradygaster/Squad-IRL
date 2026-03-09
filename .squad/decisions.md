@@ -375,6 +375,21 @@
 **Why:** Users can scroll. Hiding roster names, spacing, help text, or routing hints on narrow terminals removes information the user needs. Layout adapts to width; content does not.
 **Convention:** `compact` variable may be used for layout decisions (flex direction, column vs. row) but must NOT gate visibility of text, spacing, or UI sections. `wide` may add supplementary content but narrow must not remove it.
 
+### 2026-03-09: Add deterministic YouTube launch-resolution regression tests
+**By:** Hockney
+**Status:** Implemented
+**What:**
+- Add `resolveLaunchVideoIdsFromLinks` to normalize launch links before playlist launch.
+- Resolve `results?search_query` links to launchable video IDs when possible.
+- Enforce deterministic skip reasons for unresolved/invalid/non-YouTube/missing-ID entries.
+- Keep launch payload bounded to deduped IDs with a strict 15-video cap.
+- Test these behaviors in `mood-playlist-builder/tests/mood-logic.test.ts`.
+**Why:** Mixed-link playlists can be truncated in real flows when search results are included. Existing tests only covered direct `watch?v=` extraction and did not validate resolution + skip behavior end-to-end for launch construction.
+**Impact:**
+- Mixed-link playlists now preserve launchable tracks instead of silently dropping them.
+- Launch count and `watch_videos?video_ids=` payload are deterministic and regression-protected.
+- Future changes that break resolution, dedupe, or skip semantics fail fast in tests.
+
 ### 2026-03-01: Multi-line user message rendering pattern
 **By:** Cheritto (TUI Engineer)
 **Date:** 2026-03-01
@@ -3401,3 +3416,507 @@ Each file has two timeout occurrences that were updated:
 - No breaking changes — this is a pure timeout increase
 - All samples continue to work exactly as before, just with more patience
 
+
+### 2026-03-09: Deterministic Mood Playlist Flow for User-Curated Outputs
+**By:** Fenster
+**What:** Mood playlist sample uses keyword-based summarization + curated song libraries + mandatory user edit loop + append-only markdown + graceful YouTube fallback.
+**Why:** Deterministic core enables testing. User confirmation loop ensures intent. Append-only logs are merge-safe. Graceful fallback keeps sample robust.
+**Impact:** Users get testable, reproducible mood playlist behavior with persistent archive and decision-support history recall.
+### 2026-03-08: CMA output persisted to file alongside streaming
+**By:** Fenster
+**What:** sendAndStream accumulates streamed content in a buffer and returns it. Caller writes buffer to iles/{sanitized_area}_CMA_Package.md after streaming completes.
+**Why:** Post-stream write is atomic, avoids filesystem thrashing, consistent with error handling. Pattern is reusable for any streamed output persistence.
+
+
+---
+
+# Fenster Decision — Dynamic Mood Playlist Guardrails
+
+## Context
+Mood Playlist Builder needed prime-time demo behavior using model-driven generation without breaking existing markdown persistence contracts.
+
+## Decision
+Use Squad SDK model output for mood phrase + adjacent moods + songs, but require strict JSON schema validation (required fields, array bounds, max 15 songs). If output is invalid or model runtime is unavailable, immediately use deterministic local fallback and print an explicit warning.
+
+## Why
+This preserves reliability for live demos while still showcasing dynamic generation. The fallback keeps the UX and persistence contracts stable and avoids silent degradation.
+
+## Impact
+- Dynamic path is now default behavior.
+- Deterministic fallback preserves predictable output for edge cases.
+- Archive history is actively reused for context and adjacent mood hints.
+
+
+---
+
+# Decision: Increase Sample Timeout from 5min to 10min
+
+**Date:** 2026-03-09  
+**Author:** Fenster  
+**Status:** Implemented  
+
+## Context
+
+Brady hit a timeout error running the content-creation sample. The hardcoded 5-minute timeout (300_000ms) wasn't sufficient for multi-agent LLM workflows, especially complex pipelines like content-creation which chains 4 agents sequentially (Researcher → Outliner → Writer → Editor).
+
+## Decision
+
+Increased the timeout from 300_000ms (5 minutes) to 600_000ms (10 minutes) across all 19 sample applications.
+
+## Changes
+
+Updated all 19 sample `index.ts` files:
+- ab-test-orchestrator
+- appointment-scheduler
+- bug-triage
+- compliance-checker
+- content-creation
+- contract-reviewer
+- gmail
+- inventory-manager
+- job-application-tracker
+- linkedin-monitor
+- meeting-recap
+- mtg-commander-deck-builder
+- price-monitor
+- real-estate-analyzer
+- realtor-sales-package
+- receipt-scanner
+- social-media-manager
+- support-ticket-router
+- travel-planner
+
+Each file has two timeout occurrences that were updated:
+1. `session.sendAndWait({ prompt }, 300_000)` → `600_000`
+2. `setTimeout(resolve, 300_000)` → `600_000` (fallback path)
+
+## Rationale
+
+- Multi-agent workflows with sequential coordination naturally take longer than single-agent interactions
+- Complex content creation pipelines (research, outline, write, edit) can easily exceed 5 minutes
+- Doubling the timeout to 10 minutes provides comfortable headroom while still catching genuinely stuck sessions
+- Consistent timeout across all samples prevents similar issues in other multi-agent workflows
+
+## Alternatives Considered
+
+- **Make timeout configurable per-sample:** Rejected as premature optimization. 10 minutes works for all samples.
+- **Increase only content-creation:** Rejected. Other samples have similar multi-agent patterns and could hit the same issue.
+
+## Impact
+
+- Users running complex multi-agent samples will no longer encounter premature timeout errors
+- No breaking changes — this is a pure timeout increase
+- All samples continue to work exactly as before, just with more patience
+
+
+---
+
+# Decision: Add deterministic regression tests for dynamic mood playlist model output
+
+**Date:** 2026-03-08T21:08:33-04:00  
+**Author:** Hockney  
+**Status:** Implemented
+
+## Context
+The mood-playlist-builder sample had baseline deterministic tests but no explicit protection for dynamic model-proposed playlist payloads. That left validation, fallback behavior, and archive-informed selection logic under-specified for future Squad SDK-driven generation.
+
+## Decision
+Add explicit normalization/resolution helpers and regression tests that treat model output as untrusted input:
+- normalize and cap model-proposed mood phrases and song lists (required fields, max 15 songs)
+- fallback deterministically when model payload is malformed or empty
+- keep existing markdown append contracts and naming conventions covered
+- retain YouTube ID extraction and watch_videos URL composition guarantees
+- lock archive-informed tie-breaking behavior with deterministic tests
+
+## Impact
+Future dynamic SDK integration can reuse these hardened helpers without regressing current persistence/output contracts. The sample now has stronger test coverage around the exact failure modes expected from real model responses.
+
+
+---
+
+### 2026-03-08T16:57:41Z: User directive
+**By:** Brady (via Copilot)
+**What:** Rename the project from "100 Ways to Use Squad" to "Squad IRL" everywhere it's referenced. Folder rename will be done manually later.
+**Why:** User request — captured for team memory
+
+
+---
+
+# Decision: mood-playlist-builder orchestration lives in squad.config.ts
+
+## Context
+The mood playlist sample needed explicit, role-based Squad orchestration so mood interpretation, song curation, and mood-logic policy are visible and configurable in one place.
+
+## Decision
+- Define the mood squad responsibilities and stage order in `mood-playlist-builder/squad.config.ts` via `moodPipeline`.
+- Keep runtime orchestration (`index.ts`) stage execution bound to `moodPipeline` through `squad-orchestration.ts` helpers.
+- Preserve existing persistence/playback contracts and deterministic fallback behavior.
+
+## Impact
+- No hidden role routing in runtime; role assignment now follows `squad.config.ts`.
+- Future role or stage changes are made in config first, then reflected automatically by orchestration.
+
+
+---
+
+# Decision: Enforce mood-playlist orchestration through squad.config.ts
+
+**Date:** 2026-03-09  
+**Author:** Hockney  
+**Status:** Implemented
+
+## Context
+The mood-playlist sample needed explicit guarantees that mood interpretation, music curation, and mood-logic safety are orchestrated via `squad.config.ts` rather than hardcoded prompt text in runtime code.
+
+## Decision
+- Route dynamic prompt construction through `buildMoodPlannerSystemPrompt()` in `squad-orchestration.ts`, sourced from `squad.config.ts`.
+- Add enforcement tests that fail if required responsibility agents are missing or if prompt content stops reflecting config-defined charters.
+- Keep existing regression contracts (dynamic fallback behavior, archive-informed suggestions, append-only persistence) as mandatory passing checks.
+
+## Impact
+Future refactors cannot silently bypass squad role responsibilities. If config roles drift or are removed, tests fail immediately and block regressions.
+
+
+---
+
+### 2026-03-09T01:22:06Z: mood-playlist-builder orchestration via squad.config.ts (consolidated)
+
+**By:** Fenster, Hockney
+
+**What:**
+- Define mood squad responsibilities and stage order in mood-playlist-builder/squad.config.ts via moodPipeline
+- Route runtime orchestration binding through squad-orchestration.ts helpers (keep implementation and testing orchestration explicit)
+- Implement enforcement tests that fail if required responsibility agents are missing from config
+- Add tests to verify prompt content reflects config-defined charters
+- Preserve existing persistence/playback contracts and deterministic fallback behavior
+
+**Why:**
+- No hidden role routing; role assignment follows source-of-truth config
+- Future role or stage changes made in config first, reflected automatically by orchestration
+- Enforcement tests prevent silent regressions; impossible to bypass config-driven orchestration
+- Tests block immediate if config roles drift or are removed
+
+**Status:** Implemented — all tests passing (12/12), typecheck passing
+
+### 2026-03-09T01:40:18Z: User directive
+**By:** Jeremy Sinclair (via Copilot)
+**What:** For esults?search_query=... entries, resolve and use the top YouTube result's canonical watch?v= URL.
+**Why:** User request — captured for team memory
+
+### 2026-03-09: Prefer top ideoRenderer result for YouTube search URL resolution
+**By:** Fenster
+**Status:** Implemented
+**What:**
+- For esults?search_query=... URLs, parse the response HTML and prefer the first ideoRenderer.videoId found in ytInitialData.
+- Only fall back to regex extraction ("videoRenderer" then watch?v=) when ytInitialData is unavailable.
+- Keep launch contracts unchanged: dedupe, max 15 IDs, existing markdown persistence format, deterministic skip reasons.
+
+**Why:**
+Search result pages can contain non-top watch?v= links before the actual ranked results payload. Prior generic matching could pick those links, causing non-deterministic launch targets.
+
+**Impact:**
+Launch payload construction consistently uses the top ranked search result when available, while preserving existing behavior for unresolved and invalid links.
+
+### 2026-03-09: Harden YouTube search-result resolution in mood-playlist-builder
+**By:** Fenster (Core Dev)
+
+**What**
+- Prefer extracting the first playable `videoRenderer.videoId` from `ytInitialData` search sections when resolving `https://www.youtube.com/results?search_query=...`.
+- Support additional YouTube payload variants: escaped `JSON.parse(...)` assignments, escaped `videoRenderer` JSON fragments, and unicode-escaped watch query forms (for example `watch\u003Fv\u003D...`).
+- Keep fallback behavior deterministic (`unresolved-search-query`) and emit explicit unresolved diagnostics in CLI output.
+
+**Why**
+- Real user logs showed search URLs with apostrophes/special characters were frequently unresolved, reducing launched playlist size.
+- YouTube response payloads are not stable across contexts; robust multi-path extraction avoids overfitting to one HTML pattern.
+
+**Impact**
+- Improves launch consistency without changing existing contracts: max 15 videos, markdown persistence behavior, and launch URL format (`watch_videos?video_ids=...`) remain unchanged.
+
+### 2026-03-09: Cover encoded YouTube search-query regressions in launch-resolution tests
+**By:** Hockney (Tester)  
+**Scope:** `mood-playlist-builder/tests/mood-logic.test.ts`
+
+**What**
+Add explicit regression tests for YouTube `results?search_query=` links containing encoded apostrophes/special characters so launch resolution remains stable for real user data.
+
+**Why**
+Real playlist rows can store results URLs (not watch URLs), including apostrophes in search terms (e.g., `Who%27s Making Love`, `Ridin%27`). Without this guard, unresolved parsing can silently reduce launchable songs.
+
+**Guardrails Added**
+1. Encoded apostrophe queries must resolve to top watch video IDs.
+2. Resolved IDs from results links must be present in final `watch_videos?video_ids=` launch payload.
+3. Mixed direct watch + results links must still cap at 15 launch IDs.
+4. Unresolved search links must emit deterministic `unresolved-search-query` reasons.
+
+---
+## Decision: mood-playlist-builder cap at 8 songs
+
+- **Date:** 2026-03-09
+- **Decider:** Fenster
+- **Requested by:** Jeremy Sinclair
+- **Scope:** mood-playlist-builder
+
+### Context
+Launch reliability degraded when dynamic output and launch resolution frequently approached the previous 15-song ceiling.
+
+### Decision
+Standardize the playlist/launch cap to **8 songs** across runtime flow, model constraints, interactive edit limits, and launch payload limits.
+
+### Consequences
+- Improves launch reliability by reducing resolution and payload pressure.
+- Keeps archive/markdown behavior unchanged except each run now records up to 8 songs.
+- Requires tests and docs to enforce and communicate 1-8 constraints.
+
+---
+
+## Decision: mood-playlist-builder cap at 8 songs
+
+- **Date:** 2026-03-09
+- **Decider:** Fenster
+- **Requested by:** Jeremy Sinclair
+- **Scope:** mood-playlist-builder
+
+### Context
+Launch reliability degraded when dynamic output and launch resolution frequently approached the previous 15-song ceiling.
+
+### Decision
+Standardize the playlist/launch cap to **8 songs** across runtime flow, model constraints, interactive edit limits, and launch payload limits.
+
+### Consequences
+- Improves launch reliability by reducing resolution and payload pressure.
+- Keeps archive/markdown behavior unchanged except each run now records up to 8 songs.
+- Requires tests and docs to enforce and communicate 1-8 constraints.
+
+---
+
+# Decision: Open Previous Mood Playlists Mode
+
+- **Date:** 2026-03-10
+- **Owner:** Fenster (Core Dev)
+- **Scope:** mood-playlist-builder
+
+## Decision
+
+Add a first-class CLI path to open previously saved daily playlists (mood-playlists/playlist-YYYY-MM-DD.md) with numbered selection and launch those saved links through the same YouTube launch-resolution pipeline used by new playlists.
+
+## Why
+
+Users need a direct way to relaunch prior playlists without generating a new mood session. Reusing the existing esolveLaunchVideoIdsFromLinks + watch_videos?video_ids= flow preserves deterministic launch semantics, skip-reason diagnostics, and the current 8-song cap.
+
+## Implementation Notes
+
+- Added playlist file discovery (listSavedPlaylistFiles) and robust markdown table parsing (eadSavedPlaylistEntries) for Mood | Genre | Artist | Song | YouTube Link rows.
+- Parser handles escaped table pipes (\|) and both markdown-formatted links and bare YouTube URLs.
+- CLI now prompts for mode (new vs previous), supports numbered prior-file selection, and surfaces unresolved row diagnostics explicitly before launch.
+
+## Impact
+
+- Existing create-new-playlist flow remains intact.
+- Previous playlists are now operational for relaunch in one CLI run.
+- Diagnostics for unresolved legacy entries are explicit and consistent with existing launch skip reporting.
+
+---
+
+# Decision: Open Previous Playlists Test Strategy
+
+- **Date:** 2026-03-10
+- **Owner:** Hockney (Test Lead)
+- **Scope:** mood-playlist-builder
+
+## Decision
+
+For "open previous playlists", enforce behavior with unit-level tests in mood-playlist-builder/tests/mood-logic.test.ts using markdown fixtures and mocked fetch responses rather than CLI-interaction tests.
+
+## Why
+
+- The critical risk is deterministic parsing + launch assembly correctness (recover links, dedupe IDs, cap at 8, stable skip reasons).
+- These paths are pure/near-pure logic and are faster and more stable to validate in logic-level tests than end-to-end terminal flows.
+- Mocked fetch keeps historical launch behavior reproducible for duplicate/overflow/unresolved branches.
+
+## Coverage Required
+
+1. Recover YouTube links from playlist markdown table rows ([Watch](...) and bare URLs).
+2. Handle edge inputs (no prior files, malformed rows) without throwing or false positives.
+3. Assemble historical launch payload from recovered links with:
+   - dedupe enforcement
+   - max cap of 8
+   - deterministic skip reasons (duplicate-video-id, max-videos-reached, etc.) from launch resolution.
+
+
+---
+
+
+# Decision: Support session-level launch for mood playlist history
+
+**Date:** 2026-03-09  
+**Decider:** Fenster (Core Dev)  
+**Requested by:** Jeremy Sinclair
+
+## Context
+
+Saved daily playlist markdown files can contain multiple mood runs over time. Users needed to open either the full file or only one logical run without changing the persisted file format.
+
+## Decision
+
+Implement session-level launch in mood-playlist-builder while preserving existing file compatibility:
+
+1. Keep current daily markdown table format unchanged.
+2. Derive sessions deterministically from existing data as **contiguous rows with the same Mood value**.
+3. In CLI previous-playlist flow, prompt users to open either:
+   - whole file, or
+   - a specific derived session (shown as mood + row range + song/link counts).
+4. Preserve existing launch semantics: 8-song cap, dedupe, and skip diagnostics.
+
+## Why
+
+The file format has no explicit session marker, so contiguous mood-grouping gives a deterministic, user-readable rule without migration risk. It also keeps historical files launchable exactly as before.
+
+## Impact
+
+- Users can target one mood run from a busy daily playlist.
+- No schema migration needed.
+- Existing full-file open behavior remains available.
+
+---
+
+# Decision: Session-level launch regression coverage for saved daily playlists
+
+- **Date:** 2026-03-09
+- **By:** Hockney (Tester)
+- **Scope:** \mood-playlist-builder\ saved-playlist parsing/grouping and launch resolution
+
+## What we decided
+
+Add deterministic regression tests that validate session-level launch behavior end-to-end through existing resolver semantics, rather than introducing a parallel launch path.
+
+## Why
+
+Daily playlist markdown files can contain multiple contiguous mood sessions plus malformed legacy rows. Launching a selected session must preserve deterministic outcomes: only selected-session links are launched, duplicates are skipped, launch list is capped at 8, and skip reasons remain stable for diagnostics.
+
+## Test coverage added
+
+1. Parse + group recovery test from a daily playlist markdown fixture using \eadSavedPlaylistEntries\ and \groupSavedPlaylistSessions\.
+2. Selected-session launch test that routes grouped session links through \esolveLaunchVideoIdsFromLinks\ and asserts:
+   - selected session only,
+   - dedupe,
+   - max-8 cap,
+   - deterministic skip reasons.
+3. Edge-case validation retained for malformed rows and empty-session-adjacent headers.
+
+## Impact
+
+Future changes to playlist parsing, grouping, or launch resolution will fail fast if session selection accidentally broadens launch scope or destabilizes skip diagnostics.
+
+
+---
+
+# Decision: Documentation Structure for Mood Playlist Builder
+
+**Date:** 2026-03-15  
+**Owner:** McManus (DevRel)  
+**Status:** Proposed  
+
+## Problem
+
+1. Root README listed "19 Samples" but mood-playlist-builder was completely absent, making it invisible to new visitors
+2. Mood-playlist-builder's behavior (8-song cap, skip diagnostics, multi-mode launch) was poorly explained
+3. No clear category existed for interactive/preference-learning tools
+
+## Solution
+
+### Root README Changes
+- Updated sample count from 19 → 20
+- Created new category: "🎵 Interactive & Personalization" for tools that learn user preferences
+- Added mood-playlist-builder to this category with one-line description highlighting:
+  - Mood-based playlist creation
+  - Date-based playlist access
+  - Individual session launch capability
+  - 8-song cap enforcement
+  - Skip diagnostic reporting
+
+### Mood Playlist Builder README Changes
+- Restructured "What This Sample Does" into three clear subsections:
+  1. Creating a New Playlist (steps 1–8)
+  2. Opening a Saved Playlist (steps 9–11)
+  3. Launching to YouTube (steps 12–15)
+- Explicitly documented the 8-song cap and named all skip diagnostic reasons:
+  - `unresolved-search-query` (YouTube search that couldn't resolve to video ID)
+  - `invalid-link` (malformed or non-YouTube URL)
+  - `non-youtube-link` (link from another source)
+  - `missing-video-id` (YouTube URL without valid video ID)
+  - `duplicate-video-id` (song already in playlist)
+  - `max-videos-reached` (valid links beyond 8-song cap)
+- Reorganized Usage section to explicitly map the two entry points (1=create, 2=open) to workflows
+
+## Rationale
+
+- **Discoverability:** Mood-playlist-builder was the only sample not visible in the root README
+- **Semantic clarity:** "Interactive & Personalization" is the right category for tools that adapt to user history/mood
+- **User clarity:** Skip diagnostics are no longer mysterious; each one is named and explained
+- **Consistency:** Sample description in root README matches details in sample's own README without duplication
+
+## Implications
+
+- **New category established:** Future samples with user preference learning should use "Interactive & Personalization" category
+- **Documentation standard:** Sample descriptions in root README should highlight launch/output behavior clearly (not just input transformation)
+- **No code changes:** This is docs-only; no behavior changed
+
+## Approval Needed From
+
+- Keaton (Lead) — verify category naming/structure fits team documentation philosophy
+- Verbal (Prompt Engineer) — confirm skip diagnostic names are user-friendly
+
+---
+
+# 2026-03-09: Mood playlist stage-progress messaging
+
+**By:** Fenster (Core Dev)  
+**Requested by:** Jeremy Sinclair
+
+## What
+
+Add explicit, user-visible progress messaging in mood-playlist-builder/index.ts during dynamic generation so the CLI visibly advances through the configured stage pipeline:
+1. interpret mood
+2. curate songs
+3. apply mood logic
+
+The runtime now prints stage start/completion indicators, a pipeline completion indicator, and deterministic fallback status when the dynamic path is unavailable or needs normalization fallback.
+
+## Why
+
+Users were seeing a perceived idle wait while the Squad pipeline executed. The sample now communicates that the team is actively working and where it is in the flow.
+
+## Impact
+
+- No contract changes to playlist content, persistence, or launch behavior.
+- Existing 8-song cap, archive append flow, and previous playlist open/launch paths are preserved.
+- UX is clearer during generation without introducing new dependencies or changing orchestrator semantics.
+
+---
+
+# 2026-03-09: Progress message regression coverage
+
+- **Date:** 2026-03-09
+- **Owner:** Hockney (Tester)
+- **Context:** mood-playlist-builder needed regression protection for in-flight Squad stage visibility and fallback communication.
+
+## Decision
+
+Add deterministic source-level regression tests in 	ests/progress-messaging.test.ts that assert:
+1. All three Squad pipeline stages remain visibly logged while running (interpret-mood, curate-songs, pply-mood-logic).
+2. Stage-completion and pipeline-completion lines remain in order.
+3. Fallback transition and warning propagation remain clearly communicated.
+
+## Rationale
+
+The progress behavior depends on interactive runtime + SDK session calls, which are expensive and non-deterministic for unit tests. Source-level assertions provide stable regression coverage for user-facing copy and sequencing without introducing flaky SDK/network dependencies.
+
+## Follow-up
+
+If progress messaging is refactored, update these assertions in the same PR to preserve explicit user-visible stage and fallback communication guarantees.
+
+### 2026-03-10: Parallelize independent mood-pipeline stages in mood-playlist-builder
+**By:** Fenster (Core Dev)  
+**What:** Keep moodPipeline in mood-playlist-builder/squad.config.ts as the orchestration source of truth and add explicit dependsOn metadata per stage. Introduce dependency-aware execution batching in mood-playlist-builder/squad-orchestration.ts (uildMoodPipelineExecutionBatches). Execute each independent batch concurrently in mood-playlist-builder/index.ts with Promise.all, while preserving stage progress and completion messaging.  
+**Why:** Dynamic playlist generation was perceived as slow (~40 seconds) because all mood pipeline stages were executed strictly in sequence, even where stages could run independently. Parallelizing independent stages (interpret-mood and curate-songs) reduces generation time to ~25-30 seconds while preserving deterministic fallback and output contracts.  
+**Impact:** interpret-mood and curate-songs now run in parallel; pply-mood-logic still runs after both complete. Role enforcement remains config-driven; no hardcoded bypass of squad.config.ts responsibilities. Existing persistence, playlist launch, and fallback normalization behaviors remain unchanged.

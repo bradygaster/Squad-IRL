@@ -16,6 +16,7 @@
 - Consumer-perspective import tests: 6 tests validating barrel exports (index/parsers/types)
 - Hostile QA (Issue #327): 32 adversarial scenarios, all pass (small terminal, missing config, invalid input, corrupt config, non-TTY, UTF-8, rapid input)
 - Test gap filing (2026-02-28): 10 issues (#558–#567) now tracked explicitly for Wave E
+- Mood playlist YouTube resolution tests (2026-03-09): 16 deterministic regression tests for mixed-link resolution and launch payload verification, all passing
 
 **Known Bugs Found:**
 - `--version` output missing "squad" prefix (cli-entry.ts:48)
@@ -24,7 +25,18 @@
 
 **Next Sprint:** Brady to triage 10 test gap issues; Hockney available for refine approach.
 
+### 📌 Team update (2026-03-09T01:36:29Z): Mood playlist launch truncation fix completed — YouTube ID hardening + regression tests — decided by Fenster & Hockney
+- Fenster: Hardened YouTube ID extraction, `resolveLaunchVideoIds` for search-result normalization, preserved 15-video dedup contract, explicit skip-reason reporting
+- Hockney: 16 deterministic regression tests, all passing, covers mixed-link resolution and launch payload verification
+- Decision merged: "Add deterministic YouTube launch-resolution regression tests" (2026-03-09)
+
 ## Learnings
+
+### Mood playlist session-level launch regressions (2026-03-09)
+**Status:** Complete — added deterministic regression coverage in `mood-playlist-builder/tests/mood-logic.test.ts`; all tests + typecheck pass.
+- Added parser/grouping regression that reads a realistic daily markdown playlist, then verifies `readSavedPlaylistEntries` + `groupSavedPlaylistSessions` recover contiguous sessions deterministically.
+- Added session-scope launch regression that selects one grouped session and routes its links through `resolveLaunchVideoIdsFromLinks`, asserting dedupe behavior, 8-song cap, and stable skip reasons (`duplicate-video-id`, `unresolved-search-query`, `max-videos-reached`).
+- Preserved/extended edge-case coverage for malformed rows and empty-session-adjacent headers so malformed cells remain diagnosable and deterministic during session grouping.
 
 ### A/B Test Orchestrator sample (2026-03-08)
 **Status:** Built — all 7 files + 2 sample briefs created. TypeScript compiles clean (zero errors).
@@ -832,3 +844,80 @@ All labeled squad:hockney for routing. Each issue includes: what's missing, why 
 - **Pattern followed:** gmail/ gold standard — SquadClient from squad-sdk/client, streaming with ANSI output, banner, sendAndWait with delta handler, closing inspiration section, buildSystemPrompt from squad config.
 - **Verification:** `npm install` clean (0 vulnerabilities), `npx tsc --noEmit` passes with zero errors.
 - **Key difference from gmail:** File-based integration (reads .txt/.md from folder) instead of Playwright browser automation. No interactive readline — reads tickets and triages in one shot.
+
+### Mood playlist dynamic-regression coverage (2026-03-09)
+- Expanded mood-playlist-builder/tests/mood-logic.test.ts from 3 to 9 tests, covering model-proposal normalization, malformed/empty fallback behavior, persistence append contracts, YouTube ID extraction/playlist URL composition, and deterministic archive-informed mood selection.
+- Added test-driven helpers in mood-playlist-builder/mood-logic.ts: `normalizeMoodPhraseFromModel`, `normalizeSongsFromModel`, `resolvePlaylistFromModel`, and `chooseArchiveInformedMoodPhrase` to harden dynamic SDK-style response handling.
+- Verified quality gate with `npm run typecheck && npm test` in mood-playlist-builder (9/9 passing).
+
+
+### 📌 Team update (2026-03-09T01:13:18Z): Deterministic Regression Tests for Dynamic Mood Playlist — decided by Hockney
+- Expanded mood-playlist-builder test suite with dynamic model output validation
+- Added deterministic tests for fallback behavior, archive-informed tie-breaking, markdown append contracts
+- Protected YouTube ID extraction and watch_videos URL composition guarantees
+- All tests passing
+
+### Mood squad.config enforcement tests (2026-03-09)
+- Added explicit squad-orchestration coverage in `mood-playlist-builder/tests/squad-config.test.ts` to enforce non-bypassable responsibilities from `squad.config.ts`.
+- New assertions fail fast when required agents are missing (`mood-interpreter`, `song-curator`, `mood-logic-guardian`) and verify system prompt assembly pulls role charters from config (including override sensitivity).
+- Wired runtime prompt generation in `mood-playlist-builder/index.ts` to `buildMoodPlannerSystemPrompt()` from `squad-orchestration.ts` so mood/music/mood-logic orchestration is config-driven.
+- Regression safety confirmed: dynamic response handling, archive-informed behavior, persistence append contracts, and YouTube playlist composition still pass (`npm run typecheck && npm test`, 12/12 passing).
+
+### 📌 Team update (2026-03-09T01:22:06Z): mood-playlist-builder orchestration hardened via squad.config.ts — decided by Fenster, Hockney
+- Explicit role-based orchestration in mood-playlist-builder/squad.config.ts via moodPipeline
+- Runtime bound to config through squad-orchestration.ts helpers
+- Enforcement tests prevent silent bypasses; all 12 tests passing
+- Persistence and YouTube playback contracts preserved
+
+
+### Mood playlist launch truncation regression coverage (2026-03-09)
+- Added regression coverage in `mood-playlist-builder/tests/mood-logic.test.ts` for mixed YouTube links where some entries are `results?search_query` URLs and must be resolved before launch.
+- Added deterministic launch-resolution behavior checks via `resolveLaunchVideoIdsFromLinks`: resolves search links when possible, dedupes IDs, caps launch set at 15, and returns explicit stable skip reasons for unresolved/invalid entries.
+- Hardened runtime launch path in mood-playlist-builder/index.ts to resolve launchable IDs from saved links before opening watch_videos?video_ids= so launch count reflects deduped, actually launchable IDs.
+- Verified with `npm test` (16 pass, 0 fail) and `npm run typecheck` (pass) in mood-playlist-builder.
+
+### Mood playlist top-result regression expansion (2026-03-09)
+- Added 3 targeted tests in `mood-playlist-builder/tests/mood-logic.test.ts` (suite now 19 passing) to lock search-result behavior:
+  1. `findYouTubeLink` converts `results?search_query` responses to canonical `https://www.youtube.com/watch?v={id}` using top-result extraction.
+  2. Launch payload path verifies resolved IDs are included in final `watch_videos?video_ids=` output with dedupe + 15-video cap preserved.
+  3. Unextractable search results keep deterministic `unresolved-search-query` skip reasons across repeated misses.
+- Regression guard confirms persistence and launch-path tests still pass (append-only markdown rows, archive parsing, playlist URL construction).
+- Validation run after updates: `npm test` => 19/19 pass, `npm run typecheck` => pass.
+
+📌 Team update (2026-03-09T01:40:18Z): Top-result YouTube watch URL resolution merged to decisions.md — implemented by Fenster, validated by Hockney
+
+
+### Mood unresolved-search-query apostrophe regression tests (2026-03-09)
+- Added regression test coverage for encoded apostrophes in `search_query` using user examples: `Who%27s Making Love` and `Ridin%27`.
+- Confirmed `resolveLaunchVideoIdsFromLinks` resolves results URLs to top watch video IDs and those IDs flow into final `watch_videos?video_ids=` launch payload.
+- Locked mixed-link behavior: watch URLs + results URLs still launch exactly 15 videos (deduped/capped), while unresolved search entries keep deterministic `unresolved-search-query` skip reasons.
+- Validation: `npm test` in `mood-playlist-builder` passed 21/21.
+
+### Open previous playlists test coverage (2026-03-09)
+- Added focused regression tests for recovering YouTube links from saved playlist markdown table rows.
+- Covered edge behavior for empty historical inputs and malformed playlist rows so parsing is resilient and non-throwing.
+- Added historical launch assembly test to verify dedupe, cap at 8, and deterministic skip reasons when recovered links include duplicates/overflow.
+- Validation after updates: `npm run typecheck` (pass) and `npm test` (26/26 pass) in `mood-playlist-builder`.
+
+### Mood playlist progress messaging regressions (2026-03-09)
+**Status:** Complete — added deterministic regression coverage in `mood-playlist-builder/tests/progress-messaging.test.ts`; tests + typecheck pass.
+- Added source-level regression assertions for visible in-flight Squad stage updates (`interpret-mood`, `curate-songs`, `apply-mood-logic`) so status messaging cannot silently regress to final-result-only output.
+- Added fallback-path regression assertions to keep deterministic communication for failure transition (`Dynamic pipeline unavailable...`) and user-facing warning propagation (`Dynamic generation unavailable (...) Using deterministic fallback.`).
+- Kept test style aligned with existing Node `test` + `assert/strict` patterns and deterministic text/index checks (no network/session dependencies).
+
+
+
+
+
+### Mood pipeline parallel-stage regression tests (2026-03-09)
+**Status:** Complete — deterministic regression coverage added for parallel stage execution, merge behavior, fallback handling, and orchestration enforcement safety.
+- Added `tests/parallel-pipeline.test.ts` with deterministic deferred-stage mocking that proves independent stages (`interpret-mood`, `curate-songs`) begin before dependent `apply-mood-logic`, while preserving coherent progress output order.
+- Added merge-equivalence coverage validating malformed final-stage payloads still resolve to equivalent behavior via interpreted mood + curated songs (shape, song list, warnings).
+- Added hard-failure fallback coverage validating deterministic local fallback output + user-facing fallback messaging remain stable.
+- Validation command: `npm test && npm run typecheck` in `mood-playlist-builder` passes.
+
+### Mood startup warning-suppression regression coverage (2026-03-09)
+- Added source-level regression assertions in `mood-playlist-builder/tests/progress-messaging.test.ts` to lock startup warning suppression setup before Squad subprocess kickoff (`NODE_NO_WARNINGS`) and preserve deterministic ordering relative to `new SquadClient()` + `connect()`.
+- Added startup helper in `mood-playlist-builder/index.ts` (`configureSubprocessWarningSuppression`) and invoked it at dynamic playlist startup so child-process warnings are suppressed at kickoff without muting progress output.
+- Existing progress-output regression assertions remain intact (stage start/completion + fallback messages), protecting against accidental output silence while warning suppression is active.
+- Validation: `npm test && npm run typecheck` in `mood-playlist-builder` passed (41/41 tests, typecheck pass).
