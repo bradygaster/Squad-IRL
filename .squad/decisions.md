@@ -375,6 +375,21 @@
 **Why:** Users can scroll. Hiding roster names, spacing, help text, or routing hints on narrow terminals removes information the user needs. Layout adapts to width; content does not.
 **Convention:** `compact` variable may be used for layout decisions (flex direction, column vs. row) but must NOT gate visibility of text, spacing, or UI sections. `wide` may add supplementary content but narrow must not remove it.
 
+### 2026-03-09: Add deterministic YouTube launch-resolution regression tests
+**By:** Hockney
+**Status:** Implemented
+**What:**
+- Add `resolveLaunchVideoIdsFromLinks` to normalize launch links before playlist launch.
+- Resolve `results?search_query` links to launchable video IDs when possible.
+- Enforce deterministic skip reasons for unresolved/invalid/non-YouTube/missing-ID entries.
+- Keep launch payload bounded to deduped IDs with a strict 15-video cap.
+- Test these behaviors in `mood-playlist-builder/tests/mood-logic.test.ts`.
+**Why:** Mixed-link playlists can be truncated in real flows when search results are included. Existing tests only covered direct `watch?v=` extraction and did not validate resolution + skip behavior end-to-end for launch construction.
+**Impact:**
+- Mixed-link playlists now preserve launchable tracks instead of silently dropping them.
+- Launch count and `watch_videos?video_ids=` payload are deterministic and regression-protected.
+- Future changes that break resolution, dedupe, or skip semantics fail fast in tests.
+
 ### 2026-03-01: Multi-line user message rendering pattern
 **By:** Cheritto (TUI Engineer)
 **Date:** 2026-03-01

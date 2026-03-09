@@ -29,6 +29,11 @@
 - Session timeout bumped from 300_000ms (5min) to 600_000ms (10min) to accommodate OTel overhead
 - Context: Brady reported content-creation sample timing out at 5 minutes; increased headroom for telemetry + network latency
 
+### 📌 Team update (2026-03-09T01:36:29Z): Mood playlist launch truncation fix completed — YouTube ID hardening + regression tests — decided by Fenster & Hockney
+- Fenster: Hardened YouTube ID extraction, `resolveLaunchVideoIds` for search-result normalization, preserved 15-video dedup contract, explicit skip-reason reporting
+- Hockney: 16 deterministic regression tests, all passing, covers mixed-link resolution and launch payload verification
+- Decision merged: "Add deterministic YouTube launch-resolution regression tests" (2026-03-09)
+
 **Phase 3 Blocking (2026-02-22 onwards):**
 - Ralph start(): EventBus subscription + health checks (14 TODOs)
 - Coordinator initialize()/route(): CopilotClient wiring + agent manager (13 TODOs)
@@ -972,3 +977,10 @@ pm start works.
 - Enforcement tests prevent silent bypasses; all 12 tests passing
 - Persistence and YouTube playback contracts preserved
 
+
+### 📌 Team update (2026-03-09): Mood playlist YouTube launch resolution hardening
+- **Requested by:** Jeremy Sinclair
+- **Issue:** Playlist launch opened ~8 tracks even when 15 curated songs were saved because several links were `youtube.com/results?search_query=...` and the resolver only matched `watch?v=` in HTML.
+- **Fix:** Hardened YouTube ID extraction in `mood-playlist-builder/mood-logic.ts` to support `www/m` host variants, shorts/embed/live path IDs, and richer search HTML patterns (`"videoId"` / `videoRenderer` / `watch?v=`) for follow-up search resolution.
+- **Behavioral impact:** Launch path keeps existing contracts (dedupe + max 15 + markdown format), still preserves fallback links, and continues emitting explicit skip reasons when a link cannot be resolved.
+- **Verification:** `npm run typecheck` and `npm test` both pass in `mood-playlist-builder` (16/16 tests).

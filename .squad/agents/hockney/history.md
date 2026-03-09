@@ -16,6 +16,7 @@
 - Consumer-perspective import tests: 6 tests validating barrel exports (index/parsers/types)
 - Hostile QA (Issue #327): 32 adversarial scenarios, all pass (small terminal, missing config, invalid input, corrupt config, non-TTY, UTF-8, rapid input)
 - Test gap filing (2026-02-28): 10 issues (#558–#567) now tracked explicitly for Wave E
+- Mood playlist YouTube resolution tests (2026-03-09): 16 deterministic regression tests for mixed-link resolution and launch payload verification, all passing
 
 **Known Bugs Found:**
 - `--version` output missing "squad" prefix (cli-entry.ts:48)
@@ -23,6 +24,11 @@
 - No sanitization for null bytes in spawn args (Node.js-level issue, should pre-validate)
 
 **Next Sprint:** Brady to triage 10 test gap issues; Hockney available for refine approach.
+
+### 📌 Team update (2026-03-09T01:36:29Z): Mood playlist launch truncation fix completed — YouTube ID hardening + regression tests — decided by Fenster & Hockney
+- Fenster: Hardened YouTube ID extraction, `resolveLaunchVideoIds` for search-result normalization, preserved 15-video dedup contract, explicit skip-reason reporting
+- Hockney: 16 deterministic regression tests, all passing, covers mixed-link resolution and launch payload verification
+- Decision merged: "Add deterministic YouTube launch-resolution regression tests" (2026-03-09)
 
 ## Learnings
 
@@ -857,3 +863,9 @@ All labeled squad:hockney for routing. Each issue includes: what's missing, why 
 - Enforcement tests prevent silent bypasses; all 12 tests passing
 - Persistence and YouTube playback contracts preserved
 
+
+### Mood playlist launch truncation regression coverage (2026-03-09)
+- Added regression coverage in `mood-playlist-builder/tests/mood-logic.test.ts` for mixed YouTube links where some entries are `results?search_query` URLs and must be resolved before launch.
+- Added deterministic launch-resolution behavior checks via `resolveLaunchVideoIdsFromLinks`: resolves search links when possible, dedupes IDs, caps launch set at 15, and returns explicit stable skip reasons for unresolved/invalid entries.
+- Hardened runtime launch path in mood-playlist-builder/index.ts to resolve launchable IDs from saved links before opening watch_videos?video_ids= so launch count reflects deduped, actually launchable IDs.
+- Verified with `npm test` (16 pass, 0 fail) and `npm run typecheck` (pass) in mood-playlist-builder.
