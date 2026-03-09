@@ -3647,3 +3647,42 @@ Real playlist rows can store results URLs (not watch URLs), including apostrophe
 2. Resolved IDs from results links must be present in final `watch_videos?video_ids=` launch payload.
 3. Mixed direct watch + results links must still cap at 15 launch IDs.
 4. Unresolved search links must emit deterministic `unresolved-search-query` reasons.
+
+---
+## Decision: mood-playlist-builder cap at 8 songs
+
+- **Date:** 2026-03-09
+- **Decider:** Fenster
+- **Requested by:** Jeremy Sinclair
+- **Scope:** mood-playlist-builder
+
+### Context
+Launch reliability degraded when dynamic output and launch resolution frequently approached the previous 15-song ceiling.
+
+### Decision
+Standardize the playlist/launch cap to **8 songs** across runtime flow, model constraints, interactive edit limits, and launch payload limits.
+
+### Consequences
+- Improves launch reliability by reducing resolution and payload pressure.
+- Keeps archive/markdown behavior unchanged except each run now records up to 8 songs.
+- Requires tests and docs to enforce and communicate 1-8 constraints.
+
+---
+
+## Decision: mood-playlist-builder cap at 8 songs
+
+- **Date:** 2026-03-09
+- **Decider:** Fenster
+- **Requested by:** Jeremy Sinclair
+- **Scope:** mood-playlist-builder
+
+### Context
+Launch reliability degraded when dynamic output and launch resolution frequently approached the previous 15-song ceiling.
+
+### Decision
+Standardize the playlist/launch cap to **8 songs** across runtime flow, model constraints, interactive edit limits, and launch payload limits.
+
+### Consequences
+- Improves launch reliability by reducing resolution and payload pressure.
+- Keeps archive/markdown behavior unchanged except each run now records up to 8 songs.
+- Requires tests and docs to enforce and communicate 1-8 constraints.

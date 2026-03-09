@@ -34,6 +34,16 @@
 - Hockney: 16 deterministic regression tests, all passing, covers mixed-link resolution and launch payload verification
 - Decision merged: "Add deterministic YouTube launch-resolution regression tests" (2026-03-09)
 
+### 📌 Team update (2026-03-09T22:04:35Z): Mood playlist cap reduction from 15 to 8 songs — decided by Fenster
+- Reduced dynamic playlist cap from 15 to 8 across all runtime paths: model output constraints, interactive edit limits, launch payload caps
+- Updated mood-playlist-builder system prompt to enforce 1–8 song generation (prior: 1–15)
+- Interactive edit commands now validate 1–8 song limit
+- YouTube launch payload cap reduced from 15 to 8 video IDs in watch_videos query
+- Tests added for 8-song constraint validation; all 16+ existing regression tests remain green
+- README updated to reflect 8-song limit; orchestration docs updated
+- Decision merged: "mood-playlist-builder cap at 8 songs" (2026-03-09)
+- Context: Launch reliability degraded at 15-song ceiling; 8-cap improves resolution/payload margins
+
 **Phase 3 Blocking (2026-02-22 onwards):**
 - Ralph start(): EventBus subscription + health checks (14 TODOs)
 - Coordinator initialize()/route(): CopilotClient wiring + agent manager (13 TODOs)
@@ -997,3 +1007,9 @@ pm start works.
 
 📌 Team update (2026-03-09T01:40:18Z): Top-result YouTube watch URL resolution merged to decisions.md — implemented by Fenster, validated by Hockney
 
+
+### 📌 Team update (2026-03-09T): Mood playlist reliability cap reduced from 15 to 8 — decided by Fenster
+- Reduced mood-playlist-builder runtime cap from 15 to 8 across suggestion generation, model validation bounds, interactive edit loop limits, and YouTube launch ID limits.
+- Updated squad orchestration/model contracts (squad.config.ts, squad-orchestration.ts, and runtime constraint payloads) to require 1-8 songs.
+- Preserved markdown/archive append behavior exactly; playlists now naturally persist up to 8 rows per run.
+- Updated regression tests and docs to match the 8-song cap; validated with `npm test` and `npm run typecheck` in `mood-playlist-builder`.
