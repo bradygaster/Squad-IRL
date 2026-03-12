@@ -45,6 +45,7 @@ These analyze web data, listings, or user activity to provide recommendations.
 | [real-estate-analyzer](real-estate-analyzer/) | Evaluates property listings for investment potential with financial modeling, neighborhood scoring, and opportunity ranking |
 | [mtg-commander-deck-builder](mtg-commander-deck-builder/) | Scrapes EDHREC for card recommendations, builds 100-card Commander decks, saves to disk, and supports conversational follow-up modifications |
 | [realtor-sales-package](realtor-sales-package/) | Builds professional CMAs (Comparative Market Analysis) with market trends, comparable sales, and pricing recommendations for realtors |
+| [options-trader](options-trader/) | Reads live charts via Playwright, runs composite signal analysis (EMA/VWAP/RSI), and produces paper-trade recommendations for debit spreads with full risk management |
 
 ### 📁 File & Data Analysis
 

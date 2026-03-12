@@ -1,0 +1,27 @@
+{
+  "name": "options-trader",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Squad-powered options day trader — opens TradingView, reads chart signals, and analyzes 0DTE debit spread opportunities with a team of AI specialists. Uses SPX by default.",
+  "type": "module",
+  "scripts": {
+    "start": "npx tsx index.ts"
+  },
+  "dependencies": {
+    "@bradygaster/squad-sdk": "^0.8.0",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.57.2",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.57.2",
+    "@opentelemetry/resources": "^1.30.0",
+    "@opentelemetry/sdk-metrics": "^1.30.0",
+    "@opentelemetry/sdk-node": "^0.57.2",
+    "@opentelemetry/sdk-trace-base": "^1.30.0",
+    "@opentelemetry/sdk-trace-node": "^0.57.2",
+    "@opentelemetry/semantic-conventions": "^1.28.0",
+    "playwright": "^1.52.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.4",
+    "typescript": "^5.7.0"
+  }
+}
